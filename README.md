@@ -1,2 +1,2 @@
 # odysseus
-Data visualization tools in arc lisp
+Data visualization tools in lisp
