@@ -1,2 +1,3 @@
 # odysseus
-Data visualization tools in lisp
+
+My Swiss Army knife for data treatment: scrap, store, visualize.
