@@ -3,7 +3,7 @@
 (provide (except-out (all-defined-out) c2))
 
 (require compatibility/defmacro)
-(require "../utils.rkt")
+(require "misc.rkt")
 
 ;; algebra of operations with strings and lists (arrays)
 
@@ -107,7 +107,7 @@
         (else (indexof-all-iter
                 (ltrim seq (+ 1 index))
                 el
-                (rpush (+ index el-passed) acclist)
+                (rpush acclist (+ index el-passed))
                 (+ index el-passed 1))))))
   (indexof-all-iter seq el empty 0))
 
@@ -138,7 +138,7 @@
 
 (define triml ltrim)
 
-(define (lpush el seq)
+(define (lpush seq el)
   (cons el seq))
 
 (define (rshift seq (count 1))
@@ -158,7 +158,7 @@
 
 (define trimr rtrim)
 
-(define (rpush el seq)
+(define (rpush seq el)
   (reverse (cons el (reverse seq))))
 
 ;; slice inclusively: slice c f -> a b [c d e f] g
@@ -191,8 +191,8 @@
   (case (length body)
     ((0) empty)
     ((1) (car body))
-    ((2) (lpush (car body) (cadr body)))
-    (else (lpush (car body) (apply push (cdr body))))))
+    ((2) (lpush (cadr body) (car body)))
+    (else (lpush (apply push (cdr body)) (car body)))))
 
 (define (concat . body)
   body)
@@ -238,7 +238,7 @@
         (implode (insert (explode seq) index el)))
       ((empty? seq) (list el))
       ((or (= index -1) (= index (add1 ll)))
-        (rpush el seq))
+        (rpush seq el))
       ((in (- ll) -1 index) (insert seq (+ ll index 2) el))
       ((< index 0) (insert seq 1 el))
       ((> index (add1 ll)) seq)

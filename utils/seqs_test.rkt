@@ -3,7 +3,7 @@
 (module+ test
 
   (require rackunit)
-  (require "main.rkt")
+  (require "seqs.rkt")
 
   (check-equal? (len "") 0)
   (check-equal? (len "Oslo is a capital of Great Britain") 34)
@@ -15,7 +15,7 @@
   (check-equal? (reverse "Lestrigons") "snogirtseL")
   (check-equal? (reverse '(1 2 3 4 5)) '(5 4 3 2 1))
 
-  (check-equal? (str "hello" " world!") "hello world!")
+  (check-equal? (str "" "hello" " world!" "") "hello world!")
 
   (check-equal? (implode '("a" "b" "c" "d") "-") "a-b-c-d")
 
@@ -72,8 +72,8 @@
   (check-equal? (ltrim "Oslo god morgen" -5) "") ; add contract!
   (check-equal? (ltrim '(1 2 3 4 5 6 7 8 9) 2) '(3 4 5 6 7 8 9))
 
-  (check-equal? (lpush 100 '()) '(100))
-  (check-equal? (lpush 100 '(1 2 3)) '(100 1 2 3))
+  (check-equal? (lpush '() 100) '(100))
+  (check-equal? (lpush '(1 2 3) 100) '(100 1 2 3))
 
   (check-equal? (rshift "" 10) "")
   (check-equal? (rshift "Black waters" 3) "ers")
@@ -92,8 +92,8 @@
   (check-equal? (rtrim "Oslo god morgen" -5) "") ; add contract!
   (check-equal? (rtrim '(1 2 3 4 5 6 7 8 9) 2) '(1 2 3 4 5 6 7))
 
-  (check-equal? (rpush 100 '()) '(100))
-  (check-equal? (rpush 100 '(1 2 3)) '(1 2 3 100))
+  (check-equal? (rpush '() 100) '(100))
+  (check-equal? (rpush '(1 2 3) 100) '(1 2 3 100))
 
   (check-equal? (slice "" 1 3) "")
   (check-equal? (slice "Oslo god morgen" 3 1) "")

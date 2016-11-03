@@ -2,6 +2,8 @@
 
 (provide (all-defined-out))
 
+(require compatibility/defmacro)
+
 (define debug
   (lambda args (apply string-append
     (map
@@ -11,14 +13,3 @@
           ((list? el) (list->string el)) ; list of chars to string
           (else el)))
       args))))
-
-(define (true? x) x)
-
-(define (in a b x)
-  (<= a x b))
-
-(define nil?
-  (λ (v) (or (null? v) (and (string? v) (equal? v "")))))
-
-(define (!= a b)
-  (not (= a b)))
