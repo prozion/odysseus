@@ -82,3 +82,13 @@
     ((empty? (cdr fs)) (car fs))
     (else
       ((car fs) (apply ->> (cdr fs))))))
+
+(define (clean f xs)
+  (filter (λ (x) (not (f x))) xs))
+
+(define (syntax->string stx)
+  (let ((el (syntax->datum stx)))
+    (cond
+      ((list? el) #f)
+      ((symbol? el) (symbol->string el))
+      (else #f))))

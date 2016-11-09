@@ -13,3 +13,6 @@
           ((list? el) (list->string el)) ; list of chars to string
           (else el)))
       args))))
+
+(define (write-file filename str)
+  (display-to-file str filename #:exists 'replace))
