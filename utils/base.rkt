@@ -6,8 +6,15 @@
 
 (define % remainder)
 
+(define dec sub1)
+
+(define inc add1)
+
 (define (// a b)
   (exact->inexact (/ a b)))
+
+(define (/r a b)
+  (round (/ a b)))
 
 (define (*r . xs)
   (exact-round (apply * xs)))
@@ -43,20 +50,14 @@
 (define (rcurry f a)
   (lambda (x) (f x a)))
 
-; (gen (random 100) 10) -> '(1 34 50 7 80 62 58 91 10 8)
-(define-macro (gen f size)
-  `(let ((n ,size))
-    (define (gen-r count)
-      (cond
-        ((= count 1) (list ,f))
-        (else (cons ,f (gen-r (- count 1))))))
-    (gen-r n)))
+(define (clean f xs)
+  (filter (λ (x) (not (f x))) xs))
 
 (define (rand n)
   (add1 (random n))) ;; STX random
 
 ; cyclic addition (e.g. for finding contrast values on color circle)
-(define (cycadd a b base)
+(define (+c a b base)
   (let ((factor
           (if (or (inee 0 1 a) (inee 0 1 b))
             (/ 1 (min a b))
@@ -66,25 +67,6 @@
         (exact-round (* factor (+ a b))
         base))
       factor)))
-
-; ((-> floor sqrt random) 10)
-(define (-> . fs)
-  (define (call-r fs x)
-    (cond
-      ((empty? fs) x)
-      (else ((car fs) (call-r (cdr fs) x)))))
-  (λ (x)
-    (call-r fs x)))
-
-; (->> floor sqrt random 10)
-(define (->> . fs)
-  (cond
-    ((empty? (cdr fs)) (car fs))
-    (else
-      ((car fs) (apply ->> (cdr fs))))))
-
-(define (clean f xs)
-  (filter (λ (x) (not (f x))) xs))
 
 (define (syntax->string stx)
   (let ((el (syntax->datum stx)))

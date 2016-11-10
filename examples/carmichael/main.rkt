@@ -1,7 +1,7 @@
 #lang racket
 
-(require "../../lib/seqs.rkt")
-(require "../../lib/utils.rkt")
+(require "../../utils/seqs.rkt")
+(require "../../utils/base.rkt")
 
 ;; Fermat's little theorem illustration for different numbers from 1 to 1000
 ;; with Carmichael numbers (at least 561)

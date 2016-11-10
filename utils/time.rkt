@@ -5,7 +5,7 @@
 ;;;; functions to work with time
 
 ;; add hours and minutes
-(define (add-hourly . hs)
+(define (+h . hs)
   (define (rst a) (- a (floor a)))
     (let* ( [intsum (apply + (map floor hs))]
             [fractsum (apply + (map rst hs))]

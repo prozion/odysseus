@@ -2,9 +2,9 @@
 
 (require racket/file)
 (require (for-syntax racket/syntax))
-(require "../utils/misc.rkt" (for-syntax "../utils/misc.rkt"))
+(require "../utils/base.rkt" (for-syntax "../utils/base.rkt"))
 (require "../utils/hash.rkt")
-(require "../utils/seqs.rkt")
+(require "../utils/seqs.rkt" (for-syntax "../utils/seqs.rkt"))
 (require compatibility/defmacro)
 
 (provide (all-defined-out))
@@ -22,14 +22,18 @@
         [body (if (empty? body) "" (apply string-append body))])
     (format "<svg~a~a>~a</svg>" xmlns xlink body)))
 
-;; 1. +TODO: define-syntax: if first tag in body is (attr  ...) then do (g (attrs (hash)) . body), else (g . body)
-;; 2. +TODO: print all arbitrary attributes from the given hash-table (text (attr 'x 10 'y 10 'foobar "baz") (tspan ... ) ...)
-;; 3. +TODO: make this more generalized: (define-syntax (make-tag <tagname>)) -> (define-syntax (<tagname> stx) ...)
-;; (make-tag "g") (make-tag "text")
 
+; e.g.: (rect x 10 y 10 width 100 height 100) as well as (rect 'x 10 'y 10 'width 100 'height 100)
 (define-macro (make-single-tag tagname)
-  `(define (,tagname . body)
-      (str "<" (quote ,tagname) (print-hash " ~a=\"~a\"" (apply hash body)) "/>")))
+  `(define-macro (,tagname . body)
+    (define (odd-f f lst)
+      (cond
+        ((null? lst) null)
+        ((null? (cadr lst)) (cdr lst))
+        (else (cons (f (car lst)) (cons (cadr lst) (odd-f f (cddr lst)))))))
+    (let ([nbody (odd-f (λ(x) (if (symbol? x) (symbol->string x) x)) body)]
+          [t (symbol->string (quote ,tagname))])
+      `(str "<" ,t (print-hash " ~a=\"~a\"" (hash ,@nbody)) " />"))))
 
 (define-syntax (make-tag stx)
   (let ((tagname (symbol->string (list-ref (syntax->datum stx) 1))))

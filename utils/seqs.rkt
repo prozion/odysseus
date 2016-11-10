@@ -3,7 +3,8 @@
 (provide (except-out (all-defined-out) c2))
 
 (require compatibility/defmacro)
-(require "misc.rkt")
+(require "base.rkt")
+(require "controls.rkt")
 
 ;; algebra of operations with strings and lists (arrays)
 

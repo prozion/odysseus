@@ -3,7 +3,7 @@
 (require racket/cmdline)
 (require racket/file)
 
-(require "../utils/misc.rkt")
+(require "../utils/base.rkt")
 
 ;; count lines of code in the project
 
