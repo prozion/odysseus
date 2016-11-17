@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<style type="text/css">
+/* <![CDATA[ */
+text {
+    font-size: 12;
+    font-family: Arial, sans-serif;
+    font-style: normal;
+}
+
+rect {
+  fill: black;
+}
+
+.barchart {
+  font-size: 12;
+  font-family: Arial, sans-serif;
+  font-style: normal;
+}
+
+.barchart rect {
+  fill: red;
+}
+/* ]]> */
+</style>
+<g class="barchart"><text x="300" y="108" font-size="40">Storskog bordercrossings by year</text><rect x="100" width="54" height="95" y="405" /><rect x="155" width="54" height="94" y="406" /><rect x="210" width="54" height="93" y="407" /><rect x="265" width="54" height="95" y="405" /><rect x="320" width="54" height="91" y="409" /><rect x="375" width="54" height="96" y="404" /><rect x="430" width="54" height="123" y="377" /><rect x="485" width="54" height="171" y="329" /><rect x="540" width="54" height="221" y="279" /><rect x="595" width="54" height="280" y="220" /><rect x="650" width="54" height="141" y="359" /></g></svg>

@@ -3,10 +3,8 @@
 (module+ test
 
   (require rackunit)
-  (require "svg.rkt")
-  (require "../utils/base.rkt")
-  (require "../utils/seqs.rkt")
-  (require "../utils/hash.rkt")
+  (require "../svg.rkt")
+  (require "../../utils/all.rkt")
 
   (check-equal?
     (svg)

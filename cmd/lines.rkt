@@ -9,11 +9,16 @@
 
 (define (count-lines pars f)
   (let ([ext (parameters-ext pars)]
-        [iline (parameters-iline pars)])
+        [iline (parameters-iline pars)]
+        [exclude-filenames (parameters-exclude-filenames pars)])
     (cond
       ((file-exists? f)
         (if ext
-          (if (regexp-match (pregexp (string-append ".*?\\." ext "$")) (path->string f)) ; STX regexp-match
+          (if (and
+                (regexp-match (pregexp (string-append ".*?\\." ext "$")) (path->string f))
+                (if exclude-filenames
+                  (not (regexp-match (pregexp exclude-filenames) (path->string f)))
+                  #t))
             (count-lines-file pars f)
             0)
           (count-lines-file pars f)))
@@ -34,12 +39,12 @@
       (curry regexp-match (pregexp preg))
       (file->lines f))))
 
-(struct parameters (ext iline) #:mutable);; STX: add 'struct'
+(struct parameters (ext iline exclude-filenames) #:mutable)
 
-(define params (parameters #f #f))
+(define params (parameters #f #f #f))
 
 (define (print-pars p)
-  (printf "~a ~a ~n" (parameters-ext p) (parameters-iline p)))
+  (printf "~a ~a ~a ~n" (parameters-ext p) (parameters-iline p) (parameters-exclude-filenames p)))
 
 (command-line
   #:program "lines"
@@ -47,6 +52,9 @@
     [("-e" "--ext") ext
                     "pregexp of file extension. Matched will be counted"
                     (set-parameters-ext! params ext)]
+    [("-F" "--exclude-filenames") exclude-filenames
+                    "pregexp for files to exclude from count"
+                    (set-parameters-exclude-filenames! params exclude-filenames)]
     [("-i" "--ignore-lines") iline
                     "pregexp for lines to ignore in counting. For example '^\\s*;+.*' will ignore commented lines"
                     ;; "(^\s*$|^\s*;+.*$)" - ignore blank and commented lines

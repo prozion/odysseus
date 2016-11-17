@@ -100,6 +100,9 @@
     (indexof-iter (explode seq) el 1)
     (indexof-iter seq el 1)))
 
+(define (indexof? seq el)
+  (if (= 0 (indexof seq el)) #f #t))
+
 (define (indexof-all seq el)
   (define (indexof-all-iter seq el acclist el-passed)
     (let ((index (indexof seq el)))

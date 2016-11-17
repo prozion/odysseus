@@ -1,0 +1,5 @@
+
+(barchart
+  data (108671 107520 106644 108708 104584 109535 140855 195813 252055 320042 161727)
+  layout (x 100 y 100 width 600 height 400)
+  title "Storskog bordercrossings by year")

@@ -3,7 +3,7 @@
 (module+ test
 
   (require rackunit)
-  (require "seqs.rkt")
+  (require "../seqs.rkt")
 
   (check-equal? (len "") 0)
   (check-equal? (len "Oslo is a capital of Great Britain") 34)
@@ -51,6 +51,10 @@
   (check-equal? (indexof '(11 -22 30 80 -5) 30) 3)
   (check-equal? (indexof '(11 -22 30 80 -5) -5) 5)
   (check-equal? (indexof '(11 -22 30 80 -5) 333) 0)
+
+  (check-true (indexof? '(a b c d e f) 'd))
+  (check-true (indexof? '(1 (10 1) 2) '(10 1)))
+  (check-false (indexof? '(1 2 3 4 5) 6))
 
   (check-equal? (indexof-all "Hercules" "e") '(2 7))
   (check-equal? (indexof-all '(11 8 -22  8 30 80 -5 8) 8) '(2 4 8))

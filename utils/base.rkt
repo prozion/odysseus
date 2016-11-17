@@ -6,6 +6,9 @@
 
 (define % remainder)
 
+(define (int a)
+  (inexact->exact (floor a)))
+
 (define dec sub1)
 
 (define inc add1)
@@ -14,7 +17,7 @@
   (exact->inexact (/ a b)))
 
 (define (/r a b)
-  (round (/ a b)))
+  (exact-round (/ a b)))
 
 (define (*r . xs)
   (exact-round (apply * xs)))
@@ -54,7 +57,22 @@
   (filter (λ (x) (not (f x))) xs))
 
 (define (rand n)
-  (add1 (random n))) ;; STX random
+  (add1 (random n)))
+
+(define (type? x)
+  (cond
+    ((number? x) 'number)
+    ((string? x) 'string)
+    ((list? x) 'list)
+    ((pair? x) 'pair)
+    ((char? x) 'char)
+    ((symbol? x) 'symbol)
+    ((procedure? x) 'procedure)
+    ((syntax? x) 'syntax)
+    ((vector? x) 'vector)
+    ((hash? x) 'hash) ; STX hash?
+    ((path? x) 'path) ; STX path?
+    (else #f)))
 
 ; cyclic addition (e.g. for finding contrast values on color circle)
 (define (+c a b base)
@@ -64,13 +82,6 @@
             1)))
     (/
       (remainder
-        (exact-round (* factor (+ a b))
-        base))
+        (exact-round (* factor (+ a b)))
+        base)
       factor)))
-
-(define (syntax->string stx)
-  (let ((el (syntax->datum stx)))
-    (cond
-      ((list? el) #f)
-      ((symbol? el) (symbol->string el))
-      (else #f))))

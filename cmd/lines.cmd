@@ -1,6 +1,6 @@
 @echo off
 setlocal enableextensions
 
-racket lines.rkt -e "rkt" -i "^\s*$|^\s*;+.*$" ..
+racket lines.rkt -e "rkt" -F "_test" -i "^\s*$|^\s*;+.*$" ..
 
 endlocal

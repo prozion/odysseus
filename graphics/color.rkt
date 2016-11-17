@@ -10,8 +10,6 @@
 ;(provide (rgb->hsv rgb->hsl hsv->rgb hsl->rgb))
 (provide (all-defined-out))
 
-;; STX: add 'when'
-
 (define (rand-color)
   (let ((hex "0123456789abcdef"))
     (str "#" (implode (gen (nth hex (rand 16)) 6)))))

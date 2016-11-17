@@ -1,5 +1,7 @@
 #lang racket
 
 (require "utils/all.rkt")
+(require "graphics/svg.rkt")
 
-(nth '(1 2 3 4 5) 2)
+;(svg xmlns styles
+;  (rect x 10 y 100 width 100 height 50))

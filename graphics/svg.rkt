@@ -4,24 +4,47 @@
 (require (for-syntax racket/syntax))
 (require "../utils/base.rkt" (for-syntax "../utils/base.rkt"))
 (require "../utils/hash.rkt")
+(require "../utils/io.rkt")
+(require "fonts.rkt")
 (require "../utils/seqs.rkt" (for-syntax "../utils/seqs.rkt"))
 (require compatibility/defmacro)
+(require racket/runtime-path)
+
+(define-runtime-path rootpath "..")
 
 (provide (all-defined-out))
 
-;; STX define-syntax-rule, syntax-case, with-syntax as constructions
-;; STX syntax->list, syntax->datum etc. as standard functions
+(define (foo) "bar")
 
-(define @ hash)
+(define-macro (svg . args)
+  (let* ( (xmlns (if (indexof? args 'xmlns) #t #f))
+          (xlink (if (indexof? args 'xlink) #t #f))
+          (styles (if (indexof? args 'styles) #t #f))
+          (body (clean (λ (x) (or (equal? x 'xmlns) (equal? x 'xlink)  (equal? x 'styles) )) args))
+          (body (if (null? body) "" (car body))))
+    `(svg-f ,xmlns ,xlink ,styles ,body)))
 
-(define (svg
-          (attrs (hash 'xmlns #f 'xlink #f))
+(define (svg-f
+          xmlns
+          xlink
+          styles
           . body)
-  (let ([xmlns (if (hash-ref attrs 'xmlns #f) " xmlns=\"http://www.w3.org/2000/svg\"" "")]
-        [xlink (if (hash-ref attrs 'xlink #f) " xmlns:xlink=\"http://www.w3.org/1999/xlink\"" "")]
+  (let ([xmlns (if xmlns
+                      " xmlns=\"http://www.w3.org/2000/svg\""
+                      "")]
+        [xlink (if xlink
+                      " xmlns:xlink=\"http://www.w3.org/1999/xlink\""
+                      "")]
+        [styles (if styles
+                      (str  "\n<style type=\"text/css\">\n"
+                            "/* <![CDATA[ */\n"
+                            (read-file (str rootpath "\\templates\\styles.css"))
+                            "/* ]]> */\n"
+                            "</style>\n")
+                      "")]
         [body (if (empty? body) "" (apply string-append body))])
-    (format "<svg~a~a>~a</svg>" xmlns xlink body)))
 
+    (format "<svg~a~a>~a~a</svg>" xmlns xlink styles body)))
 
 ; e.g.: (rect x 10 y 10 width 100 height 100) as well as (rect 'x 10 'y 10 'width 100 'height 100)
 (define-macro (make-single-tag tagname)
@@ -69,3 +92,4 @@
 
 (make-single-tag rect)
 (make-tag g)
+(make-tag text)
