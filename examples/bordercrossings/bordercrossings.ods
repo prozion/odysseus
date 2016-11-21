@@ -1,5 +1,14 @@
 
 (barchart
-  data (108671 107520 106644 108708 104584 109535 140855 195813 252055 320042 161727)
-  layout (x 100 y 100 width 600 height 400)
-  title "Storskog bordercrossings by year")
+        data '((2006 108671) (2007 107520) (2008 106644) (2009 108708) (2010 104584) (2011 109535) (2012 140855) (2013 195813) (2014 252055) (2015 320042) (2016 161727))
+        layout (@ 'widget (@ 'x 100 'y 100 'w 700 'h 400)
+                  'title (@ 'h 100 'pos 'top)
+                  'y-axis (@ 'w 30 'pos 'left)
+                  'x-axis (@ 'h 30 'pos 'bottom)
+                  'bars (@ 'gap 2))
+        labels (@ 'x-axis (@ 'text "Years")
+                  'y-axis (@ 'text "Bordercrossings" 'direction 'vertical))
+        styles (@ 'bar (@ 'class 'some-bar-class)
+                  'x-axis (@ 'font-size 13))
+        normalize-mode 'trunc-at-zero
+        title "Storskog the best!")

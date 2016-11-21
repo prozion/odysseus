@@ -1,6 +1,7 @@
 #lang racket
 
 (require compatibility/defmacro)
+(require "base.rkt")
 
 (provide (all-defined-out))
 
@@ -33,3 +34,34 @@
 ;(define-macro (nlet n letargs . body)
 ;  `(define (,n ,@letargs)
 ;      ,@body))
+
+; (the y-axis-pos 'left y-axis-left) -> (if (equal? y-axis-pos 'left) y-axis-left 0)
+(define-syntax (the stx)
+  (syntax-case stx ()
+    ([_ var (test ...) result]
+      (syntax (if (ormap (curry equal? var) '(test ...))
+                result
+                0)))
+    ([_ var test result]
+      (syntax (if (equal? var test) result 0)))))
+
+; (thenot y-axis-pos 'hidden 10) -> (if (not (equal? y-axis-pos 'hidden)) 10 0)
+(define-syntax (thenot stx)
+  (syntax-case stx ()
+    ([_ var (test ...) result]
+      (syntax (if (not (ormap (curry equal? var) '(test ...)))
+                result
+                0)))
+    ([_ var test result]
+      (syntax (if (not (equal? var test)) result 0)))))
+
+(define (zor . body)
+  (cond
+    ((null? body) #t)
+    ((null? (cdr body)) (car body))
+    (else (if
+            (or
+              (nil? (car body))
+              (equal? (car body) 0))
+                (apply zor (cdr body))
+                (car body)))))

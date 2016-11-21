@@ -19,6 +19,12 @@
 (define (/r a b)
   (exact-round (/ a b)))
 
+(define (/f a b)
+  (exact-floor (/ a b))) ; STX exact-floor ~exact-round
+
+(define (/c a b)
+  (exact-ceiling (/ a b))) ; STX exact-ceiling ~exact-round
+
 (define (*r . xs)
   (exact-round (apply * xs)))
 
@@ -30,22 +36,15 @@
 
 (define (true? x) x)
 
-(define (in a b x)
-  (<= a x b))
-
-(define inii in)
-
-(define (inee a b x)
-  (< a x b))
-
-(define (inei a b x)
-  (and (< a x) (<= x b)))
-
-(define (inie a b x)
-  (and (<= a x) (< x b)))
-
 (define nil?
-  (λ (v) (or (null? v) (and (string? v) (equal? v "")))))
+  (λ (v) (or
+            (null? v)
+            (void? v)
+            (and (string? v) (equal? v ""))
+            (false? v)))) ; STX false?
+
+(define znil?
+  (λ (v) (or (nil? v) (= v 0))))
 
 (define (!= a b)
   (not (= a b)))
@@ -59,29 +58,5 @@
 (define (rand n)
   (add1 (random n)))
 
-(define (type? x)
-  (cond
-    ((number? x) 'number)
-    ((string? x) 'string)
-    ((list? x) 'list)
-    ((pair? x) 'pair)
-    ((char? x) 'char)
-    ((symbol? x) 'symbol)
-    ((procedure? x) 'procedure)
-    ((syntax? x) 'syntax)
-    ((vector? x) 'vector)
-    ((hash? x) 'hash) ; STX hash?
-    ((path? x) 'path) ; STX path?
-    (else #f)))
-
-; cyclic addition (e.g. for finding contrast values on color circle)
-(define (+c a b base)
-  (let ((factor
-          (if (or (inee 0 1 a) (inee 0 1 b))
-            (/ 1 (min a b))
-            1)))
-    (/
-      (remainder
-        (exact-round (* factor (+ a b)))
-        base)
-      factor)))
+(define (lg x a)
+  (/ (log x) (log a)))

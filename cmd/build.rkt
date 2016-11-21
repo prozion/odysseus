@@ -14,6 +14,7 @@
 (define (build #:in ods-file #:out (svg-file #f))
   (parameterize ([current-namespace (make-base-namespace)])
     (namespace-require "../widgets/all.rkt")
+    (namespace-require "../utils/all.rkt")
     (let ([v (load ods-file)]
           [svg-filename (if svg-file
                             svg-file

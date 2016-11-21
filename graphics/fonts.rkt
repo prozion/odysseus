@@ -35,23 +35,25 @@
 (define (@font-aspect-ratio . path)
   (apply (curry hash-path @font-aspect-ratios) path))
 
-; TODO text-struct
-(define-struct text: (text font-size font-family font-style) #:mutable)
-
 (define (text-length t)
-  (let* ([txt (if (text:? t) t (text: t (@base-property 'font-size) (@base-property 'font-family) (@base-property 'font-style)))]
-        [res (* (text:-font-size txt)
-                (@font-aspect-ratio (text:-font-family txt) (text:-font-style txt))
-                (string-length (text:-text txt)))])
-    ; (println res)
-    res))
+  (let* (
+          [t (if (hash? t) t (hash 'text t))]
+          [text (hash-ref t 'text "")]
+          [font-size (hash-ref t 'font-size (@base-property 'font-size))]
+          [font-family (hash-ref t 'font-family (@base-property 'font-family))]
+          [font-style (hash-ref t 'font-style (@base-property 'font-style))])
+    (*  font-size
+        (@font-aspect-ratio font-family font-style)
+        (string-length text))))
 
 (define (text-height t)
-  (if (text:? t)
-    (text:-font-size t)
+  (if (hash? t)
+    (hash-path t 'font-size (@base-property 'font-size))
     (@base-property 'font-size)))
 
-(define (centrify left-edge right-edge $txt)
-  (let ([w (- right-edge left-edge)]
-        [tl (text-length $txt)])
+(define (h-centrify w t)
+  (let ([tl (text-length t)])
     (/r (- w tl) 2)))
+
+(define (v-centrify h (font-size (@base-property 'font-size)))
+  (+ (/r h 2) (/r font-size 2)))

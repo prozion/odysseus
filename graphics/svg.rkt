@@ -2,7 +2,7 @@
 
 (require racket/file)
 (require (for-syntax racket/syntax))
-(require "../utils/base.rkt" (for-syntax "../utils/base.rkt"))
+(require "../utils/base.rkt" (for-syntax "../utils/base.rkt")) ;; STX for-syntax ~require
 (require "../utils/hash.rkt")
 (require "../utils/io.rkt")
 (require "fonts.rkt")

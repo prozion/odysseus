@@ -5,6 +5,7 @@
 (require compatibility/defmacro)
 (require "base.rkt")
 (require "controls.rkt")
+(require "interval.rkt")
 
 ;; algebra of operations with strings and lists (arrays)
 
@@ -37,19 +38,14 @@
     (implode (reverse (explode seq)))
     (reverse-iter seq null)))
 
-;(define (_list el)
-;  (cons el null))
-
-;;;
-
 (define (str . body)
   (implode body))
 
 (define (implode lst (sep ""))
-  (let ([seq (map tostring lst)]
+  (let ([seq (map tostring (clean nil? lst))]
         [sep (tostring sep)])
     (cond
-      ((empty? seq) "")
+      ((nil? seq) "")
       ((empty? (cdr seq)) (car seq))
       (else
         (string-append (car seq) sep (implode (cdr seq) sep))))))

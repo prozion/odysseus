@@ -2,9 +2,9 @@
 <style type="text/css">
 /* <![CDATA[ */
 text {
-    font-size: 12;
-    font-family: Arial, sans-serif;
-    font-style: normal;
+  font-size: 12;
+  font-family: Arial, sans-serif;
+  font-style: normal;
 }
 
 rect {
@@ -19,7 +19,8 @@ rect {
 
 .barchart rect {
   fill: red;
+  opacity: 0.5;
 }
 /* ]]> */
 </style>
-<g class="barchart"><text x="300" y="108" font-size="40">Storskog bordercrossings by year</text><rect x="100" width="54" height="95" y="405" /><rect x="155" width="54" height="94" y="406" /><rect x="210" width="54" height="93" y="407" /><rect x="265" width="54" height="95" y="405" /><rect x="320" width="54" height="91" y="409" /><rect x="375" width="54" height="96" y="404" /><rect x="430" width="54" height="123" y="377" /><rect x="485" width="54" height="171" y="329" /><rect x="540" width="54" height="221" y="279" /><rect x="595" width="54" height="280" y="220" /><rect x="650" width="54" height="141" y="359" /></g></svg>
+<g class="barchart" transform="translate(100 100)"><g id="title" transform="translate(0 0)"><text x="196" y="66" font-size="33">Storskog the best!</text></g><g id="y-axis" transform="translate(0 100)"><text x="0" y="156" transform="rotate(-90 0 156)">Bordercrossings</text></g><g id="x-axis" transform="translate(30 370)"><text x="14" y="21" font-size="13">2006</text><text x="75" y="21" font-size="13">2007</text><text x="136" y="21" font-size="13">2008</text><text x="197" y="21" font-size="13">2009</text><text x="258" y="21" font-size="13">2010</text><text x="319" y="21" font-size="13">2011</text><text x="380" y="21" font-size="13">2012</text><text x="441" y="21" font-size="13">2013</text><text x="502" y="21" font-size="13">2014</text><text x="563" y="21" font-size="13">2015</text><text x="624" y="21" font-size="13">2016</text></g><g class="some-bar-class" id="bars" transform="translate(30 100)"><rect x="0" width="59" height="92" y="178" /><rect x="61" width="59" height="91" y="179" /><rect x="122" width="59" height="90" y="180" /><rect x="183" width="59" height="92" y="178" /><rect x="244" width="59" height="88" y="182" /><rect x="305" width="59" height="92" y="178" /><rect x="366" width="59" height="119" y="151" /><rect x="427" width="59" height="165" y="105" /><rect x="488" width="59" height="213" y="57" /><rect x="549" width="59" height="270" y="0" /><rect x="610" width="59" height="136" y="134" /></g></g></svg>

@@ -4,6 +4,7 @@
 
   (require rackunit)
   (require "../base.rkt")
+  (require "../interval.rkt")
 
   (check-equal? (% 5 3) 2)
 
@@ -31,31 +32,17 @@
   (check-pred true? null)
   (check-equal? (true? #f) #f)
 
-  (check-equal? (in 0 1 0.5) #t)
-  (check-equal? (in 0 1 2) #f)
-  (check-equal? (in 0 1 0) #t)
-  (check-equal? (in 0 1 1) #t)
-
-  (check-equal? (inii -100 100 -100) #t)
-
-  (check-equal? (inee 1 3 2) #t)
-  (check-equal? (inee 0 1 0) #f)
-  (check-equal? (inee 0 1 1) #f)
-
-  (check-equal? (inei 1 3 2) #t)
-  (check-equal? (inei 0 1 0) #f)
-  (check-equal? (inei 0 1 1) #t)
-
-  (check-equal? (inie 1 3 2) #t)
-  (check-equal? (inie 0 1 0) #t)
-  (check-equal? (inie 0 1 1) #f)
-
   (check-pred nil? null)
   (check-pred nil? empty)
   (check-pred nil? '())
   (check-pred nil? (list))
   (check-pred nil? (cdr '(a)))
   (check-pred nil? "")
+  (check-pred nil? #f)
+  (check-pred nil? (unless #t #t))
+
+  (check-pred znil? 0)
+  (check-pred znil? null)
 
   (check-equal? (!= 1 0) #t)
   (check-equal? (!= 1 1) #f)
@@ -64,9 +51,5 @@
 
   (check-equal? (clean odd? '(1 2 3 4 5)) '(2 4))
   ;
-  (check-true (andmap (λ (x) (inii 1 10 x)) (for/list ((_ (range 100))) (rand 10)))) 
-  ;
-  (check-equal? (+c 4 4 5) 3)
-  (check-equal? (+c 3 2 8) 5)
-  (check-equal? (+c 17 20 4) 1)
+  (check-true (andmap (λ (x) (inii 1 10 x)) (for/list ((_ (range 100))) (rand 10))))
 )

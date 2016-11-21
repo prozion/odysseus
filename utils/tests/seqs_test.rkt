@@ -16,6 +16,7 @@
   (check-equal? (reverse '(1 2 3 4 5)) '(5 4 3 2 1))
 
   (check-equal? (str "" "hello" " world!" "") "hello world!")
+  (check-equal? (str "1" (unless #t "2") "3") "13")
 
   (check-equal? (implode '("a" "b" "c" "d") "-") "a-b-c-d")
 

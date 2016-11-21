@@ -1,7 +1,7 @@
 text {
-    font-size: 12;
-    font-family: Arial, sans-serif;
-    font-style: normal;
+  font-size: 12;
+  font-family: Arial, sans-serif;
+  font-style: normal;
 }
 
 rect {
@@ -16,4 +16,5 @@ rect {
 
 .barchart rect {
   fill: red;
+  opacity: 0.5;
 }
