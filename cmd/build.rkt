@@ -15,7 +15,7 @@
   (parameterize ([current-namespace (make-base-namespace)])
     (namespace-require "../widgets/all.rkt")
     (namespace-require "../utils/all.rkt")
-    (let ([v (load ods-file)]
+    (let ([v (load ods-file)] ;; TODO: load multiple widgets from ods-file (needs loading without evaluation to ,@ (splice) into str)
           [svg-filename (if svg-file
                             svg-file
                             (path-replace-extension (file-name-from-path ods-file) #".svg"))])

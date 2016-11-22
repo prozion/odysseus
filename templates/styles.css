@@ -8,6 +8,11 @@ rect {
   fill: black;
 }
 
+line {
+  stroke-width: 1;
+  stroke: black;
+}
+
 .barchart {
   font-size: 12;
   font-family: Arial, sans-serif;

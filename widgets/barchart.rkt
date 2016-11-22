@@ -47,9 +47,21 @@
             'widget (hash 'x 0 'y 0 'w 800 'h 600)
             'title (hash 'h 0 'pos 'top)
             'y-axis (hash 'w 0 'pos 'left)
-            'x-axis (hash 'h 0 'pos 'bottom)
+            'x-axis (hash 'h 0 'pos 'bottom 'font-size 12)
             'bars (hash 'gap 1))]
         [@layout (hash-union @layout default-layout)]
+
+        [default-labels
+          (hash
+            'y-axis (hash 'label-direction 'vertical 'start 0 'text "Y" 'tick-offset 10)
+            'x-axis (hash 'text "X" 'tick-offset 5))]
+        [@labels (hash-union @labels default-labels)]
+
+        [default-styles
+          (hash
+            'y-axis (hash 'font-size 12)
+            'x-axis (hash 'font-size 12))]
+        [@styles (hash-union @styles default-styles)]
 
         [widget-x (hash-path @layout 'widget 'x)]
         [widget-y (hash-path @layout 'widget 'y)]
@@ -69,15 +81,18 @@
         [y-axis-pos (hash-path @layout 'y-axis 'pos)]
         [y-axis-y (the title-pos 'top title-h)]
         [y-axis-w (thenot y-axis-pos 'hidden (hash-path @layout 'y-axis 'w))]
-        [y-axis-h (- widget-h title-h)]
+        [y-axis-font-size (hash-path @styles 'y-axis 'font-size)]
         [y-axis-label (hash-path @labels 'y-axis 'text)]
-        [y-axis-label-direction (hash-path @labels 'y-axis 'direction)]
+        [y-axis-label-direction (hash-path @labels 'y-axis 'label-direction)]
+        [y-axis-start (hash-path @labels 'y-axis 'start)]
+        [y-axis-tick-offset (@. @labels.y-axis.tick-offset)]
 
         [x-axis-pos (hash-path @layout 'x-axis 'pos)]
         [x-axis-x (the y-axis-pos 'left y-axis-w)]
         [x-axis-h (thenot x-axis-pos 'hidden (hash-path @layout 'x-axis 'h))]
         [x-axis-font-size (hash-path @styles 'x-axis 'font-size)]
-        [x-axis-label (hash-path @labels 'x-axis 'text)]
+        [x-axis-label (@. @labels.x-axis.text)]
+        [x-axis-tick-offset (@. @labels.x-axis.tick-offset)]
 
         [bars-gap (hash-path @layout 'bars 'gap)]
         [bars-x (the y-axis-pos 'left y-axis-w)]
@@ -88,6 +103,7 @@
         [title-y (the title-pos 'bottom (+ bars-h x-axis-h))] ;(if (equal? title-pos 'bottom) (+ bars-h x-axis-h) 0)
 
         [y-axis-x (the y-axis-pos 'right bars-w)]
+        [y-axis-h bars-h]
 
         [x-axis-y (+ (the title-pos 'top title-h) (the x-axis-pos 'bottom bars-h))]
         [x-axis-w bars-w]
@@ -116,8 +132,9 @@
             ([trunc-at-zero]
               (map (λ (x) (if (< x 0) 0 x)) data))
             (else data))]
+        [scale-factor (exact->inexact (/ bars-h (apply max data-n1)))]
         ; data normalization (scaling), second step
-        [data-n2 (map (λ (y) (/r (* y bars-h) data-max)) data-n1)])
+        [data-n2 (map (λ (y) (*r y scale-factor)) data-n1)])
 
     ;; barchart widget
     (g (@ 'class "barchart" 'transform (svg/translate widget-x widget-y))
@@ -135,18 +152,48 @@
       ;; y-axis block
       (unless (equal? y-axis-pos 'hidden)
         (g
-          (@ 'id "y-axis" 'transform (svg/translate y-axis-x  y-axis-y))
-          (let* ((x 0)
-                (y (v-centrify y-axis-h))
-                (ang (the y-axis-label-direction 'vertical "-90")))
-            (text (@ 'x x 'y y
-                      'transform (svg/rotate ang x y)) ; TODO: make it more elegant, don't transform when not vertical
-                  y-axis-label))))
+          (@ 'id "y-axis" 'transform (svg/translate y-axis-x y-axis-y))
+          (let* ( (label-x 0)
+                  (label-y (v-centrify y-axis-h))
+                  (ang (the y-axis-label-direction 'vertical "-90")))
+            (str
+              (text (@ 'x label-x 'y label-y 'font-size y-axis-font-size
+                        'transform (svg/rotate ang label-x label-y)) ; TODO: make it more elegant, don't transform when not vertical
+                    y-axis-label)
+
+              (let ((ticks (fractize
+                              (or y-axis-start (apply min data-n1))
+                              (apply max data-n1)
+                              10)))
+                (for/fold/idx
+                  (s "")
+                  (tick ticks)
+                    (let* ((tick-y (- y-axis-h (* scale-factor tick)))
+                          (tick-w (if (> y-axis-w 60) 20 (* 0.33 y-axis-w)))
+                          (tick-offset y-axis-tick-offset)
+                          (tick-label-offset (+ (* 2 tick-offset) tick-w))
+                          (tick-label-length (text-length (@ 'text (str tick) 'font-size y-axis-font-size))))
+                      (if (> tick-y 0)
+                        (str s
+                          (text (@
+                                  'x (- y-axis-w tick-label-offset tick-label-length)
+                                  'y (+ tick-y (/r y-axis-font-size 2))
+                                  'font-size y-axis-font-size) (str tick))
+                          (line 'x1 (- y-axis-w tick-w tick-offset)
+                                'y1 tick-y
+                                'x2 (- y-axis-w tick-offset)
+                                'y2 tick-y))
+                        s))))))))
 
       ;; x-axis block
       (unless (equal? x-axis-pos 'hidden)
         (g
           (@ 'id "x-axis" 'transform (svg/translate x-axis-x  x-axis-y))
+          (text (@
+                  'x (h-centrify x-axis-w (@ 'text x-axis-label 'font-size x-axis-font-size))
+                  'y x-axis-h
+                  'font-size x-axis-font-size)
+                x-axis-label)
           (unless (nil? labels)
             (for/fold/idx
               (s "")
@@ -158,7 +205,7 @@
                               (* $idx bar-w)
                               (* (dec $idx) bars-gap)
                               (h-centrify bar-w (@ 'text lbl 'font-size x-axis-font-size)))
-                        'y (v-centrify x-axis-h)
+                        'y (+ x-axis-tick-offset x-axis-font-size)
                         'font-size x-axis-font-size)
                       lbl))))))
 

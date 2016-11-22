@@ -1,14 +1,30 @@
 
 (barchart
         data '((2006 108671) (2007 107520) (2008 106644) (2009 108708) (2010 104584) (2011 109535) (2012 140855) (2013 195813) (2014 252055) (2015 320042) (2016 161727))
-        layout (@ 'widget (@ 'x 100 'y 100 'w 700 'h 400)
-                  'title (@ 'h 100 'pos 'top)
-                  'y-axis (@ 'w 30 'pos 'left)
-                  'x-axis (@ 'h 30 'pos 'bottom)
+        layout (@ 'widget (@ 'x 50 'y 10 'w 700 'h 200)
+                  'title (@ 'h 50 'pos 'top)
+                  'y-axis (@ 'w 100 'pos 'left)
+                  'x-axis (@ 'h 40 'pos 'bottom)
                   'bars (@ 'gap 2))
         labels (@ 'x-axis (@ 'text "Years")
-                  'y-axis (@ 'text "Bordercrossings" 'direction 'vertical))
+                  'y-axis (@ 'text "Bordercrossings" 'start 0))
         styles (@ 'bar (@ 'class 'some-bar-class)
-                  'x-axis (@ 'font-size 13))
+                  'x-axis (@ 'font-size 12)
+                  'y-axis (@ 'font-size 12))
+        normalize-mode 'trunc-at-zero
+        title "Storskog the best!")
+
+(barchart
+        data '((2006 108671) (2007 107520) (2008 106644) (2009 108708) (2010 104584) (2011 109535) (2012 140855) (2013 195813) (2014 252055) (2015 320042) (2016 161727))
+        layout (@ 'widget (@ 'x 50 'y 210 'w 700 'h 200)
+                  'title (@ 'h 50 'pos 'top)
+                  'y-axis (@ 'w 100 'pos 'left)
+                  'x-axis (@ 'h 40 'pos 'bottom)
+                  'bars (@ 'gap 2))
+        labels (@ 'x-axis (@ 'text "Years")
+                  'y-axis (@ 'text "Bordercrossings" 'start 0))
+        styles (@ 'bar (@ 'class 'some-bar-class)
+                  'x-axis (@ 'font-size 12)
+                  'y-axis (@ 'font-size 12))
         normalize-mode 'trunc-at-zero
         title "Storskog the best!")

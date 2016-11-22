@@ -12,8 +12,19 @@
       <)))
 
 (define (check-hash-equal? h1 h2)
-    (and
-      (for/fold ((a #t)) (([k v] h2))
-          (and a (equal? (hash-ref h1 k #f) v)))
-      (for/fold ((a #t)) (([k v] h1))
-          (and a (equal? (hash-ref h2 k #f) v)))))
+  (cond
+    ((not (and (hash? h1) (hash? h2))) #f)
+    (else
+      (and
+        (for/fold ((a #t)) (([k v2] h2))
+            (let ((v1 (hash-ref h1 k #f)))
+              (and  a
+                    (if (hash? v1)
+                      (check-hash-equal? v1 v2)
+                      (equal? v1 v2)))))
+        (for/fold ((a #t)) (([k v1] h1))
+            (let ((v2 (hash-ref h2 k #f)))
+              (and  a
+                    (if (hash? v2)
+                      (check-hash-equal? v1 v2)
+                      (equal? v1 v2)))))))))

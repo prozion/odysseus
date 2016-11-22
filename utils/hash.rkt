@@ -1,7 +1,7 @@
 #lang racket
 
 (require compatibility/defmacro)
-(require "base.rkt")
+(require "base.rkt" (for-syntax "seqs.rkt"))
 
 (provide (all-defined-out))
 
@@ -36,8 +36,35 @@
                 #f)))))
   (hash-path-r h (reverse rest)))
 
+; (@. h.a.b.c)
+(define-macro (@. path)
+  (let* ((parts (map string->symbol (split (symbol->string path) ".")))
+        (h (car parts))
+        (rest (map (λ (x) `(quote ,x)) (cdr parts))))
+    (cond
+      ((null? rest) h)
+      (else `(hash-path ,h ,@rest)))))
+
+(define (hash-delete h k)
+  (cond
+    ((immutable? h) (hash-remove h k))
+    (else (make-immutable-hash (hash->list h)))))
+
 (define (hash-insert h1 pair)
-  (make-hash (cons pair (hash->list h1))))
+  (let ((h1-v-hash (hash-ref h1 (car pair) #f)))
+    (if (and
+          (hash? (cdr pair))
+          h1-v-hash)
+      ;; #t - we union values if they are hashes
+      (hash-insert
+        (hash-delete h1 (car pair))
+        (cons
+          (car pair)
+          (if (hash? h1-v-hash)
+            (hash-union h1-v-hash (cdr pair))
+            h1-v-hash)))
+      ;; #f - add to hash in usual way
+      (make-hash (cons pair (hash->list h1))))))
 
 ; add to resulting hash all key-val pairs from h1 and pairs from h2 with rest of the keys
 (define (hash-union h1 h2)
