@@ -1,10 +1,15 @@
-.barchart {
-  fill: black;
-  font-size: 12;
-  font-family: Arial, sans-serif;
-  font-style: normal;
+.bc1 {
+  fill: yellow;
 }
 
-.barchart rect {
+.bc2 {
+  fill: orange;
+}
+
+.bc3 {
   fill: red;
+}
+
+.bc4 {
+  fill: rgb(20, 180, 160);
 }

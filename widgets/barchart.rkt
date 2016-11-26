@@ -7,13 +7,14 @@
 (require "../utils/all.rkt" (for-syntax "../utils/syntax.rkt" "../utils/hash.rkt" "../utils/controls.rkt"))
 (require "styles.rkt")
 
+(require "../utils/debug.rkt")
+
 (provide (all-defined-out))
 
 (define-macro (barchart . body) ; STX define-macro form should have the same coloring scheme as define form
   (let* ( [@args (zor (apply hash body) (hash))]
           [data (hash-ref @args 'data null)]
           [title (hash-ref @args 'title "")]
-          ;; TODO: add just the lacking default parameters, new operation in hash.rkt (hash-union <core-hash> <rest-hash>)
           [layout (hash-ref @args 'layout (hash))]
           [labels (hash-ref @args 'labels (hash))]
           [styles (hash-ref @args 'styles (hash))]
@@ -71,7 +72,9 @@
         [title-x 0]
         [title-pos (hash-path @layout 'title 'pos)]
         [title-w widget-w]
-        [title-font-size (/r widget-h 12)]
+        [title-font-size (if (< widget-h 360)
+                            (/r widget-h 12)
+                            30)]
         [title-h (thenot
                     title-pos 'hidden
                     (zor
@@ -114,6 +117,11 @@
         [text-y (+ title-y (/r (+ title-h text-h) 2))]
 
         [bar-class (zor (hash-path @styles 'bar 'class) "none")]
+        [bar-class (split bar-class " ")]
+        [bar-class (if (= (length bar-class) 1) (car bar-class) bar-class)]
+        [bar-class-hover (zor (hash-path @styles 'bar 'class-hover) "none")]
+        [bar-class-hover (split bar-class " ")]
+        [bar-class-hover (if (= (length bar-class-hover) 1) (car bar-class-hover) bar-class-hover)]
 
         [amount (length data)]
         [bar-w (/r (- bars-w (* (- amount 1) bars-gap)) amount)]
@@ -154,8 +162,9 @@
         (g
           (@ 'id "y-axis" 'transform (svg/translate y-axis-x y-axis-y))
           (let* ( (label-x 0)
-                  (label-y (v-centrify y-axis-h))
+                  (label-y (+ (v-centrify y-axis-h) (/r (text-length (@ 'text y-axis-label 'font-size y-axis-font-size)) 2)))
                   (ang (the y-axis-label-direction 'vertical "-90")))
+
             (str
               (text (@ 'x label-x 'y label-y 'font-size y-axis-font-size
                         'transform (svg/rotate ang label-x label-y)) ; TODO: make it more elegant, don't transform when not vertical
@@ -164,12 +173,13 @@
               (let ((ticks (fractize
                               (or y-axis-start (apply min data-n1))
                               (apply max data-n1)
-                              10)))
+                              (inc (/c bars-h 60)))))
+
                 (for/fold/idx
                   (s "")
                   (tick ticks)
                     (let* ((tick-y (- y-axis-h (* scale-factor tick)))
-                          (tick-w (if (> y-axis-w 60) 20 (* 0.33 y-axis-w)))
+                          (tick-w (if (> y-axis-w 60) 15 (* 0.25 y-axis-w)))
                           (tick-offset y-axis-tick-offset)
                           (tick-label-offset (+ (* 2 tick-offset) tick-w))
                           (tick-label-length (text-length (@ 'text (str tick) 'font-size y-axis-font-size))))
@@ -211,7 +221,7 @@
 
       ;; bars block
       (g
-        (@ 'id "bars" 'class bar-class 'transform (svg/translate bars-x  bars-y))
+        (@ 'id "bars" 'transform (svg/translate bars-x bars-y))
         (for/fold/idx
           (s "")
           (h data-n2)
@@ -220,4 +230,9 @@
                   y (- bars-base h)
                   width bar-w
                   height h
+                  class (if (list? bar-class)
+                              (list-ref bar-class (+c 0 $idx (length bar-class)))
+                              bar-class)
+                  ;onmouseover (str "hover(evt, " (alist->json (list '("fill" "blue") '("opacity" "0.5"))))
+                  ;onmouseout "hout(evt)"
                   )))))))

@@ -8,34 +8,34 @@
 (require "../widgets/all.rkt")
 (require "../graphics/svg.rkt")
 
-(struct parameters (ods svg) #:mutable)
+(require "../utils/debug.rkt")
+
+(struct parameters (ods output) #:mutable)
 (define params (parameters #f #f))
 
-(define (build #:in ods-file #:out (svg-file #f))
+(define (build #:in ods-file #:out (output-file null))
   (parameterize ([current-namespace (make-base-namespace)])
     (namespace-require "../widgets/all.rkt")
     (namespace-require "../utils/all.rkt")
-    (let ([v (load ods-file)] ;; TODO: load multiple widgets from ods-file (needs loading without evaluation to ,@ (splice) into str)
-          [svg-filename (if svg-file
-                            svg-file
-                            (path-replace-extension (file-name-from-path ods-file) #".svg"))])
-      (write-file-to-dir
-        #:file svg-filename
-        #:dir (path-only ods-file)
-        (svg xmlns xlink styles v)))))
+    (namespace-require "../utils/debug.rkt")
+    (let* ([v (load ods-file)]
+          [output-filename (if (null? output-file)
+                              (path-replace-extension (file-name-from-path ods-file) (@. v.output-file-ext))
+                              output-file)])
+      ((@. v.save-file) #:file output-filename #:dir (path-only ods-file)))))
 
 (command-line
-  #:program "ods->svg transpiler"
+  #:program "ods-><some graphics file> transpiler"
   #:multi
     [("-o" "--output") output-filename
-        "output file, by default <input-filename>.svg"
-        (set-parameters-svg! params output-filename)]
+        "output file, by default <input-filename>.<ext>"
+        (set-parameters-output! params output-filename)]
   #:args
     (ods-file)
     (begin
       (set-parameters-ods! params ods-file)
-      (let ([svg-file (parameters-svg params)])
-        (if svg-file
-          (build #:in ods-file #:out svg-file)
+      (let ([output-file (parameters-output params)])
+        (if output-file
+          (build #:in ods-file #:out output-file)
           (build #:in ods-file))))
 )

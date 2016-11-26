@@ -7,6 +7,7 @@
 (require "../utils/io.rkt")
 (require "fonts.rkt")
 (require "../utils/seqs.rkt" (for-syntax "../utils/seqs.rkt"))
+(require (for-syntax "../utils/controls.rkt"))
 (require compatibility/defmacro)
 (require racket/runtime-path)
 
@@ -14,37 +15,68 @@
 
 (provide (all-defined-out))
 
-(define (foo) "bar")
-
 (define-macro (svg . args)
   (let* ( (xmlns (if (indexof? args 'xmlns) #t #f))
           (xlink (if (indexof? args 'xlink) #t #f))
           (styles (if (indexof? args 'styles) #t #f))
-          (body (clean (λ (x) (or (equal? x 'xmlns) (equal? x 'xlink)  (equal? x 'styles) )) args))
+          (scripts (if (indexof? args 'scripts) #t #f))
+          (params (car
+                    (zor
+                      (filter (λ (x) (and (list? x) (equal? (car x) '@))) args)
+                      (list '(@)))))
+          ;(viewbox (hash-ref params 'viewbox #f))
+          (body (clean (λ (x) (or (equal? x 'xmlns) (equal? x 'xlink) (and (list? x) (equal? (car x) '@)) (equal? x 'styles) (equal? x 'scripts) )) args))
           (body (if (null? body) "" (car body))))
-    `(svg-f ,xmlns ,xlink ,styles ,body)))
+    `(svg-f ,xmlns ,xlink ,params ,styles ,scripts ,body)))
 
 (define (svg-f
           xmlns
           xlink
+          params
           styles
+          scripts
           . body)
-  (let ([xmlns (if xmlns
+  (let* ([xmlns (if xmlns
                       " xmlns=\"http://www.w3.org/2000/svg\""
                       "")]
         [xlink (if xlink
                       " xmlns:xlink=\"http://www.w3.org/1999/xlink\""
                       "")]
+        [viewbox (hash-ref params 'viewbox #f)]
+        [viewbox-w (if viewbox
+                        (nth viewbox 3)
+                        100)]
+        [viewbox-h (if viewbox
+                        (nth viewbox 4)
+                        100)]
         [styles (if styles
                       (str  "\n<style type=\"text/css\">\n"
                             "/* <![CDATA[ */\n"
                             (read-file (str rootpath "\\templates\\styles.css"))
+                            "\n\n/* barchart: */\n\n"
+                            (read-file (str rootpath "\\templates\\barchart.css"))
                             "/* ]]> */\n"
                             "</style>\n")
                       "")]
+        [scripts (if scripts
+                      (str  "\n<script type=\"text/ecmascript\">\n"
+                            "/* <![CDATA[ */\n"
+                            "\n\n/* base.js: */\n\n"
+                            (read-file (str rootpath "\\templates\\gui\\base.js"))
+                            "/* ]]> */\n"
+                            "</script>\n")
+                      "")]
         [body (if (empty? body) "" (apply string-append body))])
 
-    (format "<svg~a~a>~a~a</svg>" xmlns xlink styles body)))
+    (format "<svg~a~a~a>~a~a~a</svg>"
+            xmlns
+            xlink
+            (if viewbox
+              (format " viewBox=\"0 0 ~a ~a\"" viewbox-w viewbox-h)
+              "")
+            styles
+            scripts
+            body)))
 
 ; e.g.: (rect x 10 y 10 width 100 height 100) as well as (rect 'x 10 'y 10 'width 100 'height 100)
 (define-macro (make-single-tag tagname)

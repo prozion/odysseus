@@ -2,6 +2,8 @@
 
 (require "base.rkt")
 
+(require "debug.rkt")
+
 (provide (all-defined-out))
 ;(provide (except-out (all-defined-out) >plain ))
 
@@ -33,6 +35,7 @@
 
 ; (>plain 10 8) -> #t
 ; (>plain 5 4) -> #t
+; TODO: optimize speed of the algorythm
 (define (>plain x y)
   (let ((pris '(10 5 2 3 1)))
     (define (first-pri) (car pris))
@@ -50,7 +53,7 @@
           (else #t))))
     (>plain-n x y (first-pri))))
 
-(define (fractize a b n #:crop (crop #t))
+(define (fractize a b n #:crop (crop #f))
   (let ((res (fractize-2 a b n 0.3)))
     (if crop
       (take res n) ;; STX take ~list-ref
@@ -108,7 +111,6 @@
   (let* ( [start (min-plain a)]
           [end (max-plain b)]
           [step (inexact->exact (* (- end start) step-ratio))])
-    (printf "~a ~a ~a~n~n" start end step)
     (range start (inc end) (exact->inexact step))))
 
 (define (fractize-4 a b)
