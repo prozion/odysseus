@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<style type="text/css">
+/* <![CDATA[ */
+text {
+  font-size: 12;
+  font-family: Arial, sans-serif;
+  font-style: normal;
+}
+
+rect {
+  fill: black;
+}
+
+line {
+  stroke-width: 1;
+  stroke: black;
+}
+
+.barchart {
+  font-size: 12;
+  font-family: Arial, sans-serif;
+  font-style: normal;
+}
+
+/*.barchart rect {
+  fill: red;
+  opacity: 0.5;
+}*/
+
+
+/* barchart: */
+
+.bc1 {
+  fill: yellow;
+}
+
+.bc2 {
+  fill: orange;
+}
+
+.bc3 {
+  fill: red;
+}
+
+.bc4 {
+  fill: rgb(20, 180, 160);
+}
+/* ]]> */
+</style>
+<g class="barchart" transform="translate(10 10)"><g id="title" transform="translate(0 0)"><text x="310" y="40" font-size="30">Storskog the best!</text></g><g id="y-axis" transform="translate(0 50)"><text x="0" y="308" font-size="12" transform="rotate(-90 0 308)">Bordercrossings</text><text x="48.76" y="516" font-size="12">0</text><line x1="65" y2="510" y1="510" x2="80" /><text x="23.799999999999997" y="468.1937745670881" font-size="12">30000</text><line x1="65" y2="462.1937745670881" y1="462.1937745670881" x2="80" /><text x="23.799999999999997" y="420.38754913417614" font-size="12">60000</text><line x1="65" y2="414.38754913417614" y1="414.38754913417614" x2="80" /><text x="23.799999999999997" y="372.5813237012642" font-size="12">90000</text><line x1="65" y2="366.5813237012642" y1="366.5813237012642" x2="80" /><text x="17.560000000000002" y="324.7750982683523" font-size="12">120000</text><line x1="65" y2="318.7750982683523" y1="318.7750982683523" x2="80" /><text x="17.560000000000002" y="276.9688728354404" font-size="12">150000</text><line x1="65" y2="270.9688728354404" y1="270.9688728354404" x2="80" /><text x="17.560000000000002" y="229.16264740252842" font-size="12">180000</text><line x1="65" y2="223.16264740252842" y1="223.16264740252842" x2="80" /><text x="17.560000000000002" y="181.35642196961646" font-size="12">210000</text><line x1="65" y2="175.35642196961646" y1="175.35642196961646" x2="80" /><text x="17.560000000000002" y="133.55019653670456" font-size="12">240000</text><line x1="65" y2="127.55019653670456" y1="127.55019653670456" x2="80" /><text x="17.560000000000002" y="85.7439711037926" font-size="12">270000</text><line x1="65" y2="79.7439711037926" y1="79.7439711037926" x2="80" /><text x="17.560000000000002" y="37.9377456708807" font-size="12">300000</text><line x1="65" y2="31.9377456708807" y1="31.9377456708807" x2="80" /></g><g id="x-axis" transform="translate(90 560)"><text x="389" y="40" font-size="12">Years</text><text x="16" y="17" font-size="12">2004</text><text x="78" y="17" font-size="12">2005</text><text x="140" y="17" font-size="12">2006</text><text x="202" y="17" font-size="12">2007</text><text x="264" y="17" font-size="12">2008</text><text x="326" y="17" font-size="12">2009</text><text x="388" y="17" font-size="12">2010</text><text x="450" y="17" font-size="12">2011</text><text x="512" y="17" font-size="12">2012</text><text x="574" y="17" font-size="12">2013</text><text x="636" y="17" font-size="12">2014</text><text x="698" y="17" font-size="12">2015</text><text x="760" y="17" font-size="12">2016</text></g><g id="bars" transform="translate(90 50)"><rect class="none" x="0" width="60" height="173" y="337" /><rect class="none" x="62" width="60" height="171" y="339" /><rect class="none" x="124" width="60" height="170" y="340" /><rect class="none" x="186" width="60" height="173" y="337" /><rect class="none" x="248" width="60" height="167" y="343" /><rect class="none" x="310" width="60" height="175" y="335" /><rect class="none" x="372" width="60" height="224" y="286" /><rect class="none" x="434" width="60" height="312" y="198" /><rect class="none" x="496" width="60" height="402" y="108" /><rect class="none" x="558" width="60" height="510" y="0" /><rect class="none" x="620" width="60" height="507" y="3" /><rect class="none" x="682" width="60" height="388" y="122" /><rect class="none" x="744" width="60" height="354" y="156" /></g></g></svg>
