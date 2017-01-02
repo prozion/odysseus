@@ -4,7 +4,7 @@
 
   (require rackunit)
   (require "../svg.rkt")
-  (require "../../utils/all.rkt")
+  (require "../../lib/all.rkt")
 
   (check-equal?
     (svg)

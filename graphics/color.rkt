@@ -1,8 +1,8 @@
 #lang racket
 
-(require "../utils/seqs.rkt")
-(require "../utils/base.rkt")
-(require "../utils/controls.rkt")
+(require "../lib/seqs.rkt")
+(require "../lib/base.rkt")
+(require "../lib/controls.rkt")
 
 ;(require dshirshov/utils)
 ;(require dshirshov/seqs)

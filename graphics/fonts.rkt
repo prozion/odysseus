@@ -1,8 +1,8 @@
 #lang racket
 
-(require "../utils/base.rkt")
-(require "../utils/hash.rkt")
-(require "../widgets/styles.rkt")
+(require "../lib/base.rkt")
+(require "../lib/hash.rkt")
+(require "../reports/styles.rkt")
 
 (provide (all-defined-out))
 

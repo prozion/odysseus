@@ -2,12 +2,12 @@
 
 (require racket/file)
 (require (for-syntax racket/syntax))
-(require "../utils/base.rkt" (for-syntax "../utils/base.rkt")) ;; STX for-syntax ~require
-(require "../utils/hash.rkt")
-(require "../utils/io.rkt")
+(require "../lib/base.rkt" (for-syntax "../lib/base.rkt")) 
+(require "../lib/hash.rkt")
+(require "../lib/io.rkt")
 (require "fonts.rkt")
-(require "../utils/seqs.rkt" (for-syntax "../utils/seqs.rkt"))
-(require (for-syntax "../utils/controls.rkt"))
+(require "../lib/seqs.rkt" (for-syntax "../lib/seqs.rkt"))
+(require (for-syntax "../lib/controls.rkt"))
 (require compatibility/defmacro)
 (require racket/runtime-path)
 
