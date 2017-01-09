@@ -1,8 +1,8 @@
 #lang racket
 
 (require net/url)
-(require "../utils/all.rkt")
-;(require "../utils/seqs.rkt" "../utils/http.rkt" "../utils/hash.rkt")
+(require "../lib/all.rkt")
+;(require "../lib/seqs.rkt" "../lib/http.rkt" "../lib/hash.rkt")
 (require json)
 
 (provide (all-defined-out))

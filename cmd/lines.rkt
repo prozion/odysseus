@@ -3,7 +3,7 @@
 (require racket/cmdline)
 (require racket/file)
 
-(require "../utils/base.rkt")
+(require (file "c:/denis/denis_core/odysseus/lib/base.rkt"))
 
 ;; count lines of code in the project
 

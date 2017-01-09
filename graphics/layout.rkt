@@ -1,7 +1,7 @@
 #lang racket
 
 (require compatibility/defmacro)
-(require "../utils/all.rkt")
+(require "../lib/all.rkt")
 
 (provide (all-defined-out))
 
