@@ -1,7 +1,6 @@
 #lang racket
 
 (require racket/cmdline)
-(require racket/file)
 
 (require (file "c:/denis/denis_core/settings/web.rkt"))
 (require (file "c:/denis/denis_core/settings/mydata.rkt"))
@@ -47,12 +46,12 @@
 
 (command-line
   #:program "pwd"
-  #:once-any
-    [("-q" "--query") q
-                    "query to filter"
-										(set! query q)]
+  ;#:once-any
+  ;  [("-q" "--query") q
+  ;                  "query to filter"
+	;									(set! query q)]
   #:args
-    ()
+    (query)
     (begin
       (newline)
 			(print-records

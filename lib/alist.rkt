@@ -1,6 +1,10 @@
 #lang racket
 
-(require (prefix-in base: "base.rkt")) 
+(require (prefix-in base: "base.rkt"))
+(require "seqs.rkt")
+(require "debug.rkt")
+(require compatibility/defmacro)
+(require (for-syntax racket/list))
 
 (provide (all-defined-out))
 
@@ -23,3 +27,19 @@
   (cond
     ((null? alst) null)
     (else (cons (second (car alst)) (seconds (cdr alst))))))
+
+(define-macro (dup-alist lst n)
+    `(map (λ (x) (quote ,lst)) (range 1 ,n)))
+
+; (alist-expand '((1 2) (3 4)) '(10 20) 1) -> '((1 2 10) (1 2 20) (3 4))
+(define (alist-expand base-list expander-list pos)
+  (let ((pos-el (nth base-list pos)))
+      (splice
+        (remove base-list pos)
+        (map
+          (λ (x) (pushr pos-el x))
+          expander-list)
+        pos)))
+
+(define (alist-flatten alst)
+  (foldl merge '() alst))

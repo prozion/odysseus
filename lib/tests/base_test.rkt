@@ -42,8 +42,17 @@
   (check-pred nil? #f)
   (check-pred nil? (unless #t #t))
 
+  (check-pred notnil? #t)
+  (check-pred notnil? "txt")
+  (check-pred notnil? 3)
+  (check-pred notnil? 3.141592)
+
   (check-pred znil? 0)
   (check-pred znil? null)
+  (check-pred znil? #f)
+  (check-pred znil? "")
+  (check-pred znil? '())
+  (check-pred znil? (hash))
 
   (check-equal? (!= 1 0) #t)
   (check-equal? (!= 1 1) #f)

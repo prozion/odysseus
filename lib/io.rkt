@@ -28,8 +28,3 @@
   (write-file
     (build-path path file)
     v)))
-
-(define (printc color text)
-  ;; kernel32.dll SetConsoleTextAttribute
-  #t
-)

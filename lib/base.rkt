@@ -38,17 +38,6 @@
 
 (define (true? x) x)
 
-(define nil?
-  (λ (v) (or
-            (null? v)
-            (void? v)
-            (and (hash? v) (empty? (hash-keys v)))
-            (and (string? v) (equal? v ""))
-            (false? v))))
-
-(define znil?
-  (λ (v) (or (nil? v) (= v 0))))
-
 (define (!= a b)
   (not (= a b)))
 
@@ -81,13 +70,20 @@
   (λ (argument)
     (not (f argument))))
 
+(define nil?
+  (λ (v) (or
+            (null? v)
+            (void? v)
+            (and (hash? v) (empty? (hash-keys v)))
+            (and (string? v) (equal? v ""))
+            (false? v))))
+
+(define notnil? (not-> nil?))
+
+(define znil?
+  (λ (v) (or (nil? v) (= v 0))))    
+
 ;; filtering
 (define (clean f xs)
-  (filter (λ (x) (not (f x))) xs))
-
-; to use with defined?
-(define-syntax (if-defined stx)
-  (syntax-case stx ()
-    [(_ id iftrue iffalse)
-     (let ([where (identifier-binding #'id)])
-       (if where #'iftrue #'iffalse))]))
+  ;(filter (λ (x) (not (f x))) xs))
+  (filter-not f xs))

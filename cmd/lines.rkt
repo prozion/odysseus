@@ -3,7 +3,9 @@
 (require racket/cmdline)
 (require racket/file)
 
-(require (file "c:/denis/denis_core/odysseus/lib/base.rkt"))
+;(require (file "c:/denis/denis_core/odysseus/lib/base.rkt"))
+(require "../lib/all.rkt")
+(require "../graphics/console.rkt")
 
 ;; count lines of code in the project
 
@@ -61,5 +63,11 @@
                     (set-parameters-iline! params iline)]
   #:args
     (dir)
-    (printf "Total lines: ~a" (count-lines params (string->path dir)))
+    (begin
+      (newline)
+      (set-text-color 'yellow)
+      (display "Total lines: ")
+      (set-text-color 'green)
+      (displayln (count-lines params (string->path dir)))
+      (set-text-color 'default))
 )

@@ -73,6 +73,7 @@
 
   (check-equal? (ltrim "" 10) "")
   (check-equal? (ltrim "Oslo god morgen" 0) "Oslo god morgen")
+  (check-equal? (ltrim "Oslo god morgen") "slo god morgen")
   (check-equal? (ltrim "Oslo god morgen" 10) "orgen")
   (check-equal? (ltrim "Oslo god morgen" 100) "")
   (check-equal? (ltrim "Oslo god morgen" -5) "") ; add contract!
@@ -80,6 +81,9 @@
 
   (check-equal? (lpush '() 100) '(100))
   (check-equal? (lpush '(1 2 3) 100) '(100 1 2 3))
+
+  (check-equal? (lpush-unique '(1 2 3) 100) '(100 1 2 3))
+  (check-equal? (lpush-unique '(1 2 3) 3) '(1 2 3))
 
   (check-equal? (rshift "" 10) "")
   (check-equal? (rshift "Black waters" 3) "ers")
@@ -100,6 +104,10 @@
 
   (check-equal? (rpush '() 100) '(100))
   (check-equal? (rpush '(1 2 3) 100) '(1 2 3 100))
+  (check-equal? (rpush '(1 2 3) 3) '(1 2 3 3))
+
+  (check-equal? (rpush-unique '(1 2 3) 100) '(1 2 3 100))
+  (check-equal? (rpush-unique '(1 2 3) 3) '(1 2 3))
 
   (check-equal? (slice "" 1 3) "")
   (check-equal? (slice "Oslo god morgen" 3 1) "")
@@ -120,6 +128,10 @@
 
   (check-equal? (merge "hello" " " "world" "!") "hello world!")
   (check-equal? (merge '(1 2 3 4) '(100 200) '("a" "b")) '(1 2 3 4 100 200 "a" "b"))
+
+  (check-equal? (merge-unique '(1 2 3 4) '(100 200)) '(1 2 3 4 100 200))
+  (check-equal? (merge-unique '(1 2 3 4) '(5 1 8 2 4)) '(1 2 3 4 5 8))
+  (check-equal? (merge-unique '(1 2 3 4) '(5 1 8 2 4) '(0 3 5 7)) '(1 2 3 4 5 8 0 7))
 
   (check-equal? (push '(1 2 3 4) '(100 200) '("a" "b")) '((1 2 3 4) (100 200) "a" "b"))
 
@@ -182,4 +194,23 @@
   (check-equal? (replace-all "Sparta" "a" "o") "Sporto")
   (check-equal? (replace-all "Tell me, O muse, of that ingenious hero" " " "_") "Tell_me,_O_muse,_of_that_ingenious_hero")
   (check-equal? (replace-all "Tell me, O muse, of that ingenious hero" "w" "_") "Tell me, O muse, of that ingenious hero")
+
+  (check-equal? (not-uniques '(1 2 3 1 10 7 3 4 4)) '(1 3 4))
+  (check-equal? (not-uniques "abcdefa") '("a"))
+  (check-equal? (not-uniques '(1 2 13 12 10 7 3 4 14)) '())
+
+  (check-equal? (minus '() '()) '())
+  (check-equal? (minus '(1 2 3) '()) '(1 2 3))
+  (check-equal? (minus '() '(1 2 3)) '())
+  (check-equal? (minus '(1 2 3 4 5) '(9 8 7 6 5 4)) '(1 2 3))
+
+  (check-equal? (intersect '() '()) '())
+  (check-equal? (intersect '(1 2 3) '()) '())
+  (check-equal? (intersect '() '(1 2 3)) '())
+  (check-equal? (intersect '(1 2 3 4 5) '(9 8 7 6 5 4)) '(4 5))
+
+  (check-equal? (difference '() '()) '())
+  (check-equal? (difference '(1 2 3) '()) '(1 2 3))
+  (check-equal? (difference '() '(1 2 3)) '(1 2 3))
+  (check-equal? (difference '(1 2 3 4 5) '(9 8 7 6 5 4)) '(1 2 3 9 8 7 6))
 )

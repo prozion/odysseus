@@ -2,6 +2,9 @@
 
 (require "seqs.rkt")
 (require "alist.rkt")
+(require "hash.rkt")
+
+(require json)
 
 (provide (all-defined-out))
 
@@ -24,3 +27,7 @@
               (format "\"~a\": \"~a\", " (caar alst) (cadar alst))
               (alist->json (cdr alst) #f))))
     (if first-time "}" "")))
+
+(define (json->alist jsonstr)
+  (hash->list
+    (string->jsexpr jsonstr)))

@@ -7,9 +7,9 @@ SET arglen=0
 FOR %%X IN (%*) DO SET /A arglen+=1
 
 if %arglen% == 0 (
-  racket %ods_root%/cmd/lines.rkt -e "rkt" -F "_test" -i "^\s*$|^\s*;+.*$" %ods_root%
+  echo too few arguments, please, use -l key
 ) else (
-  racket %ods_root%/cmd/lines.rkt -e "rkt" -F "_test" -i "^\s*$|^\s*;+.*$" %1
+  racket %ods_root%/cmd/goal.rkt %1 %2
 )
 
 endlocal

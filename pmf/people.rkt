@@ -1,6 +1,7 @@
 #lang racket
 
 (require "../lib/all.rkt")
+(require "../graphics/console.rkt")
 
 (provide (all-defined-out))
 
@@ -44,9 +45,13 @@
 (define th? (contains-tag? "t"))
 ; m - mafia players
 (define mafia? (contains-tag? "m"))
+; g - gay/lesbian
+(define gay? (contains-tag? "g"))
 
 (define has-phone? (contains-key? 'phone))
 (define has-email? (contains-key? 'email))
+(define has-city? (contains-key? 'city))
+(define has-sn? (contains-key? 'sn))
 
 (define (phone=? val) (key-equal? 'phone val))
 (define (city=? val) (key-equal? 'city val))
@@ -78,22 +83,33 @@
 ; ods-query '(and-> mafia? (city=? "Мурманск")'
 
 (define (field->str person fieldname (mode 'first) (default #f))
-  (let ((fieldval (hash-ref person fieldname default)))
+  (let* ( (fieldval (hash-ref person fieldname default))
+          (fieldval (if (and fieldval (indexof? fieldval " "))
+                      (split fieldval " ")
+                      fieldval)))
       (cond
-        ((list? fieldval)
+        ((list? fieldval) ; variants in a list
           (cond
             ((equal? mode 'first) (first fieldval))
             (else (implode fieldval ", ")))) ; 'all and others
         (else fieldval))))
 
-
-(define (print-person person)
-  (displayln (format  "~a ~a"
-                      (field->str person 'name 'first "")
-                      (or
-                        (field->str person 'surname)
-                        (field->str person 'nick)
-                        "")))
-  (displayln (field->str person 'email 'all "--"))
-  (displayln (field->str person 'phone 'all "--"))
-  (newline))
+(define (person->string person query fields)
+  (let ((name (field->str person 'name 'first ""))
+        (surname (field->str person 'surname 'first ""))
+        (nick (field->str person 'nick 'first "n/a")))
+  (string-append
+    (format "~a" (string-text-color 'yellow))
+            (if (and (nil? name) (nil? surname))
+              (format " ~a~n" nick)
+              (if (nil? surname)
+                (if (not (nil? nick))
+                  (format " ~a ~a~n" name nick)
+                  (format " ~a~n" name))
+                (format " ~a ~a~n" name surname)))
+    (format "~a" (string-text-color 'grey))
+    (apply string-append
+      (map
+        (λ (x) (format " ~a~n" (field->str person (string->symbol x) 'all "-")))
+        fields))
+    (format "~a" (string-text-color 'default)))))

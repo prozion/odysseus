@@ -6,6 +6,8 @@
 (require "base.rkt")
 (require "controls.rkt")
 (require "interval.rkt")
+(require "debug.rkt")
+(require racket/set)
 
 ;; algebra of operations with strings and lists (arrays)
 
@@ -84,17 +86,25 @@
       ((not (in (- ll) ll index)) null)
       ((< index 0) (nth seq (+ ll index 1)))
       ((= index 1) (car seq))
-      (else (nth (cdr seq) (sub1 index))))))
+      (else
+        ;(nth (cdr seq) (sub1 index)))))) ; slow version
+        (list-ref seq (sub1 index))))))
 
 (define (indexof seq el)
-  (define (indexof-iter seq el acc)
-    (cond
-      ((null? seq) 0)
-      ((equal? el (car seq)) acc)
-      (else (indexof-iter (cdr seq) el (+ 1 acc)))))
+  ;(define (indexof-iter seq el acc)
+  ;  (cond
+  ;    ((null? seq) 0)
+  ;    ((equal? el (car seq)) acc)
+  ;    (else (indexof-iter (cdr seq) el (+ 1 acc)))))
   (if (string? seq)
-    (indexof-iter (explode seq) el 1)
-    (indexof-iter seq el 1)))
+    ;(indexof-iter (explode seq) el 1)
+    (indexof (explode seq) el)
+    ;(indexof-iter seq el 1)))
+    (let ((res (member el seq)))
+      (if res
+        (+ 1 (- (length seq) (length (member el seq))))
+        0))))
+
 
 (define (indexof? seq el)
   (if (= 0 (indexof seq el)) #f #t))
@@ -117,8 +127,11 @@
     ((string? seq) (implode (lshift (explode seq) count)))
     ((< count 1) empty)
     ((= count 1) (list (car seq)))
+    ((> count (length seq)) seq)
     (else
-      (cons (car seq) (lshift (cdr seq) (- count 1))))))
+      ;(cons (car seq) (lshift (cdr seq) (- count 1))))))
+      (take seq count))))
+
 
 (define (lpop seq)
   (if (string? seq)
@@ -134,12 +147,21 @@
     ((>= count (len seq)) empty)
     ((< count 0) empty)
     ((= count 0) seq)
-    (else (ltrim (cdr seq) (sub1 count)))))
+    (else
+      ;(ltrim (cdr seq) (sub1 count)))))
+      (list-tail seq count))))
 
 (define triml ltrim)
 
 (define (lpush seq el)
   (cons el seq))
+
+(define pushl lpush)
+
+(define (lpush-unique seq el)
+  (if (indexof? seq el)
+    seq
+    (lpush seq el)))
 
 (define (rshift seq (count 1))
   (reverse (lshift (reverse seq) count)))
@@ -161,6 +183,13 @@
 (define (rpush seq el)
   (reverse (cons el (reverse seq))))
 
+(define pushr rpush)
+
+(define (rpush-unique seq el)
+  (if (indexof? seq el)
+    seq
+    (rpush seq el)))
+
 ;; slice inclusively: slice c f -> a b [c d e f] g
 (define (slice seq pos1 (pos2 (len seq)))
   (let ((ll (len seq)))
@@ -175,17 +204,38 @@
           (- ll pos2))))))
 
 (define (merge . seqs)
-  (define (merge2 seq1 seq2)
-    (if (and (string? seq1) (string? seq2))
-      (string-append seq1 seq2)
-      (if (null? seq1)
-        seq2
-        (merge2 (reverse (cdr (reverse seq1))) (cons (car (reverse seq1)) seq2)))))
-  (case (length seqs)
-    ((0) empty)
-    ((1) (car seqs))
-    ((2) (merge2 (car seqs) (cadr seqs)))
-    (else (merge2 (car seqs) (apply merge (cdr seqs))))))
+  ;(define (merge2 seq1 seq2)
+  ;  (if (and (string? seq1) (string? seq2))
+  ;    (string-append seq1 seq2)
+  ;    (if (null? seq1)
+  ;      seq2
+  ;      (merge2 (reverse (cdr (reverse seq1))) (cons (car (reverse seq1)) seq2)))))
+  ;(case (length seqs)
+  ;  ((0) empty)
+  ;  ((1) (car seqs))
+  ;  ((2) (merge2 (car seqs) (cadr seqs)))
+  ;  (else (merge2 (car seqs) (apply merge (cdr seqs))))))
+  (cond
+    ((andmap string? seqs) (apply string-append seqs))
+    (else (apply append seqs))))
+
+(define (merge-unique . seqs)
+  (define (merge-unique-couples-iter seq1 seq2)
+    (cond
+      ((null? seq2) seq1)
+      (else
+        ;(merge-unique-couples-iter (rpush-unique seq1 (car seq2)) (cdr seq2)))))
+        (merge seq1 (minus seq2 seq1)))))
+  (define (merge-unique-iter seq1 seq2 rest-seqs)
+    (cond
+      ((null? rest-seqs) (merge-unique-couples-iter seq1 seq2))
+      (else (merge-unique-iter (merge-unique-couples-iter seq1 seq2) (car rest-seqs) (cdr rest-seqs)))))
+  (let ((l (length seqs)))
+    (cond
+      ((= l 0) null)
+      ((= l 1) (car seqs))
+      ((= l 2) (merge-unique-couples-iter (car seqs) (cadr seqs)))
+      (else (merge-unique-iter (car seqs) (cadr seqs) (cddr seqs))))))
 
 (define (push . body)
   (case (length body)
@@ -215,9 +265,11 @@
                     (+ ll pos1 1)
                     (if (= pos2 pos1) (+ ll pos1 1) pos2)))
       ((< pos2 0) (remove seq pos1 (+ ll pos2 1)))
-      (else (merge
-              (lshift seq (sub1 pos1))
-              (rshift seq (- ll pos2)))))))
+      (else
+        (merge
+          (lshift seq (sub1 pos1))
+          (rshift seq (- ll pos2)))))))
+
 
 (define (exclude seq el)
   (if (string? seq)
@@ -269,3 +321,37 @@
   (cond
     ((> (indexof seq oldel) 0) (replace-all (replace seq oldel newel) oldel newel))
     (else seq)))
+
+(define (not-uniques seq)
+  (define (not-uniques-iter seq acc)
+    (cond
+      ((nil? seq) acc)
+      (else (not-uniques-iter
+              (ltrim seq)
+              (if (znil? (indexof (ltrim seq) (first seq)))
+                acc
+                (rpush acc (first seq)))))))
+  (not-uniques-iter seq null))
+
+(define (minus seq1 seq2)
+  ;(clean
+  ;  (λ (x)  (indexof? seq2 x))
+  ;  seq1))
+  (reverse (set-subtract seq1 seq2)))
+
+;(define (minus/hash seq1 seq2)
+
+(define (difference seq1 seq2)
+  (merge
+    (clean
+      (λ (x) (indexof? seq2 x))
+      seq1)
+    (clean
+      (λ (x) (indexof? seq1 x))
+      seq2)))
+
+(define (intersect seq1 seq2)
+  ;(filter
+  ;  (λ (x) (indexof? seq2 x))
+  ;  seq1))
+  (reverse (set-intersect seq1 seq2)))

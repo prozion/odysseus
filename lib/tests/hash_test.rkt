@@ -39,6 +39,11 @@
       (hash-insert (hash 'a 10 'b 20) (cons 'c 30))
       (hash 'a 10 'b 20 'c 30)))
 
+  (check-true
+    (check-hash-equal?
+      (hash-insert (hash 'a 10 'b 20 'c 40) (cons 'c 70))
+      (hash 'a 10 'b 20 'c 40)))      
+
   ; TODO: how to compare hashes directly?
   (check-true
     (check-hash-equal?

@@ -3,6 +3,6 @@ setlocal enableextensions
 
 set "ods_root=c:/denis/denis_core/odysseus"
 
-racket %ods_root%/cmd/ppl.rkt %*
+racket %ods_root%/cmd/vk.rkt %*
 
 endlocal
