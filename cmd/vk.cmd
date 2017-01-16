@@ -1,8 +1,9 @@
 @echo off
 setlocal enableextensions
 
-set "ods_root=c:/denis/denis_core/odysseus"
+REM set "ods_root=c:/denis/denis_core/odysseus"
+REM racket %ods_root%/cmd/vk.rkt %*
 
-racket %ods_root%/cmd/vk.rkt %*
+racket %odysseus%/cmd/vk.rkt %*
 
 endlocal

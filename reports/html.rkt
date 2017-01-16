@@ -24,7 +24,7 @@
     (else (li-iter (cdr body) (format "~a~n<li>~a</li>~n" res (str (car body)))))))
 
 (define (write-html-file filename title body)
-  (let* ( (html-format (read-file "c:/denis/denis_core/odysseus/templates/base.fhtml"))
+  (let* ( (html-format (read-file (string-append (getenv "odysseus") "/templates/base.fhtml")))
           (body (cond
                   ((string? body) body)
                   ((list2? body) (div-iter body ""))

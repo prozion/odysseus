@@ -4,7 +4,7 @@
 (require json)
 (require "../../lib/all.rkt")
 (require "../../reports/html.rkt")
-(require (file "c:/denis/denis_core/settings/bots.rkt"))
+;(require (file "c:/denis/denis_core/settings/bots.rkt"))
 (require (only-in "../../cmd/globals.rkt" friends-limit status-output)) ; dynamic parameters
 
 (provide vk/find-paths vk/ids->hrefs vk/alist->html vk/link vk/friends)
@@ -101,10 +101,10 @@
       paths)))
 
 (define (vk/alist->html output-file title paths)
-      (write-html-file
-        output-file
-        title
-        paths))
+  (write-html-file
+    output-file
+    title
+    paths))
 
 (define (vk/link id)
   (format "https://vk.com/id~a" id))
