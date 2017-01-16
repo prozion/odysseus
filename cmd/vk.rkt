@@ -17,13 +17,13 @@
   #:program "vk"
   #:multi
     [("-u" "--users") u
-                    "two users to find path from one to another"
+                    "two users to find path from one to another, write only ids, space-divided, e.g. -u \"1 5\""
                     (set! users u)]
     [("-o" "--output") o
                     "redirect output to file"
                     (set! output-file o)]
     [("-f" "--friends-limit") fl
-                    "maximal friends number per each user to make search faster, but less precise"
+                    "limit for requested friends per each user to make search faster, but less precise"
                     (friends-limit (string->number fl))]
     [("-s" "--status")
                     "display the search process progress"
