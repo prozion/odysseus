@@ -20,7 +20,7 @@
                     "two users to find path from one to another, write only ids, space-divided, e.g. -u \"1 5\""
                     (set! users u)]
     [("-o" "--output") o
-                    "redirect output to file"
+                    "redirect output to file in the current directory"
                     (set! output-file o)]
     [("-f" "--friends-limit") fl
                     "limit for requested friends per each user to make search faster, but less precise"

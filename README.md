@@ -1,9 +1,11 @@
-# odysseus
+# **Odysseus**
 
 Odysseus – My Swiss Army knife for data treatment: scrap, store, visualize.
 
-Как запустить утилиты odysseus/scrap/vk?
-============================
+---
+
+## Как запустить утилиты odysseus/scrap/vk?
+
 
 Например это можно сделать вот так
 
@@ -13,4 +15,4 @@ Odysseus – My Swiss Army knife for data treatment: scrap, store, visualize.
 
 После этого утилиты vk должны запускаться из консоли в любой директории.
 
-Чтобы узнать какие ключи и опции доступны, наберите `vk -h` 
+Чтобы узнать какие ключи и опции доступны, наберите `vk -h`
