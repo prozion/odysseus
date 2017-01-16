@@ -5,6 +5,9 @@
 (require "../lib/all.rkt")
 (require "../scrap/vk/all.rkt")
 (require "../graphics/console.rkt")
+(require (only-in "globals.rkt" friends-limit status-output)) ; STX only-in as all-defined-out
+
+(provide (all-defined-out))
 
 (define query "")
 (define users "")
@@ -19,6 +22,12 @@
     [("-o" "--output") o
                     "redirect output to file"
                     (set! output-file o)]
+    [("-f" "--friends-limit") fl
+                    "maximal friends number per each user to make search faster, but less precise"
+                    (friends-limit (string->number fl))]
+    [("-s" "--status")
+                    "display the search process progress"
+                    (status-output #t)]
   #:args
     ()
     (let* ( (us (split users " "))
@@ -26,12 +35,12 @@
             (u2 (nth us 2)))
       (cond
         ((notnil? output-file)
-          (vk-alist->html
-            output-file
-            "Цепочка связей"
-            (ids->hrefs (find-paths u1 u2))))
+            (vk/alist->html
+              output-file
+              "Цепочка связей"
+              (vk/ids->hrefs (vk/find-paths u1 u2))))
         (else
           (newline)
-          (displayln (find-paths u1 u2))
+          (displayln (vk/find-paths u1 u2))
           (void))))
 )

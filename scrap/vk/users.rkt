@@ -5,22 +5,22 @@
 (require "../../lib/all.rkt")
 (require "../../reports/html.rkt")
 (require (file "c:/denis/denis_core/settings/bots.rkt"))
+(require (only-in "../../cmd/globals.rkt" friends-limit status-output)) ; dynamic parameters
 
-(provide (all-defined-out))
+(provide vk/find-paths vk/ids->hrefs vk/alist->html vk/link vk/friends)
 
-(define (vk/link id)
-  (format "https://vk.com/id~a" id))
+;(define dyn (make-parameter 0))
 
 (define (find-friends user)
-  (display ".")
-  (flush-output)
+  (when (status-output) (display ".") (flush-output))
   (let ((res (string->jsexpr
                     (get-url (format "https://api.vk.com/method/friends.get?user_id=~a&v=5.52" user)))))
     (if (@. res.error)
       null
-      (map str (@. res.response.items)))))
-
-(define vk/friends find-friends)
+      (let ((items (map str (@. res.response.items))))
+        (if (and (friends-limit) (> (length items) (friends-limit)))
+          (take items (friends-limit))
+          items)))))
 
 (define (lasts paths)
   (map (λ (x) (last x)) paths))
@@ -61,19 +61,20 @@
 ; ALGORITHM 2: Start search from the either sides:
 (define (find-paths-iter paths1 paths2)
   (let ((solutions (intersect (lasts paths1) (lasts paths2))))
-    ;(printf "~a ~a, ~a ~a~n" (length (car paths1)) (length (alist-flatten paths1)) (length (car paths2)) (length (alist-flatten paths2)))
+    ;(printf "~a ~a, ~a ~a~n" (length (car paths1)) (length paths1) (length (car paths2)) (length paths2))
     (if (empty? solutions)
       (find-paths-iter (next-layer paths1) (next-layer paths2))
       (stick-paths paths1 paths2 solutions))))
 
-(define (find-paths user1 user2)
-  (display "finding paths")
+(define (vk/find-paths user1 user2)
+  (when (status-output) (display "finding paths"))
   (find-paths-iter (list (list user1)) (list (list user2))))
+
+(define vk/friends find-friends)
 
 ;; user properties
 (define (request-username user)
-  (display ".")
-  (flush-output)
+  (when (status-output) (display ".") (flush-output))
   (let ((res (string->jsexpr
                 (get-url (format "https://api.vk.com/method/users.get?user_ids=~a&v=5.52" user)))))
     (if (@. res.error)
@@ -81,7 +82,7 @@
       (let ((u (car (@. res.response))))
         (format "~a ~a" (@. u.first_name) (@. u.last_name))))))
 
-(define (get-vk/username)
+(define (memoized-vk/username)
   (let ((users-hash (hash)))
     (λ (user)
       (let* ((hashed (hash-ref users-hash user #f))
@@ -90,17 +91,20 @@
         res))))
 
 ;; output
-(define (ids->hrefs paths)
-  (display "\nrequesting names")
-  (let ((vk/username (get-vk/username))) ; function with static hash through closure
+(define (vk/ids->hrefs paths)
+  (when (status-output) (display "\nrequesting names"))
+  (let ((vk/username (memoized-vk/username))) ; function with static hash through closure
     (map
       (λ (x) (map
                 (λ (id) (format "<a href=\"~a\" target=\"_blank\">~a</a>" (vk/link id) (vk/username id)))
                 x))
       paths)))
 
-(define (vk-alist->html output-file title paths)
-  (write-html-file
-    output-file
-    title
-    paths))
+(define (vk/alist->html output-file title paths)
+      (write-html-file
+        output-file
+        title
+        paths))
+
+(define (vk/link id)
+  (format "https://vk.com/id~a" id))

@@ -35,7 +35,7 @@
                     "verify uniqueness for values in specified field"
 										(set! verifyf v)]
     [("-i" "--info") i
-                    "various information on contacts database"
+                    "various information on contacts database. Options: total|offline - numbers of person records"
 										(set! info i)]
     [("-f" "--fields") f
                     "fields to show"
