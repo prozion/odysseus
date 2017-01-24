@@ -50,6 +50,14 @@
 (define (lg x a)
   (/ (log x) (log a)))
 
+(define nil?
+  (λ (v) (or
+            (null? v)
+            (void? v)
+            (and (hash? v) (empty? (hash-keys v)))
+            (and (string? v) (equal? v ""))
+            (false? v))))
+            
 (define-macro (f-> f)
   `(λ preds
     (λ (argument)
@@ -70,18 +78,10 @@
   (λ (argument)
     (not (f argument))))
 
-(define nil?
-  (λ (v) (or
-            (null? v)
-            (void? v)
-            (and (hash? v) (empty? (hash-keys v)))
-            (and (string? v) (equal? v ""))
-            (false? v))))
-
 (define notnil? (not-> nil?))
 
 (define znil?
-  (λ (v) (or (nil? v) (= v 0))))    
+  (λ (v) (or (nil? v) (= v 0))))
 
 ;; filtering
 (define (clean f xs)

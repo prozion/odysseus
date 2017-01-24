@@ -24,9 +24,14 @@
   (check-equal? (implode empty) "")
   (check-equal? (implode '(" " "b" "a" "k" "e" "\n" "r" "y")) " bake\nry")
   (check-equal? (implode '(1 2 3 4)) "1234")
+  (check-equal? (implode (list null null null) ",") ",,")
 
-  (check-equal? (interleave 0 '(1 2 3 4)) '(1 0 2 0 3 0 4))
-  (check-equal? (interleave "." "Orest") "O.r.e.s.t")
+  (check-equal? (intermix 0 '(1 2 3 4)) '(1 0 2 0 3 0 4))
+  (check-equal? (intermix "." "Orest") "O.r.e.s.t")
+
+  (check-equal? (interleave '(1 2) '(3 4)) '(1 3 2 4))
+  (check-equal? (interleave '(1 2 10) '(3 4)) '(1 3 2 4))
+  (check-equal? (interleave '(1 2) '(3 4 10)) '(1 3 2 4))
 
   (check-equal? (explode "") empty)
   (check-equal? (explode " bake\nry") '(" " "b" "a" "k" "e" "\n" "r" "y"))
@@ -46,6 +51,7 @@
   (check-equal? (nth '(0 1 2 3 4 5) 1) 0)
   (check-equal? (nth '(0 1 2 3 4 5) 3) 2)
   (check-equal? (nth '(0 1 2 3 4 5) -1) 5)
+  (check-equal? (nth '(0 1 2 3 4 5) 7) null)
 
   (check-equal? (indexof "" "e") 0)
   (check-equal? (indexof "Hercules" "e") 2)
@@ -213,4 +219,12 @@
   (check-equal? (difference '(1 2 3) '()) '(1 2 3))
   (check-equal? (difference '() '(1 2 3)) '(1 2 3))
   (check-equal? (difference '(1 2 3 4 5) '(9 8 7 6 5 4)) '(1 2 3 9 8 7 6))
+
+  (check-equal? (nlist-ref '(1 (2 3) (4 5) (6 (7 8 (9))) 10) '(3 1 2)) '(9))
+  (check-equal? (nlist-ref '(1 (2 3) (4 5) (6 (7 8 (9))) 10) '(3 1 2 0)) '9)
+  (check-equal? (nlist-ref '(1 (2 3) (4 5) (6 (7 8 (9))) 10) '(2)) '(4 5))
+  (check-equal? (nlist-ref '(1 (2 3) (4 5) (6 (7 8 (9))) 10) '(1 0)) 2)
+
+  (check-equal? (dupstr "a" 5) "aaaaa")
+  (check-equal? (dupstr "foo " 3) "foo foo foo ")
 )

@@ -44,7 +44,9 @@
   (implode body))
 
 (define (implode lst (sep ""))
-  (let ([seq (map tostring (clean nil? lst))]
+  (let ([seq (map
+                (λ (x) (if (nil? x) "" (tostring x)))
+                lst)] ;(clean nil? lst))]
         [sep (tostring sep)])
     (cond
       ((nil? seq) "")
@@ -52,11 +54,18 @@
       (else
         (string-append (car seq) sep (implode (cdr seq) sep))))))
 
-(define (interleave sep seq)
+(define (intermix sep seq)
   (cond
     ((string? seq) (implode (explode seq) sep))
     ((empty? (cdr seq)) seq)
-    (else (push (car seq) sep (interleave sep (cdr seq))))))
+    (else (push (car seq) sep (intermix sep (cdr seq))))))
+
+(define (interleave l1 l2)
+  (define (interleave-iter l1 l2 lres)
+    (cond
+      ((or (null? l1) (null? l2)) lres)
+      (else (interleave-iter (cdr l1) (cdr l2) (rpush (rpush lres (car l1)) (car l2))))))
+  (interleave-iter l1 l2 empty))
 
 (define (explode seq)
   (map string (string->list seq)))
@@ -342,16 +351,30 @@
 ;(define (minus/hash seq1 seq2)
 
 (define (difference seq1 seq2)
-  (merge
-    (clean
-      (λ (x) (indexof? seq2 x))
-      seq1)
-    (clean
-      (λ (x) (indexof? seq1 x))
-      seq2)))
+  ;(merge
+  ;  (clean
+  ;    (λ (x) (indexof? seq2 x))
+  ;    seq1)
+  ;  (clean
+  ;    (λ (x) (indexof? seq1 x))
+  ;    seq2)))
+  (set-symmetric-difference seq2 (reverse seq1)))
 
 (define (intersect seq1 seq2)
   ;(filter
   ;  (λ (x) (indexof? seq2 x))
   ;  seq1))
   (reverse (set-intersect seq1 seq2)))
+
+;; complex structures access
+(define (nlist-ref lst indexes)
+  (cond
+    ((= (length indexes) 1) (list-ref lst (car indexes)))
+    (else (nlist-ref (list-ref lst (car indexes)) (cdr indexes)))))
+
+;; generation
+(define (dupstr txt n)
+  (implode
+    (map
+      (λ (x) txt)
+      (range 0 n))))

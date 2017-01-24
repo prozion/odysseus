@@ -42,27 +42,6 @@
   (check-pred nil? #f)
   (check-pred nil? (unless #t #t))
 
-  (check-pred notnil? #t)
-  (check-pred notnil? "txt")
-  (check-pred notnil? 3)
-  (check-pred notnil? 3.141592)
-
-  (check-pred znil? 0)
-  (check-pred znil? null)
-  (check-pred znil? #f)
-  (check-pred znil? "")
-  (check-pred znil? '())
-  (check-pred znil? (hash))
-
-  (check-equal? (!= 1 0) #t)
-  (check-equal? (!= 1 1) #f)
-
-  (check-equal? (map (rcurry / 5) '(10 5 1)) '(2 1 1/5))
-
-  (check-equal? (clean odd? '(1 2 3 4 5)) '(2 4))
-  ;
-  (check-true (andmap (λ (x) (inii 1 10 x)) (for/list ((_ (range 100))) (rand 10))))
-
   (check-equal? (filter (and-> odd? (λ (x) (> x 10))) '(1 2 3 11 12 14 17)) '(11 17))
 
   (check-equal? (filter (or-> odd? (λ (x) (> x 10))) '(1 2 3 11 12 14 17)) '(1 3 11 12 14 17))
@@ -83,5 +62,26 @@
                             (λ (x) (> x 100))
                             )))
                         '(1 2 3 11 12 14 17 23 118 121 123))
-                '(11 17 23))
+                '(11 17 23))   
+
+  (check-pred notnil? #t)
+  (check-pred notnil? "txt")
+  (check-pred notnil? 3)
+  (check-pred notnil? 3.141592)
+
+  (check-pred znil? 0)
+  (check-pred znil? null)
+  (check-pred znil? #f)
+  (check-pred znil? "")
+  (check-pred znil? '())
+  (check-pred znil? (hash))
+
+  (check-equal? (!= 1 0) #t)
+  (check-equal? (!= 1 1) #f)
+
+  (check-equal? (map (rcurry / 5) '(10 5 1)) '(2 1 1/5))
+
+  (check-equal? (clean odd? '(1 2 3 4 5)) '(2 4))
+  ;
+  (check-true (andmap (λ (x) (inii 1 10 x)) (for/list ((_ (range 100))) (rand 10))))
 )

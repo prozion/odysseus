@@ -3,13 +3,10 @@
 (require net/url)
 (require json)
 (require "../../lib/all.rkt")
-(require "../../reports/html.rkt")
+(require "vk.rkt")
 ;(require (file "c:/denis/denis_core/settings/bots.rkt"))
-(require (only-in "../../cmd/globals.rkt" friends-limit status-output)) ; dynamic parameters
 
-(provide vk/find-paths vk/ids->hrefs vk/alist->html vk/link vk/friends)
-
-;(define dyn (make-parameter 0))
+(provide vk/find-paths vk/id->href vk/ids->hrefs vk/link vk/friends)
 
 (define (find-friends user)
   (when (status-output) (display ".") (flush-output))
@@ -73,16 +70,16 @@
 (define vk/friends find-friends)
 
 ;; user properties
-(define (request-username user)
+(define (request-username id)
   (when (status-output) (display ".") (flush-output))
   (let ((res (string->jsexpr
-                (get-url (format "https://api.vk.com/method/users.get?user_ids=~a&v=5.52" user)))))
+                (get-url (format "https://api.vk.com/method/users.get?user_ids=~a&v=5.52" id)))))
     (if (@. res.error)
       "n/a"
       (let ((u (car (@. res.response))))
         (format "~a ~a" (@. u.first_name) (@. u.last_name))))))
 
-(define (memoized-vk/username)
+(define (memoized-request-username)
   (let ((users-hash (hash)))
     (λ (user)
       (let* ((hashed (hash-ref users-hash user #f))
@@ -91,20 +88,17 @@
         res))))
 
 ;; output
+(define (vk/id->href id)
+  (format "<a href=\"~a\" target=\"_blank\">~a</a>" (vk/link id) (request-username id)))
+
 (define (vk/ids->hrefs paths)
   (when (status-output) (display "\nrequesting names"))
-  (let ((vk/username (memoized-vk/username))) ; function with static hash through closure
+  (let ((m-request-username (memoized-request-username))) ; function with static hash through closure
     (map
       (λ (x) (map
-                (λ (id) (format "<a href=\"~a\" target=\"_blank\">~a</a>" (vk/link id) (vk/username id)))
+                (λ (id) (format "<a href=\"~a\" target=\"_blank\">~a</a>" (vk/link id) (m-request-username id)))
                 x))
       paths)))
-
-(define (vk/alist->html output-file title paths)
-  (write-html-file
-    output-file
-    title
-    paths))
 
 (define (vk/link id)
   (format "https://vk.com/id~a" id))

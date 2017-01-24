@@ -7,7 +7,19 @@
 (require "../lib/all.rkt")
 (require "../graphics/console.rkt")
 
+(provide count-only-real-code-lines)
+
 ;; count lines of code in the project
+
+(struct parameters (ext iline exclude-filenames) #:mutable)
+
+(define params (parameters #f #f #f))
+(define directory #f)
+
+(define (count-only-real-code-lines #:exclude-tests (exclude-tests #t))
+  (count-lines
+    (parameters "rkt" "^\\s*$|^\\s*;+.*$" (and exclude-tests "_test"))
+    (string->path (getenv "odysseus"))))
 
 (define (count-lines pars f)
   (let ([ext (parameters-ext pars)]
@@ -41,10 +53,6 @@
       (curry regexp-match (pregexp preg))
       (file->lines f))))
 
-(struct parameters (ext iline exclude-filenames) #:mutable)
-
-(define params (parameters #f #f #f))
-
 (define (print-pars p)
   (printf "~a ~a ~a ~n" (parameters-ext p) (parameters-iline p) (parameters-exclude-filenames p)))
 
@@ -61,13 +69,20 @@
                     "pregexp for lines to ignore in counting. For example '^\\s*;+.*' will ignore commented lines"
                     ;; "(^\s*$|^\s*;+.*$)" - ignore blank and commented lines
                     (set-parameters-iline! params iline)]
+    [("-d" "--directory") dir
+                    "directory"
+                    ;; "(^\s*$|^\s*;+.*$)" - ignore blank and commented lines
+                    (set! directory dir)]
   #:args
-    (dir)
-    (begin
-      (newline)
-      (set-text-color 'yellow)
-      (display "Total lines: ")
-      (set-text-color 'green)
-      (displayln (count-lines params (string->path dir)))
-      (set-text-color 'default))
+    ()
+    (if directory
+      (begin
+        (newline)
+        (set-text-color 'yellow)
+        (display "Total lines: ")
+        (set-text-color 'green)
+        (displayln (count-lines params (string->path directory)))
+        (set-text-color 'default))
+      (begin ; for the case we 'require' this module
+        (void)))
 )

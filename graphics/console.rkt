@@ -6,6 +6,8 @@
 
 (provide (all-defined-out))
 
+(define console-output (make-parameter #t))
+
 (define (set-text-color c)
   (display (string-text-color c)))
 

@@ -22,6 +22,12 @@
   (check-false (hash-path h 'a 'ac))
   (check-false (hash-path h 'a 'ab 'aba))
 
+  (check-equal? (hash-refs (hash 'b 20 'a 10 'c 40 'd 30) (list 'a 'b 'd)) (list 10 20 30))
+  (check-equal? (hash-refs (hash 'b 20 'a 10 'c 40 'd 30) (list 'a 'b 'd 'e)) (list 10 20 30 null))
+  (check-equal? (hash-refs (hash) (list 'a 'b 'd 'e)) (list null null null null))
+  (check-equal? (hash-refs (hash 'b 20 'a 10 'c 40 'd 30) (list 'a 'b 'd 'e) "default") (list 10 20 30 "default"))  
+  (check-equal? (hash-refs (hash) (list 'a 'b 'd 'e) "") (list "" "" "" ""))
+
   (check-equal? (@. h.a.aa) 10)
   (check-equal? (@. h.c) #f)
   (check-true
@@ -42,7 +48,12 @@
   (check-true
     (check-hash-equal?
       (hash-insert (hash 'a 10 'b 20 'c 40) (cons 'c 70))
-      (hash 'a 10 'b 20 'c 40)))      
+      (hash 'a 10 'b 20 'c 40)))
+
+  (check-true
+    (check-hash-equal?
+      (hash-revert (hash 'a 'aa 'b 'bb 'aba 30))
+      (hash 'aa 'a 'bb 'b 30 'aba)))
 
   ; TODO: how to compare hashes directly?
   (check-true
@@ -117,6 +128,6 @@
 
   (check-true
     (check-hash-equal?
-      (hash-regex-filter (regexp "a.*a") (hash 'a 10 'b 20 'aba 30 'abba 40 "arda" 50 'cab 60)) ;; STX regexp, pregexp
+      (hash-regex-filter (regexp "a.*a") (hash 'a 10 'b 20 'aba 30 'abba 40 "arda" 50 'cab 60))
       (hash 'aba 30 'abba 40 "arda" 50)))
 )

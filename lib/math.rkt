@@ -5,6 +5,7 @@
 (provide (all-defined-out))
 
 (define PI 3.1415926535897932)
+(define π PI)
 
 (define (avg lst)
   (/ (apply + lst) (length lst)))

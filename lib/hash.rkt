@@ -1,7 +1,7 @@
 #lang racket
 
 (require compatibility/defmacro)
-(require "base.rkt" (for-syntax "seqs.rkt"))
+(require "base.rkt" "seqs.rkt" (for-syntax "seqs.rkt"))
 
 (provide (all-defined-out))
 
@@ -47,6 +47,13 @@
                 #f)))))
   (hash-path-r h (reverse rest)))
 
+(define (hash-refs h keys (missed null))
+  (define (hash-refs-iter h keys res)
+    (cond
+      ((empty? keys) res)
+      (else (hash-refs-iter h (cdr keys) (rpush res (hash-ref h (car keys) missed))))))
+  (hash-refs-iter h keys empty))
+
 ; (@. h.a.b.c)
 (define-macro (@. path)
   (let* ((parts (map string->symbol (split (symbol->string path) ".")))
@@ -77,6 +84,9 @@
       ;; #f - add to hash in usual way
       (make-hash (cons pair (hash->list h1))))))
 
+(define (hash-revert h)
+  (apply hash (interleave (hash-values h) (hash-keys h))))
+
 ; add to resulting hash all key-val pairs from h1 and pairs from h2 with rest of the keys
 (define (hash-union h1 h2)
 ;; already exists in racket/hash: hash-union (make-immutable-hash <list-of pairs> ...)
@@ -92,7 +102,7 @@
     args
     (for/hash ((k body) (v args)) (values k v))))
 
-(define (hash-regex-filter reg h) ;; STX filter, clean
+(define (hash-regex-filter reg h)
   (make-hash
     (filter
       (λ (x)

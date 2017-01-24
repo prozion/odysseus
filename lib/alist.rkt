@@ -43,3 +43,10 @@
 
 (define (alist-flatten alst)
   (foldl merge '() alst))
+
+(define (alist->mstring alst (frmt (dupstr "~a " (length (car alst)))))
+  (implode
+    (map
+      (λ (x) (apply (curry format frmt) x))
+      alst)
+    "\n"))

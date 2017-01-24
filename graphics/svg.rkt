@@ -2,7 +2,7 @@
 
 (require racket/file)
 (require (for-syntax racket/syntax))
-(require "../lib/base.rkt" (for-syntax "../lib/base.rkt")) 
+(require "../lib/base.rkt" (for-syntax "../lib/base.rkt"))
 (require "../lib/hash.rkt")
 (require "../lib/io.rkt")
 (require "fonts.rkt")

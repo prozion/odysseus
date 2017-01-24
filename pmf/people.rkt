@@ -1,7 +1,8 @@
 #lang racket
 
-(require "../lib/all.rkt")
+(require "../lib/all.rkt" (for-syntax "../lib/seqs.rkt"))
 (require "../graphics/console.rkt")
+(require compatibility/defmacro)
 
 (provide (all-defined-out))
 
@@ -28,7 +29,9 @@
   (λ (person)
     (and
       (indexof? (hash-keys person) akey)
-      (equal? (hash-ref person akey) val))))
+      (or
+        (equal? (hash-ref person akey) val)
+        (indexof? (split (hash-ref person akey) " ") val)))))
 
 ; tags:
 ; c - classmate,
@@ -55,6 +58,25 @@
 
 (define (phone=? val) (key-equal? 'phone val))
 (define (city=? val) (key-equal? 'city val))
+(define (name=? val) (key-equal? 'name val))
+(define (surname=? val) (key-equal? 'surname val))
+
+(define (by-name-surname name-surname)
+  (let* (
+        (vals (split name-surname " "))
+        (part1 (nth vals 1))
+        (part2 (nth vals 2)))
+      (cond
+        ((nil? part2)
+          (or-> (key-equal? 'name part1) (key-equal? 'surname part1)))
+        (else
+          (or->
+            (and->
+              (key-equal? 'name part1)
+              (key-equal? 'surname part2))
+            (and->
+              (key-equal? 'name part2)
+              (key-equal? 'surname part1)))))))
 
 ; acquaintances number
 (define (acqs x)
@@ -94,22 +116,34 @@
             (else (implode fieldval ", ")))) ; 'all and others
         (else fieldval))))
 
-(define (person->string person query fields)
+(define (esc-sec val)
+  (if (console-output)
+    (format "~a" val)
+    ""))
+
+(define (person->string person fields)
   (let ((name (field->str person 'name 'first ""))
         (surname (field->str person 'surname 'first ""))
         (nick (field->str person 'nick 'first "n/a")))
   (string-append
-    (format "~a" (string-text-color 'yellow))
-            (if (and (nil? name) (nil? surname))
-              (format " ~a~n" nick)
-              (if (nil? surname)
-                (if (not (nil? nick))
-                  (format " ~a ~a~n" name nick)
-                  (format " ~a~n" name))
-                (format " ~a ~a~n" name surname)))
-    (format "~a" (string-text-color 'grey))
+    (esc-sec (string-text-color 'yellow))
+    (if (and (nil? name) (nil? surname))
+      (format " ~a~n" nick)
+      (if (nil? surname)
+        (if (not (nil? nick))
+          (format " ~a ~a~n" name nick)
+          (format " ~a~n" name))
+        (format " ~a ~a~n" name surname)))
+    (esc-sec (string-text-color 'grey))
     (apply string-append
       (map
         (λ (x) (format " ~a~n" (field->str person (string->symbol x) 'all "-")))
         fields))
-    (format "~a" (string-text-color 'default)))))
+    (esc-sec (string-text-color 'default)))))
+
+(define (people->string subpeople fields)
+  (implode
+    (map
+      (λ (p) (person->string p fields))
+      subpeople)
+    "\n"))

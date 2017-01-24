@@ -20,4 +20,4 @@ Odysseus – My Swiss Army knife for data treatment: scrap, store, visualize.
 
 После этого утилиты vk должны запускаться из консоли в любой директории.
 
-Чтобы узнать какие ключи и опции доступны, наберите `vk -h`
+Чтобы узнать какие ключи и опции доступны, наберите `vk-users -h` и `vk-groups -h`

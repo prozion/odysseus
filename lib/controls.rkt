@@ -65,3 +65,6 @@
               (equal? (car body) 0))
                 (apply zor (cdr body))
                 (car body)))))
+
+(define-macro ($ name . args)
+  `(define ,name (list ,@args)))

@@ -3,9 +3,10 @@
 (require racket/cmdline)
 
 (require "../lib/all.rkt")
-(require "../scrap/vk/all.rkt")
+(require "../scrap/vk/vk.rkt")
+(require "../scrap/vk/users.rkt")
 (require "../graphics/console.rkt")
-(require (only-in "globals.rkt" friends-limit status-output)) ; STX only-in as all-defined-out
+(require "../reports/html.rkt")
 
 (provide (all-defined-out))
 
@@ -14,9 +15,9 @@
 (define output-file "")
 
 (command-line
-  #:program "vk"
+  #:program "vk-users, utility to work with users data in vk.com"
   #:multi
-    [("-u" "--users") u
+    [("-c" "--chain") u
                     "two users to find path from one to another, write only ids, space-divided, e.g. -u \"1 5\""
                     (set! users u)]
     [("-o" "--output") o
@@ -35,7 +36,7 @@
             (u2 (nth us 2)))
       (cond
         ((notnil? output-file)
-            (vk/alist->html
+            (write-html-file
               output-file
               "Цепочка связей"
               (vk/ids->hrefs (vk/find-paths u1 u2))))

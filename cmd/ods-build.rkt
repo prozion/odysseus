@@ -15,9 +15,9 @@
 
 (define (build #:in ods-file #:out (output-file null))
   (parameterize ([current-namespace (make-base-namespace)])
-    (namespace-require "../reports/all.rkt")
-    (namespace-require "../lib/all.rkt")
-    (namespace-require "../lib/debug.rkt")
+    (namespace-require (string->path (string-append (getenv "odysseus") "/reports/all.rkt")))
+    (namespace-require (string->path (string-append (getenv "odysseus") "/lib/all.rkt")))
+    (namespace-require (string->path (string-append (getenv "odysseus") "/lib/debug.rkt")))
     (let* ([v (load ods-file)]
           [output-filename (if (null? output-file)
                               (path-replace-extension (file-name-from-path ods-file) (@. v.output-file-ext))
