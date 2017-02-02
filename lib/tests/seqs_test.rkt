@@ -67,6 +67,13 @@
   (check-equal? (indexof-all "Hercules" "e") '(2 7))
   (check-equal? (indexof-all '(11 8 -22  8 30 80 -5 8) 8) '(2 4 8))
 
+  (check-true (regexp-indexof? '("doo" "fowl" "island") "doo"))
+  (check-true (regexp-indexof? '("doo" "fowl" "island") "i.*d"))
+  (check-true (regexp-indexof? '("doo" "fowl" "island") "do{2}"))
+  (check-true (regexp-indexof? '("doo" "fowl" "island") "f[oae]wl"))
+  (check-false (regexp-indexof? '("doo" "fowl" "island") "baz"))
+  (check-false (regexp-indexof? '("doo" "fowl" "island") "f[auy]+wl"))
+
   (check-equal? (lshift "" 10) "")
   (check-equal? (lshift "Black waters" 5) "Black")
   (check-equal? (lshift "Black waters" 0) "")
@@ -227,4 +234,9 @@
 
   (check-equal? (dupstr "a" 5) "aaaaa")
   (check-equal? (dupstr "foo " 3) "foo foo foo ")
+
+  (check-equal? (partition '(1 2 3 4 5 6 7 8 9) 3) '((1 2 3) (4 5 6) (7 8 9)))
+  (check-equal? (partition '(1 2 3 4 5 6 7 8 9) 4) '((1 2 3 4) (5 6 7 8)))
+  (check-equal? (partition '(1 2 3 4 5) 1) '((1) (2) (3) (4) (5)))
+  (check-equal? (partition '(1 2 3 4 5) 0) '(1 2 3 4 5))  
 )

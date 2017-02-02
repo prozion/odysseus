@@ -25,13 +25,18 @@
   (λ (person)
     (indexof? (hash-keys person) akey)))
 
-(define (key-equal? akey val)
+(define (key-equal? akey val (regexp? #f))
   (λ (person)
-    (and
-      (indexof? (hash-keys person) akey)
-      (or
-        (equal? (hash-ref person akey) val)
-        (indexof? (split (hash-ref person akey) " ") val)))))
+    (let* ( (akey-val (hash-ref person akey ""))
+            (akey-vals (if (list? akey-val) akey-val (split akey-val " "))))
+      (and
+        (indexof? (hash-keys person) akey)
+        (or
+          (equal? akey-val val)
+          (indexof? akey-vals val)
+          (if regexp?
+            (regexp-indexof? akey-vals val)
+            #f))))))
 
 ; tags:
 ; c - classmate,
@@ -68,15 +73,15 @@
         (part2 (nth vals 2)))
       (cond
         ((nil? part2)
-          (or-> (key-equal? 'name part1) (key-equal? 'surname part1)))
+          (or-> (key-equal? 'name part1 #t) (key-equal? 'surname part1 #t)))
         (else
           (or->
             (and->
-              (key-equal? 'name part1)
-              (key-equal? 'surname part2))
+              (key-equal? 'name part1 #t)
+              (key-equal? 'surname part2 #t))
             (and->
-              (key-equal? 'name part2)
-              (key-equal? 'surname part1)))))))
+              (key-equal? 'name part2 #t)
+              (key-equal? 'surname part1 #t)))))))
 
 ; acquaintances number
 (define (acqs x)

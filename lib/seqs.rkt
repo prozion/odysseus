@@ -114,7 +114,6 @@
         (+ 1 (- (length seq) (length (member el seq))))
         0))))
 
-
 (define (indexof? seq el)
   (if (= 0 (indexof seq el)) #f #t))
 
@@ -129,6 +128,11 @@
                 (rpush acclist (+ index el-passed))
                 (+ index el-passed 1))))))
   (indexof-all-iter seq el empty 0))
+
+(define (regexp-indexof? seq regxp)
+  (ormap
+    (λ (x) (regexp-match? (pregexp regxp) x))
+    seq))
 
 (define (lshift seq (count 1))
   (cond
@@ -378,3 +382,16 @@
     (map
       (λ (x) txt)
       (range 0 n))))
+
+(define (partition seq n)
+  (define (partition-iter seq res)
+    (cond
+      ((< (length seq) n) res)
+      ((< n 1) seq)
+      (else
+        (partition-iter
+          (ltrim seq n)
+          (pushr
+            res
+            (lshift seq n))))))
+  (partition-iter seq empty))

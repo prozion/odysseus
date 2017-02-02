@@ -9,7 +9,16 @@
   (let* ( (res-header (implode headers divisor))
           (res-body (implode
                       (map
-                        (λ (row) (implode (hash-refs row headers "") divisor))
+                        (λ (row)
+                          (implode
+                            (cond
+                              ((hash? row)
+                                (hash-refs row headers ""))
+                              ((list? row)
+                                row)
+                              (else
+                                row))
+                            divisor))
                         data)
                       "\n"))
           (res (str res-header "\n" res-body)))

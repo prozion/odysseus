@@ -32,7 +32,7 @@
 											(string-text-color 'grey)
 											(string-text-color 'blue))
 											))
-		((string? record) (format "as ~a" record))
+		((string? record) (format " as ~a" record))
 		(else
 			(single-record->string record))))
 
