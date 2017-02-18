@@ -49,8 +49,10 @@
 (define unknown? (contains-tag? "u"))
 ; v - only virtual acquaintance
 (define virtual? (contains-tag? "v"))
-; t - related to transhumanism
-(define th? (contains-tag? "t"))
+; t - probably related to transhumanism, T - strongly related to transhumanism
+(define th? (contains-tag? "T"))
+(define transhumanist? th?)
+(define th?? (contains-tag? "t"))
 ; m - mafia players
 (define mafia? (contains-tag? "m"))
 ; g - gay/lesbian

@@ -14,7 +14,7 @@
 (define query "")
 (define person "")
 (define verifyf null)
-(define fields "phone,email,sn")
+(define fields "sn")
 (define only-fields #f)
 (define info null)
 (define csvfile "")
