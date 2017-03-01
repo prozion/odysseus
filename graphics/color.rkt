@@ -14,23 +14,6 @@
   (let ((hex "0123456789abcdef"))
     (str "#" (implode (gen (nth hex (rand 16)) 6)))))
 
-; "a2" -> 162
-(define (hex->dec v)
-  (string->number (str "#x" v)))
-
-; 162 -> "a2"
-(define  (dec->hex v)
-  (define (next-hex v)
-    (let ((hex "0123456789abcdef"))
-      (nth hex (add1 (% v 16)))))
-  (define (dec->hex-r v)
-    (cond
-      ((= v 0) "")
-      (else (str (dec->hex-r (quotient v 16)) (next-hex (% v 16)) ))))
-  (cond
-    ((= v 0) "0")
-    (else (dec->hex-r v))))
-
 (define (str->rgb str)
   (map hex->dec (list (slice str 1 2) (slice str 3 4) (slice str 5 6))))
 

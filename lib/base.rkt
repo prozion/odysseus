@@ -57,7 +57,7 @@
             (and (hash? v) (empty? (hash-keys v)))
             (and (string? v) (equal? v ""))
             (false? v))))
-            
+
 (define-macro (f-> f)
   `(λ preds
     (λ (argument)

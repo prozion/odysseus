@@ -8,12 +8,6 @@
   ;(check-true? (string? (rand-color)))
   (check-equal? (string-length (rand-color)) 7)
 
-  (check-equal? (hex->dec "0") 0)
-  (check-equal? (hex->dec "a2") 162)
-
-  (check-equal? (dec->hex 0) "0")
-  (check-equal? (dec->hex 162) "a2")
-
   (check-equal? (rgb->hsv 0 0 0) '(0 0 0))
   (check-equal? (string-rgb->hsv "#000000") '(0 0 0))
   (check-equal? (rgb->hsl 0 0 0) '(0 0 0))
