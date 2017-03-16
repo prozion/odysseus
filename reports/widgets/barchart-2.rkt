@@ -1,13 +1,13 @@
 #lang racket
 
 (require compatibility/defmacro)
-(require "../graphics/svg.rkt")
-(require "../graphics/fonts.rkt")
-(require "../graphics/layout.rkt")
-(require "../lib/all.rkt" (for-syntax "../lib/syntax.rkt" "../lib/hash.rkt" "../lib/controls.rkt"))
-(require "styles.rkt")
+(require "../../graphics/svg.rkt")
+(require "../../graphics/fonts.rkt")
+(require "../../graphics/layout.rkt")
+(require "../../lib/all.rkt" (for-syntax "../../lib/syntax.rkt" "../../lib/hash.rkt" "../../lib/controls.rkt"))
+(require "../styles.rkt")
 
-(require "../lib/debug.rkt")
+(require "../../lib/debug.rkt")
 
 (provide (all-defined-out))
 

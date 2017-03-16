@@ -63,6 +63,8 @@
   (check-true (indexof? '(a b c d e f) 'd))
   (check-true (indexof? '(1 (10 1) 2) '(10 1)))
   (check-false (indexof? '(1 2 3 4 5) 6))
+  (check-true (indexof? "abcdef" "d"))
+  (check-false (indexof? "abcdef" "k"))  
 
   (check-equal? (indexof-all "Hercules" "e") '(2 7))
   (check-equal? (indexof-all '(11 8 -22  8 30 80 -5 8) 8) '(2 4 8))
@@ -238,5 +240,13 @@
   (check-equal? (partition '(1 2 3 4 5 6 7 8 9) 3) '((1 2 3) (4 5 6) (7 8 9)))
   (check-equal? (partition '(1 2 3 4 5 6 7 8 9) 4) '((1 2 3 4) (5 6 7 8)))
   (check-equal? (partition '(1 2 3 4 5) 1) '((1) (2) (3) (4) (5)))
-  (check-equal? (partition '(1 2 3 4 5) 0) '(1 2 3 4 5))  
+  (check-equal? (partition '(1 2 3 4 5) 0) '(1 2 3 4 5))
+
+  (check-equal? (partition-all '(1 2 3 4 5 6 7 8 9) 3) '((1 2 3) (4 5 6) (7 8 9)))
+  (check-equal? (partition-all '(1 2 3 4 5 6 7 8 9) 4) '((1 2 3 4) (5 6 7 8) (9)))
+  (check-equal? (partition-all '(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15) 6) '((1 2 3 4 5 6) (7 8 9 10 11 12) (13 14 15)))
+  (check-equal? (partition-all '(1 2 3 4 5) 1) '((1) (2) (3) (4) (5)))
+  (check-equal? (partition-all '(1 2 3 4 5) 0) '(1 2 3 4 5))
+
+
 )

@@ -395,3 +395,18 @@
             res
             (lshift seq n))))))
   (partition-iter seq empty))
+
+
+(define (partition-all seq n)
+  (define (partition-iter seq res)
+    (cond
+      ((< n 1) seq)
+      ((empty? seq) res)
+      ((< (length seq) n) (pushr res seq))
+      (else
+        (partition-iter
+          (ltrim seq n)
+          (pushr
+            res
+            (lshift seq n))))))
+  (partition-iter seq empty))

@@ -15,6 +15,6 @@ REM   racket ../utils/build.rkt %*
 REM   REM echo build: wrong number of arguments
 REM )
 
-racket %odysseus%/cmd/ods-build.rkt %*
+racket %odysseus%/cmd/build-svg.rkt %*
 
 endlocal

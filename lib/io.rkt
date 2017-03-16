@@ -22,7 +22,9 @@
 
 (define (write-file-to-dir #:file file #:dir dir v)
   ; first try thinking that dir is relative, then absolute path, if both are not directories then write to current-directory
-  (let* ( [path (build-path (current-directory) dir)]
+  (let* ( [path (if dir
+                    (build-path (current-directory) dir)
+                    (current-directory))]
           [path (if (directory-exists? path) path (build-path dir))]
           [path (if (directory-exists? path) path (current-directory))])
   (write-file

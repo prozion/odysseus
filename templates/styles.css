@@ -12,14 +12,3 @@ line {
   stroke-width: 1;
   stroke: black;
 }
-
-.barchart {
-  font-size: 12;
-  font-family: Arial, sans-serif;
-  font-style: normal;
-}
-
-/*.barchart rect {
-  fill: red;
-  opacity: 0.5;
-}*/

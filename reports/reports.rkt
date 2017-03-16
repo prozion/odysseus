@@ -1,10 +1,11 @@
 #lang racket
 
-(require "barchart.rkt" "../graphics/svg.rkt")
+(require "widgets/barchart.rkt" "widgets/heatmap.rkt")
+(require "../graphics/svg.rkt")
 (require compatibility/defmacro)
 (require "../lib/all.rkt")
 
-(provide (all-from-out "barchart.rkt") (all-defined-out))
+(provide (all-from-out "widgets/barchart.rkt" "widgets/heatmap.rkt") (all-defined-out))
 
 (define widgets str)
 
@@ -32,6 +33,6 @@
     (write-file-to-dir
       #:file file
       #:dir dir
-      (svg xmlns xlink styles #;scripts ;; STX #; as s-expression comment
+      (svg xmlns xlink styles
         svg-str)))
   (@ 'output-file-ext ".svg" 'save-file save-svg))

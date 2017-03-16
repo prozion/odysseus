@@ -4,7 +4,7 @@
 (require json)
 (require "../../lib/all.rkt")
 (require "vk.rkt")
-;(require (file "c:/denis/denis_core/settings/bots.rkt"))
+;(require (file "c:/denis/denis_core/settings/bots.rkt")) 
 
 (provide vk/find-paths vk/id->href vk/ids->hrefs vk/link vk/friends)
 

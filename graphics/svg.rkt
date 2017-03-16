@@ -53,8 +53,8 @@
                       (str  "\n<style type=\"text/css\">\n"
                             "/* <![CDATA[ */\n"
                             (read-file (str rootpath "\\templates\\styles.css"))
-                            "\n\n/* barchart: */\n\n"
-                            (read-file (str rootpath "\\templates\\barchart.css"))
+                            ;"\n\n/* barchart: */\n\n"
+                            ;(read-file (str rootpath "\\templates\\barchart.css"))
                             "/* ]]> */\n"
                             "</style>\n")
                       "")]

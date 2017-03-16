@@ -57,6 +57,8 @@
 (define mafia? (contains-tag? "m"))
 ; g - gay/lesbian
 (define gay? (contains-tag? "g"))
+; p - probable candidate to link each other in PA-network
+(define pan? (contains-tag? "p"))
 
 (define has-phone? (contains-key? 'phone))
 (define has-email? (contains-key? 'email))
