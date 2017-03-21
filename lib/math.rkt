@@ -37,3 +37,13 @@
   (cond
     ((= v 0) "0")
     (else (dec->hex-r v))))
+
+(define (accumulate lst #:op (op +))
+  (cond
+    ((null? (cdr lst)) lst)
+    (else
+      (foldl
+        (λ (x x0)
+          (pushr x0 (op (last x0) x)))
+        (list (car lst))
+        (cdr lst)))))

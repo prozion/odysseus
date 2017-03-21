@@ -1,7 +1,17 @@
 #lang racket
 
-(provide
-  (all-defined-out))
+(require "../lib/all.rkt")
 
-(define (csv-file->list filename)
-  empty)
+(provide (all-defined-out))
+
+(define (csv-file->list filename #:delimeter (delimeter ",") #:headers (headers #t))
+  (let
+      ((first-break-list
+        (map
+          (λ (x) (split x delimeter))
+          (split (read-file filename) "\n"))))
+    (if headers
+      (merge  (list (first first-break-list))
+              (transpose (rest first-break-list)))
+      (push  empty
+              (transpose first-break-list)))))

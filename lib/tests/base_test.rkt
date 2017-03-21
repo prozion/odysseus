@@ -1,5 +1,14 @@
 #lang racket
 
+; alist - harrison in Hurrycap castle
+; base - personal guard in emerald city
+; controls - harrison in Gyngeme cave
+; hash - harrison in Blinkers country
+; interval - post near Miners cave
+; math - post in the mountains towards Gyngeme rocks
+; seqs - army camp near emerald city
+; type - harrison in Chewers country
+
 (module+ test
 
   (require rackunit)
@@ -16,9 +25,15 @@
   (check-equal? (inc 5) 6)
 
   (check-equal? (// 5 3) 1.6666666666666667)
+  (check-= (// 5 3 1) 1.666666666666666 0.1)
 
   (check-equal? (/r 5 3) 2)
+  (check-equal? (/r 5 3 1) 2)
   (check-equal? (/r 2 (sin 10)) -4)
+
+  (check-equal? (/f 15 2 3) 2)
+
+  (check-equal? (/c 15 2 3) 3)
 
   (check-equal? (*r 10 0.2 (sin 3) 80) 23)
 
@@ -84,4 +99,23 @@
   (check-equal? (clean odd? '(1 2 3 4 5)) '(2 4))
   ;
   (check-true (andmap (λ (x) (inii 1 10 x)) (for/list ((_ (range 100))) (rand 10))))
+
+  (check-equal? (in 0 1 0.5) #t)
+  (check-equal? (in 0 1 2) #f)
+  (check-equal? (in 0 1 0) #t)
+  (check-equal? (in 0 1 1) #t)
+
+  (check-equal? (inii -100 100 -100) #t)
+
+  (check-equal? (inee 1 3 2) #t)
+  (check-equal? (inee 0 1 0) #f)
+  (check-equal? (inee 0 1 1) #f)
+
+  (check-equal? (inei 1 3 2) #t)
+  (check-equal? (inei 0 1 0) #f)
+  (check-equal? (inei 0 1 1) #t)
+
+  (check-equal? (inie 1 3 2) #t)
+  (check-equal? (inie 0 1 0) #t)
+  (check-equal? (inie 0 1 1) #f)
 )

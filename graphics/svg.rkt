@@ -124,6 +124,8 @@
                               ,(string->symbol (string-append tagname "2")))))))))))
 
 (make-single-tag rect)
+(make-single-tag circle)
 (make-single-tag line)
+(make-single-tag path)
 (make-tag g)
 (make-tag text)

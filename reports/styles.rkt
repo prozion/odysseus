@@ -8,7 +8,7 @@
     (@
         ; fonts
         'font-family "Arial"
-        'font-size 12
+        'font-size 10
         'font-style "normal"
         ;colors
         'fill "black"

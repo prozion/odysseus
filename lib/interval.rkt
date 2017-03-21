@@ -1,25 +1,12 @@
 #lang racket
 
 (require "base.rkt")
+(require "type.rkt")
 
 (require "debug.rkt")
 
 (provide (all-defined-out))
 ;(provide (except-out (all-defined-out) >plain ))
-
-(define (in a b x)
-  (<= a x b))
-
-(define inii in)
-
-(define (inee a b x)
-  (< a x b))
-
-(define (inei a b x)
-  (and (< a x) (<= x b)))
-
-(define (inie a b x)
-  (and (<= a x) (< x b)))
 
 ; cyclic addition (e.g. for finding contrast values on color circle)
 (define (+c a b base)
@@ -33,6 +20,7 @@
         base)
       factor)))
 
+; 'plain numbers' - numbers that are especially good as values on y-axis
 ; (>plain 10 8) -> #t
 ; (>plain 5 4) -> #t
 ; TODO: optimize speed of the algorythm
@@ -122,3 +110,16 @@
                       >plain))])
       (range start end step)))
   (fractize-4-p a b 0.3))
+
+(define (get-scale-factor datas height #:base (base 0))
+  (cond
+    ((list2? datas)
+        (let* ( (maxdatas (map (λ (x) (apply max (map ->number x))) datas))
+                (maxdata (apply max maxdatas)))
+          (/ height (- maxdata base) 1.0)))
+    ((list? datas) (/ height (- (apply max (map ->number datas)) base) 1.0))
+    (else 1)))
+
+(define (scale-data data height)
+  (let ((maxdata (apply max (map ->number data))))
+    (map (λ (x) (- height (*r (/ x maxdata) height))) data)))

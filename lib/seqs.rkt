@@ -5,7 +5,6 @@
 (require compatibility/defmacro)
 (require "base.rkt")
 (require "controls.rkt")
-(require "interval.rkt")
 (require "debug.rkt")
 (require racket/set)
 
@@ -98,6 +97,14 @@
       (else
         ;(nth (cdr seq) (sub1 index)))))) ; slow version
         (list-ref seq (sub1 index))))))
+
+(define (nth-cycled seq index)
+  (let ((remnd (remainder index (length seq))))
+    (cond
+      ((>= (length seq) index) (nth seq index))
+      ((= remnd 0) (nth seq -1))
+      (else
+        (nth seq (remainder index (length seq)))))))
 
 (define (indexof seq el)
   ;(define (indexof-iter seq el acc)
@@ -396,7 +403,6 @@
             (lshift seq n))))))
   (partition-iter seq empty))
 
-
 (define (partition-all seq n)
   (define (partition-iter seq res)
     (cond
@@ -410,3 +416,29 @@
             res
             (lshift seq n))))))
   (partition-iter seq empty))
+
+(define (flatten lnlst)
+  (cond
+    (((not-> list?) lnlst) lnlst)
+    ((null? lnlst) lnlst)
+    (else
+      (foldl
+        (λ (a b) (merge b
+                        (if (list? a)
+                          (flatten a)
+                          (list a))))
+        '()
+        lnlst))))
+
+(define (transpose llst)
+  (cond
+    ((null? (cdr (car llst))) (list (flatten llst)))
+    (else (merge (list (flatten (map car llst))) (transpose (map cdr llst))))))
+
+(define (map-cycled f . seqs)
+  (let* ( (max-count (apply max (map length seqs)))
+          (is (range 1 (+ 1 max-count))))
+    (for/fold
+      ((res '()))
+      ((i is))
+      (pushr res (apply f (map (λ (x) (nth-cycled x i)) seqs))))))

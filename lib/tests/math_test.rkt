@@ -12,5 +12,8 @@
   (check-equal? (hex->dec "a2") 162)
 
   (check-equal? (dec->hex 0) "0")
-  (check-equal? (dec->hex 162) "a2")    
+  (check-equal? (dec->hex 162) "a2")
+
+  (check-equal? (accumulate '(1 2 3 4 5)) '(1 3 6 10 15))
+  (check-equal? (accumulate '(1 2 3 4 5) #:op *) '(1 2 6 24 120))
 )

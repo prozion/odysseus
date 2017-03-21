@@ -24,6 +24,7 @@
   (check-equal? (implode empty) "")
   (check-equal? (implode '(" " "b" "a" "k" "e" "\n" "r" "y")) " bake\nry")
   (check-equal? (implode '(1 2 3 4)) "1234")
+  (check-equal? (implode '(1 2 3 4) "+") "1+2+3+4")
   (check-equal? (implode (list null null null) ",") ",,")
 
   (check-equal? (intermix 0 '(1 2 3 4)) '(1 0 2 0 3 0 4))
@@ -53,6 +54,10 @@
   (check-equal? (nth '(0 1 2 3 4 5) -1) 5)
   (check-equal? (nth '(0 1 2 3 4 5) 7) null)
 
+  (check-equal? (nth-cycled '(0 1 2 3 4 5) 7) 0)
+  (check-equal? (nth-cycled '(0 1 2 3 4 5) 17) 4)
+  (check-equal? (nth-cycled '(1 2 3 4 5) 10) 5)
+
   (check-equal? (indexof "" "e") 0)
   (check-equal? (indexof "Hercules" "e") 2)
   (check-equal? (indexof "Hercules" "a") 0)
@@ -64,7 +69,7 @@
   (check-true (indexof? '(1 (10 1) 2) '(10 1)))
   (check-false (indexof? '(1 2 3 4 5) 6))
   (check-true (indexof? "abcdef" "d"))
-  (check-false (indexof? "abcdef" "k"))  
+  (check-false (indexof? "abcdef" "k"))
 
   (check-equal? (indexof-all "Hercules" "e") '(2 7))
   (check-equal? (indexof-all '(11 8 -22  8 30 80 -5 8) 8) '(2 4 8))
@@ -248,5 +253,11 @@
   (check-equal? (partition-all '(1 2 3 4 5) 1) '((1) (2) (3) (4) (5)))
   (check-equal? (partition-all '(1 2 3 4 5) 0) '(1 2 3 4 5))
 
+  (check-equal? (flatten '((1 2 3) (4 5 6))) '(1 2 3 4 5 6))
+  (check-equal? (flatten '((1 (2 (3))) (4 ((5)) 6) 7)) '(1 2 3 4 5 6 7))
+  (check-equal? (flatten '(1 2 3)) '(1 2 3))
 
+  (check-equal? (transpose '((1 2 3) (4 5 6) (7 8 9))) '((1 4 7) (2 5 8) (3 6 9)))
+
+  (check-equal? (map-cycled (λ (a b c) (+ b c)) '(1 2 3 4 5 6) '(10 20) '(5 15 25)) '(15 35 35 25 25 45))
 )

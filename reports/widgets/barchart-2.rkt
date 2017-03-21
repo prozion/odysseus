@@ -11,7 +11,7 @@
 
 (provide (all-defined-out))
 
-(define-macro (barchart . body) ; STX define-macro form should have the same coloring scheme as define form
+(define-macro (barchart-2 . body) ; STX define-macro form should have the same coloring scheme as define form
   (let* ( [@args (zor (apply hash body) (hash))]
           [data (hash-ref @args 'data null)]
           [title (hash-ref @args 'title "")]
@@ -55,7 +55,7 @@
         [default-labels
           (hash
             'y-axis (hash 'label-direction 'vertical 'start 0 'text "Y" 'tick-offset 10)
-            'x-axis (hash 'text "X" 'tick-offset 5))]
+            'x-axis (hash 'text "X" 'tick-offset 5 'orientation 0))]
         [@labels (hash-union @labels default-labels)]
 
         [default-styles
@@ -96,6 +96,7 @@
         [x-axis-font-size (hash-path @styles 'x-axis 'font-size)]
         [x-axis-label (@. @labels.x-axis.text)]
         [x-axis-tick-offset (@. @labels.x-axis.tick-offset)]
+        [x-axis-orientation (@. @labels.x-axis.orientation)]
 
         [bars-gap (hash-path @layout 'bars 'gap)]
         [bars-x (the y-axis-pos 'left y-axis-w)]
@@ -122,6 +123,9 @@
         [bar-class-hover (zor (hash-path @styles 'bar 'class-hover) "none")]
         [bar-class-hover (split bar-class " ")]
         [bar-class-hover (if (= (length bar-class-hover) 1) (car bar-class-hover) bar-class-hover)]
+
+        [bar-colors (zor (hash-path @styles 'bar 'colors) "black")]
+        ;[_ (__t (format "bar-colors: ~a~n" bar-colors))]
 
         [amount (length data)]
         [bar-w (/r (- bars-w (* (- amount 1) bars-gap)) amount)]
@@ -209,15 +213,18 @@
               (s "")
               (lbl (map str labels))
                 (str s
-                    (text
-                      (@
-                        'x (+
-                              (* $idx bar-w)
-                              (* (dec $idx) bars-gap)
-                              (h-centrify bar-w (@ 'text lbl 'font-size x-axis-font-size)))
-                        'y (+ x-axis-tick-offset x-axis-font-size)
-                        'font-size x-axis-font-size)
-                      lbl))))))
+                    (let ((x (+
+                                (* $idx bar-w)
+                                (* (dec $idx) bars-gap)))
+                                ;(h-centrify bar-w (@ 'text lbl 'font-size x-axis-font-size))))
+                          (y (+ x-axis-tick-offset x-axis-font-size)))
+                      (text
+                        (@
+                          'x x
+                          'y y
+                          'font-size x-axis-font-size
+                          'transform (svg/rotate x-axis-orientation x y))
+                        lbl)))))))
 
       ;; bars block
       (g
@@ -230,9 +237,14 @@
                   y (- bars-base h)
                   width bar-w
                   height h
-                  class (if (list? bar-class)
-                              (list-ref bar-class (+c 0 $idx (length bar-class)))
-                              bar-class)
+                  ;class (if (list? bar-class)
+                  ;            (list-ref bar-class (+c 0 $idx (length bar-class)))
+                  ;            bar-class)
+                  style (format
+                          "fill:~a"
+                          (if (list? bar-colors)
+                              (list-ref bar-colors (+c 0 $idx (length bar-colors)))
+                              bar-colors))
                   ;onmouseover (str "hover(evt, " (alist->json (list '("fill" "blue") '("opacity" "0.5"))))
                   ;onmouseout "hout(evt)"
                   )))))))

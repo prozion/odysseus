@@ -1,7 +1,18 @@
 text {
-  font-size: 12;
-  font-family: Arial, sans-serif;
+  font-size: 10pt;
+  font-family: Arial;
   font-style: normal;
+}
+
+text.title {
+  font-size: 16pt;
+  font-family: Arial;
+  font-weight: bold;
+}
+
+circle.plot_dot {
+  fill: white;
+  stroke-width: 2;
 }
 
 rect {
@@ -10,5 +21,15 @@ rect {
 
 line {
   stroke-width: 1;
+  stroke: black;
+}
+
+path {
+  fill: none;
+}
+
+path.plot {
+  stroke-opacity: 0.5;
+  stroke-weight: 2;
   stroke: black;
 }

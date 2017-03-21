@@ -27,3 +27,9 @@
     ((hash? x) 'hash)
     ((path? x) 'path)
     (else #f)))
+
+(define (->number x)
+  (cond
+    ((number? x) x)
+    ((string? x) (string->number x))
+    (else x)))

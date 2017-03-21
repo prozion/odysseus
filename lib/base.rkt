@@ -12,29 +12,18 @@
   (inexact->exact (floor a)))
 
 (define dec sub1)
-
 (define inc add1)
 
-(define (// a b)
-  (exact->inexact (/ a b)))
+(define-macro (make-rounded-op op round-op)
+  `(λ xs (,round-op (apply ,op xs))))
 
-(define (/r a b)
-  (exact-round (/ a b)))
-
-(define (/f a b)
-  (exact-floor (/ a b)))
-
-(define (/c a b)
-  (exact-ceiling (/ a b)))
-
-(define (*r . xs)
-  (exact-round (apply * xs)))
-
-(define (*f . xs)
-  (exact-floor (apply * xs)))
-
-(define (*c . xs)
-  (exact-ceiling (apply * xs)))
+(define // (make-rounded-op / exact->inexact))
+(define /r (make-rounded-op / exact-round))
+(define /f (make-rounded-op / exact-floor))
+(define /c (make-rounded-op / exact-ceiling))
+(define *r (make-rounded-op * exact-round))
+(define *f (make-rounded-op * exact-floor))
+(define *c (make-rounded-op * exact-ceiling))
 
 (define (true? x) x)
 
@@ -87,3 +76,17 @@
 (define (clean f xs)
   ;(filter (λ (x) (not (f x))) xs))
   (filter-not f xs))
+
+(define (in a b x)
+  (<= a x b))
+
+(define inii in)
+
+(define (inee a b x)
+  (< a x b))
+
+(define (inei a b x)
+  (and (< a x) (<= x b)))
+
+(define (inie a b x)
+  (and (<= a x) (< x b)))

@@ -1,0 +1,31 @@
+;(.png (@ 'w 920 'h 620)
+;
+;  (widgets
+;
+;
+;    (barchart
+;            data (append '((2004 108671) (2005 107520) (2006 106644) (2007 108708) (2008 104584) (2009 109535) (2010 140855) (2011 195813) (2012 252055) (2013 320042) (2014 318135) (2015 243232)) (list (list 2016 (* 3 73982))))
+;            layout (@ 'widget (@ 'x 10 'y 10 'w 900 'h 600)
+;                      'title (@ 'h 50 'pos 'top)
+;                      'y-axis (@ 'w 90 'pos 'left)
+;                      'x-axis (@ 'h 40 'pos 'bottom)
+;                      'bars (@ 'gap 2))
+;            labels (@ 'x-axis (@ 'text "Years")
+;                      'y-axis (@ 'text "Bordercrossings" 'start 0))
+;            styles (@ 'bar (@ 'fill "red blue"
+;                              'opacity '(0.5 0.8 0.1)
+;                              ;'class "bc3 bc2" 'class-hover "bc3_hover bc2_hover")
+;                            )
+;                      'x-axis (@ 'font-size 12)
+;                      'y-axis (@ 'font-size 12))
+;            normalize-mode 'trunc-at-zero
+;            title "Storskog the best!")
+;  )
+;)
+
+(.svg
+  (barchart
+     #:data (append '((2004 108671) (2005 107520) (2006 106644) (2007 108708) (2008 104584) (2009 109535) (2010 140855) (2011 195813) (2012 252055) (2013 320042) (2014 318135) (2015 243232)) (list (list 2016 (* 3 73982))))
+     #:colors '("black" "grey" "#aa6")
+     #:gap 1
+     #:title "Storskog the best!"))

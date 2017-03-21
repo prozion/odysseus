@@ -1,11 +1,11 @@
 #lang racket
 
-(require "widgets/barchart.rkt" "widgets/heatmap.rkt")
+(require "widgets/barchart.rkt" "widgets/heatmap.rkt" "widgets/linechart.rkt")
 (require "../graphics/svg.rkt")
 (require compatibility/defmacro)
 (require "../lib/all.rkt")
 
-(provide (all-from-out "widgets/barchart.rkt" "widgets/heatmap.rkt") (all-defined-out))
+(provide (all-from-out "widgets/barchart.rkt" "widgets/heatmap.rkt" "widgets/linechart.rkt") (all-defined-out))
 
 (define widgets str)
 
