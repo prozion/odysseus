@@ -8,11 +8,8 @@
 (define PI 3.1415926535897932)
 (define π PI)
 
-(define (sqr a)
-  (* a a))
-
-(define (avg lst)
-  (/ (apply + lst) (length lst)))
+(define (avg . args)
+  (/ (apply + args) (length args)))
 
 (define (median-avg lst)
   lst)

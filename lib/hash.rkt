@@ -1,7 +1,7 @@
 #lang racket
 
 (require compatibility/defmacro)
-(require "base.rkt" "seqs.rkt" (for-syntax "seqs.rkt"))
+(require "base.rkt" "seqs.rkt" "type.rkt" (for-syntax "seqs.rkt"))
 
 (provide (all-defined-out))
 
@@ -47,6 +47,14 @@
                 #f)))))
   (hash-path-r h (reverse rest)))
 
+(define (hash-pair h key (default #f))
+  (for/fold
+    ((res default))
+    (((k v) h))
+    (if (equal? k key)
+        (cons k v)
+        res)))
+
 (define (hash-refs h keys (missed null))
   (define (hash-refs-iter h keys res)
     (cond
@@ -66,23 +74,48 @@
 (define (hash-delete h k)
   (cond
     ((immutable? h) (hash-remove h k))
-    (else (make-immutable-hash (hash->list h)))))
+    (else (hash-delete (make-immutable-hash (hash->list h)) k))))
+
+(define (hash-substitute h1 arg)
+  (cond
+    ((null? arg) h1)
+    ((cons? arg) ; STX cons
+      (hash-insert
+        (hash-delete h1 (car arg))
+        arg))
+    ((list-of-cons? arg)
+      (if (null? (cdr arg))
+        (hash-substitute h1 (car arg))
+        (hash-substitute (hash-substitute h1 (car arg)) (cdr arg))))
+    (else h1)))
+
+(define (hash-insert-hard h1 pair)
+  (make-hash (cons pair (hash->list h1))))
 
 (define (hash-insert h1 pair)
-  (let ((h1-v-hash (hash-ref h1 (car pair) #f)))
-    (if (and
-          (hash? (cdr pair))
-          h1-v-hash)
-      ;; #t - we union values if they are hashes
-      (hash-insert
-        (hash-delete h1 (car pair))
-        (cons
-          (car pair)
-          (if (hash? h1-v-hash)
-            (hash-union h1-v-hash (cdr pair))
-            h1-v-hash)))
-      ;; #f - add to hash in usual way
-      (make-hash (cons pair (hash->list h1))))))
+  (cond
+    ((not (pair? pair)) h1)
+    ((not (hash? h1))  (hash (car pair) (cdr pair)))
+    (else
+      (let ((h1-part-v (hash-ref h1 (car pair) #f)))
+        (cond
+          ((not h1-part-v)   (make-hash (cons pair (hash->list h1))))
+          (else
+            (hash-insert
+              (hash-delete h1 (car pair))
+              (cons
+                (car pair)
+                (cond
+                  ((and
+                      (hash? h1-part-v)
+                      (hash? (cdr pair)))
+                        (hash-union h1-part-v (cdr pair)))
+                  ((and
+                      (list? h1-part-v)
+                      (list? (cdr pair)))
+                        (merge-unique h1-part-v (cdr pair)))
+                  (else
+                    h1-part-v))))))))))
 
 (define (hash-revert h)
   (apply hash (interleave (hash-values h) (hash-keys h))))

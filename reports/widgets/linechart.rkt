@@ -43,7 +43,7 @@
           #:dots (dots #f)
           #:label (label "")
           ; layout
-          #:layout (layout (@ 'width PLOT-W 'height PLOT-H))
+          #:layout (layout (@ 'width PLOT_W 'height PLOT_H))
           ; scaling
           #:k (k 1))
   (let*
@@ -51,7 +51,7 @@
       (height (@. layout.height))
       (data (map ->number data))
       (dx (/r width (length data)))
-      ;(xs (range 0 width dx)) ; STX range
+      ;(xs (range 0 width dx)) 
       (scaled-data (map (λ (x) (- height (*r k x))) data))
       (control-points (get-control-points xs scaled-data))
       )
@@ -59,7 +59,7 @@
       (path
         d (if smooth
               (str
-                (format "M~a,~a " (first xs) (first scaled-data)) ; STX first
+                (format "M~a,~a " (first xs) (first scaled-data))
                 (format "C ~a,~a ~a,~a ~a,~a "
                   (first xs) (first scaled-data)
                   (first (first control-points)) (second (first control-points))
@@ -138,14 +138,14 @@
                   (format style-template color stroke-w))
                 charts colors stroke-widths))
       ; layout parameters:
-      (title-h TITLE-H)
-      (y-axis-w Y-AXIS-W)
-      (plot-h PLOT-H)
-      (plot-w PLOT-W)
+      (TITLE_H TITLE_H)
+      (Y-AXIS_W Y-AXIS_W)
+      (PLOT_H PLOT_H)
+      (PLOT_W PLOT_W)
       ; scaling:
-      (k (get-scale-factor charts plot-h))
+      (k (get-scale-factor charts PLOT_H))
       (x0 (apply min xs))
-      (kx (get-scale-factor xs plot-w #:base x0))
+      (kx (get-scale-factor xs PLOT_W #:base x0))
       (scaled-xs (map
                     (λ (x) (* kx (- x x0)))
                     xs))
@@ -153,20 +153,20 @@
     (g
       (when title
         (text
-          (@ 'class "title" 'x (h-centrify plot-w title) 'y (/r title-h 2))
+          (@ 'class "title" 'x (h-centrify PLOT_W title) 'y (/r TITLE_H 2))
           title))
       (when y-axis
-        (g (@ 'transform (svg/translate 0 title-h))
+        (g (@ 'transform (svg/translate 0 TITLE_H))
           (for/fold
             ((s ""))
             ((yval y-axis))
-            (let ((y (- plot-h (*r k yval))))
+            (let ((y (- PLOT_H (*r k yval))))
               (str
                 s
-                (text (@ 'x (- y-axis-w 23) 'y y 'text-anchor "end") yval)
-                (line x1 (- y-axis-w 20) y1 y x2 (- y-axis-w 10) y2 y))))))
+                (text (@ 'x (- Y-AXIS_W 23) 'y y 'text-anchor "end") yval)
+                (line x1 (- Y-AXIS_W 20) y1 y x2 (- Y-AXIS_W 10) y2 y))))))
       (when x-axis
-        (g (@ 'transform (svg/translate Y-AXIS-W (+ TITLE-H PLOT-H)))
+        (g (@ 'transform (svg/translate Y-AXIS_W (+ TITLE_H PLOT_H)))
           (for/fold/idx
             (s "")
             (xval xs)
@@ -174,9 +174,9 @@
               (if (= (% $idx x-axis) 0)
                 (str
                   s
-                  (text (@ 'x x 'y (/r X-AXIS-H 2)) xval))
+                  (text (@ 'x x 'y (/r X-AXIS_H 2)) xval))
                 s)))))
-      (g (@ 'transform (svg/translate y-axis-w title-h))
+      (g (@ 'transform (svg/translate Y-AXIS_W TITLE_H))
           (for/fold/idx
             (s "")
             (chart charts)

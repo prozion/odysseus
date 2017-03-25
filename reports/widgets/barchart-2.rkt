@@ -75,15 +75,15 @@
         [title-font-size (if (< widget-h 360)
                             (/r widget-h 12)
                             30)]
-        [title-h (thenot
+        [TITLE_H (thenot
                     title-pos 'hidden
                     (zor
                       (hash-path @layout 'title 'h)
                       (* 3 title-font-size)))]
 
         [y-axis-pos (hash-path @layout 'y-axis 'pos)]
-        [y-axis-y (the title-pos 'top title-h)]
-        [y-axis-w (thenot y-axis-pos 'hidden (hash-path @layout 'y-axis 'w))]
+        [y-axis-y (the title-pos 'top TITLE_H)]
+        [Y-AXIS_W (thenot y-axis-pos 'hidden (hash-path @layout 'y-axis 'w))]
         [y-axis-font-size (hash-path @styles 'y-axis 'font-size)]
         [y-axis-label (hash-path @labels 'y-axis 'text)]
         [y-axis-label-direction (hash-path @labels 'y-axis 'label-direction)]
@@ -91,31 +91,31 @@
         [y-axis-tick-offset (@. @labels.y-axis.tick-offset)]
 
         [x-axis-pos (hash-path @layout 'x-axis 'pos)]
-        [x-axis-x (the y-axis-pos 'left y-axis-w)]
-        [x-axis-h (thenot x-axis-pos 'hidden (hash-path @layout 'x-axis 'h))]
+        [x-axis-x (the y-axis-pos 'left Y-AXIS_W)]
+        [X-AXIS_H (thenot x-axis-pos 'hidden (hash-path @layout 'x-axis 'h))]
         [x-axis-font-size (hash-path @styles 'x-axis 'font-size)]
         [x-axis-label (@. @labels.x-axis.text)]
         [x-axis-tick-offset (@. @labels.x-axis.tick-offset)]
         [x-axis-orientation (@. @labels.x-axis.orientation)]
 
         [bars-gap (hash-path @layout 'bars 'gap)]
-        [bars-x (the y-axis-pos 'left y-axis-w)]
-        [bars-y (+ (the title-pos 'top title-h) (the x-axis-pos 'top x-axis-h))]
-        [bars-w (- widget-w y-axis-w)]
-        [bars-h (- widget-h title-h x-axis-h)]
+        [bars-x (the y-axis-pos 'left Y-AXIS_W)]
+        [bars-y (+ (the title-pos 'top TITLE_H) (the x-axis-pos 'top X-AXIS_H))]
+        [bars-w (- widget-w Y-AXIS_W)]
+        [bars-h (- widget-h TITLE_H X-AXIS_H)]
 
-        [title-y (the title-pos 'bottom (+ bars-h x-axis-h))] ;(if (equal? title-pos 'bottom) (+ bars-h x-axis-h) 0)
+        [title-y (the title-pos 'bottom (+ bars-h X-AXIS_H))] ;(if (equal? title-pos 'bottom) (+ bars-h X-AXIS_H) 0)
 
         [y-axis-x (the y-axis-pos 'right bars-w)]
         [y-axis-h bars-h]
 
-        [x-axis-y (+ (the title-pos 'top title-h) (the x-axis-pos 'bottom bars-h))]
+        [x-axis-y (+ (the title-pos 'top TITLE_H) (the x-axis-pos 'bottom bars-h))]
         [x-axis-w bars-w]
 
         [text-l (text-length title)]
         [text-h (text-height title)]
         [text-x  (+ title-x (/r (- title-w text-l) 2))]
-        [text-y (+ title-y (/r (+ title-h text-h) 2))]
+        [text-y (+ title-y (/r (+ TITLE_H text-h) 2))]
 
         [bar-class (zor (hash-path @styles 'bar 'class) "none")]
         [bar-class (split bar-class " ")]
@@ -157,7 +157,7 @@
           (@ 'id "title" 'transform (svg/translate title-x title-y))
           (text (@
                   'x (h-centrify title-w (@ 'text title 'font-size title-font-size))
-                  'y (v-centrify title-h title-font-size)
+                  'y (v-centrify TITLE_H title-font-size)
                   'font-size title-font-size)
                 title)))
 
@@ -183,19 +183,19 @@
                   (s "")
                   (tick ticks)
                     (let* ((tick-y (- y-axis-h (* scale-factor tick)))
-                          (tick-w (if (> y-axis-w 60) 15 (* 0.25 y-axis-w)))
+                          (tick-w (if (> Y-AXIS_W 60) 15 (* 0.25 Y-AXIS_W)))
                           (tick-offset y-axis-tick-offset)
                           (tick-label-offset (+ (* 2 tick-offset) tick-w))
                           (tick-label-length (text-length (@ 'text (str tick) 'font-size y-axis-font-size))))
                       (if (> tick-y 0)
                         (str s
                           (text (@
-                                  'x (- y-axis-w tick-label-offset tick-label-length)
+                                  'x (- Y-AXIS_W tick-label-offset tick-label-length)
                                   'y (+ tick-y (/r y-axis-font-size 2))
                                   'font-size y-axis-font-size) (str tick))
-                          (line 'x1 (- y-axis-w tick-w tick-offset)
+                          (line 'x1 (- Y-AXIS_W tick-w tick-offset)
                                 'y1 tick-y
-                                'x2 (- y-axis-w tick-offset)
+                                'x2 (- Y-AXIS_W tick-offset)
                                 'y2 tick-y))
                         s))))))))
 
@@ -205,7 +205,7 @@
           (@ 'id "x-axis" 'transform (svg/translate x-axis-x  x-axis-y))
           (text (@
                   'x (h-centrify x-axis-w (@ 'text x-axis-label 'font-size x-axis-font-size))
-                  'y x-axis-h
+                  'y X-AXIS_H
                   'font-size x-axis-font-size)
                 x-axis-label)
           (unless (nil? labels)

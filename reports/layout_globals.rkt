@@ -2,8 +2,8 @@
 
 (provide (all-defined-out))
 
-(define TITLE-H 100)
-(define Y-AXIS-W 100)
-(define PLOT-W 1000)
-(define PLOT-H 600)
-(define X-AXIS-H 30)
+(define TITLE_H 100)
+(define Y-AXIS_W 100)
+(define PLOT_W 1000)
+(define PLOT_H 600)
+(define X-AXIS_H 30)

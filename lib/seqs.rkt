@@ -21,10 +21,10 @@
     (,zero-condition ,zero-op)
     (else ,else-op)))
 
-(define (len seq)
+(define len (lambda (seq)
   (if (string? seq)
     (string-length seq)
-    (length seq)))
+    (length seq))))
 
 (define (tostring lst)
   (format "~a" lst))
@@ -243,6 +243,7 @@
   (define (merge-unique-couples-iter seq1 seq2)
     (cond
       ((null? seq2) seq1)
+      ((not (list? seq2)) seq1)
       (else
         ;(merge-unique-couples-iter (rpush-unique seq1 (car seq2)) (cdr seq2)))))
         (merge seq1 (minus seq2 seq1)))))
@@ -341,6 +342,15 @@
   (cond
     ((> (indexof seq oldel) 0) (replace-all (replace seq oldel newel) oldel newel))
     (else seq)))
+
+(define (uniques seq)
+  (define (uniques-iter seq acc)
+    (cond
+      ((nil? seq) acc)
+      (else (uniques-iter
+              (ltrim seq)
+              (rpush-unique acc (first seq))))))
+  (uniques-iter seq null))
 
 (define (not-uniques seq)
   (define (not-uniques-iter seq acc)
@@ -442,3 +452,8 @@
       ((res '()))
       ((i is))
       (pushr res (apply f (map (λ (x) (nth-cycled x i)) seqs))))))
+
+(define (soft-merge #:op (op +) . args )
+  (cond
+    ((ormap string? args) (apply string-append (map str args)))
+    (else (apply op args))))

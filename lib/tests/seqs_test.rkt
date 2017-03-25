@@ -152,6 +152,7 @@
   (check-equal? (merge-unique '(1 2 3 4) '(100 200)) '(1 2 3 4 100 200))
   (check-equal? (merge-unique '(1 2 3 4) '(5 1 8 2 4)) '(1 2 3 4 5 8))
   (check-equal? (merge-unique '(1 2 3 4) '(5 1 8 2 4) '(0 3 5 7)) '(1 2 3 4 5 8 0 7))
+  (check-equal? (merge-unique '(1 2 3 4) 5) '(1 2 3 4))
 
   (check-equal? (push '(1 2 3 4) '(100 200) '("a" "b")) '((1 2 3 4) (100 200) "a" "b"))
 
@@ -219,6 +220,8 @@
   (check-equal? (not-uniques "abcdefa") '("a"))
   (check-equal? (not-uniques '(1 2 13 12 10 7 3 4 14)) '())
 
+  (check-equal? (uniques '(1 2 3 1 10 7 3 4 4)) '(1 2 3 10 7 4))
+
   (check-equal? (minus '() '()) '())
   (check-equal? (minus '(1 2 3) '()) '(1 2 3))
   (check-equal? (minus '() '(1 2 3)) '())
@@ -260,4 +263,18 @@
   (check-equal? (transpose '((1 2 3) (4 5 6) (7 8 9))) '((1 4 7) (2 5 8) (3 6 9)))
 
   (check-equal? (map-cycled (λ (a b c) (+ b c)) '(1 2 3 4 5 6) '(10 20) '(5 15 25)) '(15 35 35 25 25 45))
+
+  (check-equal? (soft-merge "c") "c")
+  (check-equal? (soft-merge 567) 567)
+  (check-equal? (soft-merge 1 2) 3)
+  (check-equal? (soft-merge 1 2.5) 3.5)
+  (check-equal? (soft-merge 1 2.5 #:op -) -1.5)
+  (check-equal? (soft-merge #:op (λ args (/ (apply + args) (len args))) 1 3 4 5 7) 4)
+  (check-equal? (soft-merge 1 "a") "1a")
+  (check-equal? (soft-merge "bc" 2 48.5 "o") "bc248.5o")
+  (check-equal? (soft-merge "c" "de") "cde")
+  (check-equal? (soft-merge "moscow" " " "calling") "moscow calling")
+  ;(check-equal? (soft-merge '(1 2) 5) '(1 2 5))
+  ;(check-equal? (soft-merge "d" (hash 'a 10 'b 20)) "d")
+  ;(check-equal? (soft-merge (hash 'a 10 'b 20) "d") (hash 'a 10 'b 20 "d" null))
 )

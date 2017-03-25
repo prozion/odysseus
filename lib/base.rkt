@@ -14,6 +14,9 @@
 (define dec sub1)
 (define inc add1)
 
+(define (sqr a)
+  (* a a))
+
 (define-macro (make-rounded-op op round-op)
   `(λ xs (,round-op (apply ,op xs))))
 

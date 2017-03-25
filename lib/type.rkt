@@ -4,11 +4,20 @@
 
 (provide (all-defined-out))
 
+(define (cons? x)
+  (and (pair? x) (not (list? x))))
+
 (define (list2? x)
   (and
     (list? x)
     (not (empty? x))
     (andmap list? x)))
+
+(define (list-of-cons? x)
+  (and
+    (list? x)
+    (not (empty? x))
+    (andmap cons? x)))
 
 (define (type? x)
   (cond
@@ -16,6 +25,7 @@
     ((string? x) 'string)
     ((bytes? x) 'bytes)
     ((alist? x) 'alist)
+    ((list-of-cons? x) 'list-of-cons)
     ((list2? x) 'list2)
     ((list? x) 'list)
     ((pair? x) 'pair)

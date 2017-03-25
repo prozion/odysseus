@@ -25,8 +25,11 @@
   (check-equal? (hash-refs (hash 'b 20 'a 10 'c 40 'd 30) (list 'a 'b 'd)) (list 10 20 30))
   (check-equal? (hash-refs (hash 'b 20 'a 10 'c 40 'd 30) (list 'a 'b 'd 'e)) (list 10 20 30 null))
   (check-equal? (hash-refs (hash) (list 'a 'b 'd 'e)) (list null null null null))
-  (check-equal? (hash-refs (hash 'b 20 'a 10 'c 40 'd 30) (list 'a 'b 'd 'e) "default") (list 10 20 30 "default"))  
+  (check-equal? (hash-refs (hash 'b 20 'a 10 'c 40 'd 30) (list 'a 'b 'd 'e) "default") (list 10 20 30 "default"))
   (check-equal? (hash-refs (hash) (list 'a 'b 'd 'e) "") (list "" "" "" ""))
+
+  (check-equal? (hash-pair (hash 'a 10 'b 20) 'a) (cons 'a 10))
+  (check-equal? (hash-pair (hash (hash 'u 3 'w 30) 100 'b 20) (hash 'u 3 'w 30)) (cons (hash 'u 3 'w 30) 100))
 
   (check-equal? (@. h.a.aa) 10)
   (check-equal? (@. h.c) #f)
@@ -40,6 +43,39 @@
       (@clean 'a 1 'b 2 'c "")
       (hash 'a 1 'b 2)))
 
+; hash-substitute
+  (check-true
+    (check-hash-equal?
+      (hash-substitute (hash 'a 80 'b 70) (cons 'b 130))
+      (hash 'a 80 'b 130)))
+
+  (check-true
+    (check-hash-equal?
+      (hash-substitute (hash 'a 80 'b 70) (list (cons 'b 130) (cons 'a 10) (cons 'c 2)))
+      (hash 'a 10 'b 130 'c 2)))      
+
+; hash-insert-hard
+  (check-true
+    (check-hash-equal?
+      (hash-insert-hard (hash 'a 40 'b 14) (cons 'b 55))
+      (hash 'a 40 'b 14)))
+
+  (check-true
+    (check-hash-equal?
+      (hash-insert-hard (hash 'a 10 'b 20) (cons 'c 50))
+      (hash 'a 10 'b 20 'c 50)))
+
+; hash-insert
+  (check-true
+    (check-hash-equal?
+      (hash-insert (hash 'a 10 'b 20) null)
+      (hash 'a 10 'b 20)))
+
+  (check-true
+    (check-hash-equal?
+      (hash-insert null (cons 'c 30))
+      (hash 'c 30)))
+
   (check-true
     (check-hash-equal?
       (hash-insert (hash 'a 10 'b 20) (cons 'c 30))
@@ -50,12 +86,24 @@
       (hash-insert (hash 'a 10 'b 20 'c 40) (cons 'c 70))
       (hash 'a 10 'b 20 'c 40)))
 
+; hash-delete
+  (check-true
+    (check-hash-equal?
+      (hash-delete (hash 'a 10 'b 20 'c 40) 'c)
+      (hash 'a 10 'b 20)))
+
+  (check-true
+    (check-hash-equal?
+      (hash-delete (hash (hash 'aa 10 'ab 20) 10 'b 20 'c 40) (hash 'aa 10 'ab 20))
+      (hash 'b 20 'c 40)))
+
+; hash-revert
   (check-true
     (check-hash-equal?
       (hash-revert (hash 'a 'aa 'b 'bb 'aba 30))
       (hash 'aa 'a 'bb 'b 30 'aba)))
 
-  ; TODO: how to compare hashes directly?
+; TODO: how to compare hashes directly?
   (check-true
     (check-hash-equal?
       (hash-union (hash 'a 10 'b 20) (hash 'c 30 'a 100 'd 2))
@@ -73,7 +121,8 @@
                       'ab (hash
                             'aba -8
                             'abb -12))
-                'b 20)
+                'b 20
+                'e '(1 2 3))
               (hash
                 'a (hash
                       'aa 300
@@ -84,7 +133,8 @@
                 'b (hash
                       'ba 33) ; hash will not supersede a number
                 'c 30
-                'd 2)))
+                'd 2
+                'e '(3 4 5))))
         (e4 (hash
                 'a (hash
                       'aa 10
@@ -95,9 +145,17 @@
                       'ac 400)
                 'b 20
                 'c 30
-                'd 2)))
+                'd 2
+                'e '(1 2 3 4 5))))
     (check-true
       (check-hash-equal? e3 e4)))
+
+  ;(let ((e6 (hash-union (hash 'a (hash 'aa 10 'ab 20) 'b (list 1 2 3) 'c 8 'd (10 20 40))
+  ;                      (hash 'a (hash 'aa 300 'ac 400) 'b 10 'c 30 'd (88 99))
+  ;                      #:soft-merge #t)))
+  ;      (e7 (hash 'a (hash 'aa 310 'ab 20 'ac 400) 'b (list 1 2 3 10) 'c 38 'd '(2 88))))
+  ;  (check-true
+  ;    (check-hash-equal? e6 e7)))
 
   (check-true
     (check-hash-equal?
