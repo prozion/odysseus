@@ -8,7 +8,7 @@
 (require "../../scrap/csv.rkt")
 (require "../layout_globals.rkt")
 
-(provide (all-defined-out))
+(provide network)
 
 (define epsilon 1) ; if all steps are less than epsilon - then stop moving nodes
 (define L0 120) ; optimal distance between connected nodes, probably around (/r (avg PLOT_W PLOT_H) (sqrt graph-size))))

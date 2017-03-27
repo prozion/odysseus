@@ -47,7 +47,7 @@
 
 (define immortalism_subgraph
   (@
-    "Anti-aging_movement" (list "Social_movement" "Ageing" "Gerontology" "Negligible_senescence" "Immortality" "Transhumanism" "Extropianism" "Circulatory_system" "Ray_Kurzweil")
+    "Anti-aging_movement" (list "Social_movement" "Ageing" "Gerontology" "Negligible_senescence" "Immortality" "Transhumanism" "Extropianism" "Circulatory_system" "Ray_Kurzweil" "Life_extension")
       "Ageing" (list "Biological_immortality")
         "Biological_immortality" (list "Hayflick_limit")
           "Hayflick_limit" (list "Cell_division" "Telomere" "DNA_replication" "Apoptosis")
@@ -60,7 +60,9 @@
 
 
 (.svg
-  (network
+  (network2
     #:data (hash-union biology_subgraph immortalism_subgraph)
-    #:labels #t
+    #:labels 5
+    #:l0 40
+    #:min-distance 50
   ))

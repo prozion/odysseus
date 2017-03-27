@@ -19,6 +19,7 @@
 
   (check-pred list-of-cons? (list (cons 1 2) (cons 4 5)))
   (check-equal? (list-of-cons? (list (cons 1 2) (cons 4 5) 10)) #f)
+  (check-equal? (list-of-cons? '((1 2) (4 5))) #f)
 
   (check-equal? (type? 3) 'number)
   (check-equal? (type? "a str") 'string)

@@ -178,10 +178,14 @@
 
 (define pushl lpush)
 
-(define (lpush-unique seq el)
-  (if (indexof? seq el)
-    seq
-    (lpush seq el)))
+(define (op-unique op)
+  (λ (seq el)
+    (if (indexof? seq el)
+      seq
+      (op seq el))))
+
+(define lpush-unique (op-unique lpush))
+(define pushl-unique (op-unique pushl))
 
 (define (rshift seq (count 1))
   (reverse (lshift (reverse seq) count)))
@@ -205,10 +209,8 @@
 
 (define pushr rpush)
 
-(define (rpush-unique seq el)
-  (if (indexof? seq el)
-    seq
-    (rpush seq el)))
+(define rpush-unique (op-unique rpush))
+(define pushr-unique (op-unique pushr))
 
 ;; slice inclusively: slice c f -> a b [c d e f] g
 (define (slice seq pos1 (pos2 (len seq)))

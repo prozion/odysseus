@@ -125,6 +125,7 @@
   (check-equal? (rpush '() 100) '(100))
   (check-equal? (rpush '(1 2 3) 100) '(1 2 3 100))
   (check-equal? (rpush '(1 2 3) 3) '(1 2 3 3))
+  (check-equal? (pushr '(1 2 3) 3) '(1 2 3 3))
 
   (check-equal? (rpush-unique '(1 2 3) 100) '(1 2 3 100))
   (check-equal? (rpush-unique '(1 2 3) 3) '(1 2 3))

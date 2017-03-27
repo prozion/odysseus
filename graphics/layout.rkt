@@ -5,7 +5,14 @@
 
 (provide (all-defined-out))
 
-;; general functions for layout calculations
+;; geometric functions
+
+(define (distance x1 y1 x2 y2)
+  (sqrt (+
+          (sqr (- x2 x1))
+          (sqr (- y2 y1)))))
+
+;; general functions for layout control in svg
 
 (define (svg/translate x y)
   (str "translate(" x " " y ")"))

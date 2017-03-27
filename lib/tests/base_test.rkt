@@ -8,6 +8,7 @@
 ; math - post in the mountains towards Gyngeme rocks
 ; seqs - army camp near emerald city
 ; type - harrison in Chewers country
+; regexp - circulating unit
 
 (module+ test
 

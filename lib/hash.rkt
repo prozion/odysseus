@@ -121,14 +121,21 @@
   (apply hash (interleave (hash-values h) (hash-keys h))))
 
 ; add to resulting hash all key-val pairs from h1 and pairs from h2 with rest of the keys
-(define (hash-union h1 h2)
+(define (hash-union . hs)
 ;; already exists in racket/hash: hash-union (make-immutable-hash <list-of pairs> ...)
-  (let ((h1 (if (nil? h1) (hash) h1))
-        (h2 (if (nil? h2) (hash) h2)))
-    (for/fold
-      ((a h1))
-      (([k v] (in-hash h2)))
-      (hash-insert a (cons k v)))))
+  (case (length hs)
+    ((1) (car hs))
+    ((2)
+      (let* (
+            (h1 (car hs))
+            (h2 (cadr hs))
+            (h1 (if (nil? h1) (hash) h1))
+            (h2 (if (nil? h2) (hash) h2)))
+        (for/fold
+          ((a h1))
+          (([k v] (in-hash h2)))
+          (hash-insert a (cons k v)))))
+    (else (hash-union (car hs) (apply hash-union (cdr hs))))))
 
 (define (hasher-by-names . body)
   (λ
