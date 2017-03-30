@@ -30,3 +30,7 @@
   (write-file
     (build-path path file)
     v)))
+
+(define (read-data-from-file filepath namespace-anchor)
+  (parameterize ([current-namespace (namespace-anchor->namespace namespace-anchor)])
+    (load filepath)))

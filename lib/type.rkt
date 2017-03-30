@@ -4,8 +4,14 @@
 
 (provide (all-defined-out))
 
+(define (scalar? x)
+  (or (number? x) (string? x) (symbol? x) (null? x)))
+
 (define (cons? x)
   (and (pair? x) (not (list? x))))
+
+(define (cons-ext? x)
+  (and (pair? x) (scalar? (car x))))
 
 (define (list2? x)
   (and

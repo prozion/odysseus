@@ -5,8 +5,24 @@
   (require rackunit)
   (require "../type.rkt")
 
+  (check-pred scalar? 1)
+  (check-pred scalar? 0.3)
+  (check-pred scalar? "key")
+  (check-pred scalar? 'key)
+  (check-pred scalar? null)
+  (check-equal? (scalar? (list 1)) #f)
+  (check-equal? (scalar? (hash)) #f)
+  (check-equal? (scalar? (hash 'a 1 'b 2)) #f)
+
   (check-pred cons? (cons 1 2))
   (check-equal? (cons? (list 1 2)) #f)
+  (check-equal? (cons? (list 1)) #f)
+  (check-equal? (cons? (list)) #f)
+
+  (check-pred cons-ext? (cons 1 2))
+  (check-equal? (cons-ext? (list 1 2)) #t)
+  (check-equal? (cons-ext? (list 1)) #t)
+  (check-equal? (cons-ext? (list)) #f)
 
   (check-pred list2? '(()))
   (check-pred list2? '((1)))
@@ -27,6 +43,8 @@
   (check-equal? (type? '((a 10) (b 20))) 'alist)
   (check-equal? (type? (list (cons 1 2) (cons 3 4))) 'list-of-cons)
   (check-equal? (type? '((a 10) (b 20 30))) 'list2)
+  (check-equal? (type? (list '(a 10) '(b 20 30) null)) 'list2)
+  (check-equal? (type? '((a 10) (b 20 30) 3)) 'list)
   (check-equal? (type? '(1 2 3)) 'list)
   (check-equal? (type? (cons 1 2)) 'pair)
   (check-equal? (type? #\a) 'char)

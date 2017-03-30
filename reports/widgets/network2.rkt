@@ -36,6 +36,7 @@
             (links-ext (if (not directed)
                           (uniques (merge links (get-reverse-links data k)))
                           links)))
+    ;(display k) (flush-output)
     (hash-union
       res
       (hash
@@ -97,7 +98,7 @@
 (define (build-graph graph)
   (let ((acclst (list)))
     (define (build-graph-iter graph node x y)
-      ;(printf "build-graph-iter: ~a ~a~n" (length (hash-keys graph)) (length acclst))
+      (printf "build-graph-iter: ~a ~a~n" (length (hash-keys graph)) (length acclst))
       (let* ((v (hash-ref graph node))
             (neighbours (@. v.links))
             (graph (cond
@@ -122,12 +123,15 @@
                       y1))))))) ; and change y
     (build-graph-iter graph (car (hash-keys graph)) X0 Y0)))
 
+(define-namespace-anchor a)
+
 (define (network2
           #:data data
           #:labels (labels #f)
           #:l0 (l0 L0)
           #:min-distance (min-distance MIN_DISTANCE))
   (let* (
+          (data (if (path? data) (read-data-from-file data a) data))
           (graph (parameterize ((L0-p l0)
                                 (MIN_DISTANCE-p min-distance))
                     (build-graph (init-graph data)))))

@@ -51,6 +51,11 @@
 
   (check-true
     (check-hash-equal?
+      (hash-substitute (hash 'a 80 'b '(70 30)) (cons 'b '(130 180)))
+      (hash 'a 80 'b '(130 180))))
+
+  (check-true
+    (check-hash-equal?
       (hash-substitute (hash 'a 80 'b 70) (list (cons 'b 130) (cons 'a 10) (cons 'c 2)))
       (hash 'a 10 'b 130 'c 2)))
 
@@ -80,6 +85,11 @@
     (check-hash-equal?
       (hash-insert (hash 'a 10 'b 20) (cons 'c 30))
       (hash 'a 10 'b 20 'c 30)))
+
+  (check-true
+    (check-hash-equal?
+      (hash-insert (hash 'a 10 'b 20) (cons 'c '(30 20)))
+      (hash 'a 10 'b 20 'c '(30 20))))      
 
   (check-true
     (check-hash-equal?
@@ -113,7 +123,7 @@
   (check-true
     (check-hash-equal?
       (hash-union (hash 'a 10 'b 20) (hash 'c 30 'a 100 'd 2) (hash 'f 7 'p 18 'c 40 'b 80))
-      (hash 'a 10 'b 20 'c 30 'd 2 'f 7 'p 18)))      
+      (hash 'a 10 'b 20 'c 30 'd 2 'f 7 'p 18)))
 
   (let ((e1 (hash-union (hash 'a (hash 'aa 10 'ab 20) 'b 20) (hash 'c 30 'a (hash 'aa 300 'ac 400) 'd 2)))
         (e2 (hash 'a (hash 'aa 10 'ab 20 'ac 400) 'b 20 'c 30 'd 2)))

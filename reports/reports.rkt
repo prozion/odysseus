@@ -4,6 +4,7 @@
   "widgets/barchart.rkt"
   "widgets/heatmap.rkt"
   "widgets/linechart.rkt"
+  "widgets/radial-connections.rkt"
   "widgets/network.rkt"
   "widgets/network2.rkt")
 (require "../graphics/svg.rkt")
@@ -14,8 +15,9 @@
             "widgets/barchart.rkt"
             "widgets/heatmap.rkt"
             "widgets/linechart.rkt"
+            "widgets/radial-connections.rkt"
             "widgets/network.rkt"
-            "widgets/network2.rkt") 
+            "widgets/network2.rkt")
             (all-defined-out))
 
 (define widgets str)

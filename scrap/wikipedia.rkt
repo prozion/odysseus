@@ -6,9 +6,16 @@
 
 (provide (all-defined-out))
 
+; take only links that are met in the text (avoid plates and navigation), that is try to take context links as generally stronger related to the subject
 (define (get-links-to-articles page)
   (let* ((html (get-url (format "https://en.wikipedia.org/wiki/~a" page)))
-        ; cut html at <id="See_also"> to avoid navigation links
+        (html (car (regexp-split (pregexp "id=\"See_also\"") html))) ; take text before 'See also' section to exclude tons of links after it
         (links-urls (get-matches (pregexp "\"/wiki/([A-Za-z0-9_\\(\\)\\-]+)") html))
         (links (map (curry second) links-urls)))
-    (uniques (minus links (list page (format "~a_(disambiguation)" page) "File" "Wikipedia" "Category" "Portal" "Talk" "Main_Page")))))
+    (display ".")
+    (flush-output)
+    (map
+      (λ (x) (string-replace
+                (string-replace x "(" "\\(")
+                ")" "\\)"))
+      (uniques (minus links (list page (format "~a_(disambiguation)" page) "File" "Wikipedia" "Category" "Portal" "Talk" "Help" "Main_Page"))))))

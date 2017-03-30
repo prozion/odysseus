@@ -77,9 +77,14 @@
     (else (hash-delete (make-immutable-hash (hash->list h)) k))))
 
 (define (hash-substitute h1 arg)
+  ;(printf "arg: ~a~n(car arg): ~a~nresulted hash: ~a~n" arg (car arg) (hash-delete h1 (car arg)))
   (cond
     ((null? arg) h1)
-    ((cons? arg) ; STX cons
+    ((cons? arg)
+      (hash-insert
+        (hash-delete h1 (car arg))
+        arg))
+    ((cons-ext? arg)
       (hash-insert
         (hash-delete h1 (car arg))
         arg))
@@ -99,7 +104,7 @@
     (else
       (let ((h1-part-v (hash-ref h1 (car pair) #f)))
         (cond
-          ((not h1-part-v)   (make-hash (cons pair (hash->list h1))))
+          ((not h1-part-v) (make-hash (cons pair (hash->list h1))))
           (else
             (hash-insert
               (hash-delete h1 (car pair))

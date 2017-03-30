@@ -5,12 +5,28 @@
   (require rackunit)
   (require "../regexp.rkt")
 
+  (check-true (re? #rx"d[a-z]*\\d+$"))
+  (check-true (re? (regexp "d[a-z]*\\d+$")))
+  (check-true (re? (pregexp "d[a-z]*\\d+$")))
+
+  (check-true (re? (->re (regexp "abc"))))
+  (check-true (re? (->re "abc")))
+  (check-true (re? (->re 123)))
+
+  (check-true (re-matches? "row" "barrowbee"))
+  (check-true (re-matches? "m[abuws]{2}e" "Tell me, O muse, of that ingenious hero"))
+  (check-true (re-matches? (regexp "m[abuws]{2}e") "Tell me, O muse, of that ingenious hero"))
+  (check-true (re-matches? (pregexp "m[abuws]{2}e") "Tell me, O muse, of that ingenious hero"))
+
   (check-equal? (get-matches "a.*b" "barrowbee") '(("arrowb")))
   (check-equal? (get-matches (regexp "a.*b") "barrowbee") '(("arrowb")))
-  (check-equal? (get-matches (pregexp "a.*b") "barrowbee") '(("arrowb")))    
+  (check-equal? (get-matches (pregexp "a.*b") "barrowbee") '(("arrowb")))
   (check-equal? (get-matches "a(.*)b" "barrowbee") '(("arrowb" "rrow")))
   (check-equal?
     (get-matches "node/(\\S+)/(\\S+)" "node/a1468/index.php node/other/do~")
     '(("node/a1468/index.php" "a1468" "index.php")
       ("node/other/do~" "other" "do~")))
+
+  (check-equal? (re-substitute "some (text)" "\\(" "[") "some [text)")
+  (check-equal? (re-substitute "some (text)" "\\(.*?\\)" "[]") "some []")
 )

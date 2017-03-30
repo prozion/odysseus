@@ -17,6 +17,7 @@
 
   (check-equal? (str "" "hello" " world!" "") "hello world!")
   (check-equal? (str "1" (unless #t "2") "3") "13")
+  (check-equal? (str 123) "123")
 
   (check-equal? (implode '("a" "b" "c" "d") "-") "a-b-c-d")
   (check-equal? (implode '("long" "sail" "across" "the" "sea") " ") "long sail across the sea")
