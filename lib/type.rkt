@@ -1,6 +1,7 @@
 #lang racket
 
 (require "alist.rkt")
+(require "seqs.rkt")
 
 (provide (all-defined-out))
 
@@ -44,8 +45,11 @@
     ((path? x) 'path)
     (else #f)))
 
-(define (->number x)
+; delta is for special case met in sorting newspapers issues:
+; to compare say 160 and 160a, we add small number (0.1) to the latter, so 160a comes after 160
+(define (->number x (delta 0))
   (cond
     ((number? x) x)
-    ((string? x) (string->number x))
+    ((string? x)
+      (+ delta (string->number (implode (filter string->number (explode x))))))
     (else x)))

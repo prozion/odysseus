@@ -18,4 +18,11 @@
       (λ (x) (string-replace
                 (string-replace x "(" "\\(")
                 ")" "\\)"))
-      (uniques (minus links (list page (format "~a_(disambiguation)" page) "File" "Wikipedia" "Category" "Portal" "Talk" "Help" "Main_Page"))))))
+      (uniques
+        (minus
+          links
+          (merge
+            (explode "ABCDEFGHIJKLMNOPQRSTUVWXYZ") ; index or something
+            (list
+              page
+              (format "~a_(disambiguation)" page) "File" "Wikipedia" "Category" "Portal" "Talk" "Help" "Main_Page")))))))

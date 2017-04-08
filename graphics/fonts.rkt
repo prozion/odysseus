@@ -2,12 +2,15 @@
 
 (require "../lib/base.rkt")
 (require "../lib/hash.rkt")
-(require "../reports/styles.rkt")
 
-(provide (all-defined-out))
+(provide text-length text-height h-centrify v-centrify)
+
+(define FONT_SIZE 10)
+(define FONT_FAMILY "Arial")
+(define FONT_STYLE "normal")
 
 ; some info from here: http://webdesign.about.com/od/fonts/a/font-aspect-ratio-table.htm
-(define @font-aspect-ratios
+(define font-aspect-ratios
             (@
               "Arial" (@ "normal" 0.52 "bold" 0.6)
               "Avant Garde" (@ "normal" 0.45)
@@ -32,28 +35,23 @@
             )
 )
 
-(define (@font-aspect-ratio . path)
-  (apply (curry hash-path @font-aspect-ratios) path))
+(define (get-font-aspect-ratio . path)
+  (apply (curry hash-path font-aspect-ratios) path))
 
-(define (text-length t)
-  (let* (
-          [t (if (hash? t) t (hash 'text t))]
-          [text (hash-ref t 'text "")]
-          [font-size (hash-ref t 'font-size (@base-property 'font-size))]
-          [font-family (hash-ref t 'font-family (@base-property 'font-family))]
-          [font-style (hash-ref t 'font-style (@base-property 'font-style))])
+(define (text-length  text
+                      #:font-size (font-size FONT_SIZE)
+                      #:font-family (font-family FONT_FAMILY)
+                      #:font-style (font-style FONT_STYLE))
     (*  font-size
-        (@font-aspect-ratio font-family font-style)
-        (string-length text))))
+        (get-font-aspect-ratio font-family font-style)
+        (string-length text)))
 
-(define (text-height t)
-  (if (hash? t)
-    (hash-path t 'font-size (@base-property 'font-size))
-    (@base-property 'font-size)))
+(define (text-height t #:font-size (font-size FONT_SIZE))
+  font-size)
 
-(define (h-centrify w t)
-  (let ([tl (text-length t)])
+(define (h-centrify w t #:font-family (font-family FONT_FAMILY))
+  (let ([tl (text-length t #:font-family font-family)])
     (/r (- w tl) 2)))
 
-(define (v-centrify h (font-size (@base-property 'font-size)))
+(define (v-centrify h #:font-size (font-size FONT_SIZE))
   (+ (/r h 2) (/r font-size 2)))

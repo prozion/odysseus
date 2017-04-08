@@ -28,7 +28,7 @@
 (define *f (make-rounded-op * exact-floor))
 (define *c (make-rounded-op * exact-ceiling))
 
-(define (true? x) x)
+(define (true? x) (if (equal? #f x) #f #t))
 
 (define (!= a b)
   (not (= a b)))
@@ -73,7 +73,13 @@
 (define notnil? (not-> nil?))
 
 (define znil?
-  (λ (v) (or (nil? v) (= v 0))))
+  (λ (v) (or
+            (nil? v)
+            (and
+              (number? v)
+              (= v 0)))))
+
+(define notznil? (not-> znil?))
 
 ;; filtering
 (define (clean f xs)

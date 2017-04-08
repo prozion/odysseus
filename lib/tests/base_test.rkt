@@ -5,10 +5,11 @@
 ; controls - harrison in Gyngeme cave
 ; hash - harrison in Blinkers country
 ; interval - post near Miners cave
-; math - post in the mountains towards Gyngeme rocks
+; math - harrison in the Cannibal castle
 ; seqs - army camp near emerald city
 ; type - harrison in Chewers country
 ; regexp - circulating unit
+; time - post in the mountains towards Gyngeme rocks and outward regiment
 
 (module+ test
 

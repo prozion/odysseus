@@ -51,7 +51,7 @@
       (height (@. layout.height))
       (data (map ->number data))
       (dx (/r width (length data)))
-      ;(xs (range 0 width dx)) 
+      ;(xs (range 0 width dx))
       (scaled-data (map (λ (x) (- height (*r k x))) data))
       (control-points (get-control-points xs scaled-data))
       )

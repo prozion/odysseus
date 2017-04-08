@@ -33,7 +33,7 @@
   ;      (set! output output-filename)]
   [("-s" "--status")
                   "display the process progress"
-                  (begin (status-output #t))]
+                  (begin (debug-output #t))]
   #:args
     (input output)
     ;(if output-file

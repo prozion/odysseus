@@ -147,6 +147,17 @@
     args
     (for/hash ((k body) (v args)) (values k v))))
 
+(define (hash-filter lambdakv h)
+  (for/fold
+    ((res (hash)))
+    (((k v) h))
+    (if (lambdakv k v)
+      (hash-insert res (cons k v))
+      res)))
+
+(define (hash-clean lambdakv h)
+  (hash-filter (λ (k v) (not (lambdakv k v))) h))
+
 (define (hash-regex-filter reg h)
   (make-hash
     (filter

@@ -5,6 +5,8 @@
   "widgets/heatmap.rkt"
   "widgets/linechart.rkt"
   "widgets/radial-connections.rkt"
+  "widgets/eventline.rkt"
+  "widgets/timeline.rkt"
   "widgets/network.rkt"
   "widgets/network2.rkt")
 (require "../graphics/svg.rkt")
@@ -16,6 +18,8 @@
             "widgets/heatmap.rkt"
             "widgets/linechart.rkt"
             "widgets/radial-connections.rkt"
+            "widgets/eventline.rkt"              
+            "widgets/timeline.rkt"
             "widgets/network.rkt"
             "widgets/network2.rkt")
             (all-defined-out))

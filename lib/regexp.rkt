@@ -15,7 +15,7 @@
     (else (pregexp (str x)))))
 
 (define (re-matches? re astr)
-  (not (null? (regexp-match (->re re) astr))))
+  (true? (regexp-match (->re re) astr)))
 
 (define (get-matches re astr)
   (let ((re (->re re)))

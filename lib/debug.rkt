@@ -4,7 +4,7 @@
 
 (provide (all-defined-out))
 
-(define status-output (make-parameter #f))
+(define debug-output (make-parameter #f))
 
 (define-macro (benchmark . args)
   (let ((f (list-ref args 0))
@@ -27,7 +27,7 @@
   `(when (,status-var) (display ,text) (flush-output)))
 
 (define-macro (_t text)
-  `(show-status status-output ,text))
+  `(show-status debug-output ,text))
 
 (define-macro (__t text)
-  `(show-status-in-let status-output ,text))
+  `(show-status-in-let debug-output ,text))

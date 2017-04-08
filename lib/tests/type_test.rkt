@@ -57,4 +57,9 @@
   (check-equal? (type? #(1 2 3)) 'vector)
   (check-equal? (type? (hash 'a 10 'b 20)) 'hash)
   (check-equal? (type? (current-directory)) 'path)
+
+  (check-equal? (->number 123) 123)
+  (check-equal? (->number 123.789) 123.789)
+  (check-equal? (->number "123a") 123)
+  (check-equal? (->number "a123") 123)  
 )

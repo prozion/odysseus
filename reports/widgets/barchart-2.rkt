@@ -5,7 +5,6 @@
 (require "../../graphics/fonts.rkt")
 (require "../../graphics/layout.rkt")
 (require "../../lib/all.rkt" (for-syntax "../../lib/syntax.rkt" "../../lib/hash.rkt" "../../lib/controls.rkt"))
-(require "../styles.rkt")
 
 (require "../../lib/debug.rkt")
 
@@ -166,7 +165,7 @@
         (g
           (@ 'id "y-axis" 'transform (svg/translate y-axis-x y-axis-y))
           (let* ( (label-x 0)
-                  (label-y (+ (v-centrify y-axis-h) (/r (text-length (@ 'text y-axis-label 'font-size y-axis-font-size)) 2)))
+                  (label-y (+ (v-centrify y-axis-h) (/r (text-length y-axis-label #:font-size y-axis-font-size) 2)))
                   (ang (the y-axis-label-direction 'vertical "-90")))
 
             (str
@@ -186,7 +185,7 @@
                           (tick-w (if (> Y-AXIS_W 60) 15 (* 0.25 Y-AXIS_W)))
                           (tick-offset y-axis-tick-offset)
                           (tick-label-offset (+ (* 2 tick-offset) tick-w))
-                          (tick-label-length (text-length (@ 'text (str tick) 'font-size y-axis-font-size))))
+                          (tick-label-length (text-length (str tick) #:font-size y-axis-font-size)))
                       (if (> tick-y 0)
                         (str s
                           (text (@

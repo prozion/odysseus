@@ -5,6 +5,7 @@
   (require rackunit)
   (require "../checks.rkt")
   (require "../hash.rkt")
+  (require "../regexp.rkt")
 
   (define h (hash 'a (hash 'aa 10 'ab 20) 'b (hash 'ba (hash 'baa 300 'bab 30))))
 
@@ -89,7 +90,7 @@
   (check-true
     (check-hash-equal?
       (hash-insert (hash 'a 10 'b 20) (cons 'c '(30 20)))
-      (hash 'a 10 'b 20 'c '(30 20))))      
+      (hash 'a 10 'b 20 'c '(30 20))))
 
   (check-true
     (check-hash-equal?
@@ -204,4 +205,30 @@
     (check-hash-equal?
       (hash-regex-filter (regexp "a.*a") (hash 'a 10 'b 20 'aba 30 'abba 40 "arda" 50 'cab 60))
       (hash 'aba 30 'abba 40 "arda" 50)))
+
+  (check-true
+    (check-hash-equal?
+      (hash-filter
+        (λ (k v) (re-matches? "^\\d\\d?\\.\\d\\d\\.\\d\\d\\d\\d$" k))
+        (hash
+          "02.1986" "a1"
+          "27.04.1986" "a2"
+          "01.05.1986" "a3"
+          "05.1986" "a4"))
+      (hash
+          "27.04.1986" "a2"
+          "01.05.1986" "a3")))
+
+  (check-true
+    (check-hash-equal?
+      (hash-clean
+        (λ (k v) (re-matches? "^\\d\\d?\\.\\d\\d\\.\\d\\d\\d\\d$" k))
+        (hash
+          "02.1986" "a1"
+          "27.04.1986" "a2"
+          "01.05.1986" "a3"
+          "05.1986" "a4"))
+        (hash
+          "02.1986" "a1"
+          "05.1986" "a4")))
 )

@@ -12,11 +12,13 @@
   (check-true (re? (->re (regexp "abc"))))
   (check-true (re? (->re "abc")))
   (check-true (re? (->re 123)))
+  (check-false (re? 123))
 
   (check-true (re-matches? "row" "barrowbee"))
   (check-true (re-matches? "m[abuws]{2}e" "Tell me, O muse, of that ingenious hero"))
-  (check-true (re-matches? (regexp "m[abuws]{2}e") "Tell me, O muse, of that ingenious hero"))
+  (check-true (re-matches? (regexp "m[abuws][abuws]e") "Tell me, O muse, of that ingenious hero"))
   (check-true (re-matches? (pregexp "m[abuws]{2}e") "Tell me, O muse, of that ingenious hero"))
+  (check-false (re-matches? "row" "doo"))
 
   (check-equal? (get-matches "a.*b" "barrowbee") '(("arrowb")))
   (check-equal? (get-matches (regexp "a.*b") "barrowbee") '(("arrowb")))

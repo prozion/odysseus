@@ -1,0 +1,39 @@
+(require "../../../data/inversia/authors.rkt")
+
+;(define events-order (range 1 (+ 1 28)))
+
+;; monochrome
+    ;#:fill "#333"
+    ;#:zebra-background (list "#ccc")
+    ;#:passive-fill "#fff"
+    ;#:vertical-ruler-color "white"
+
+(.svg
+  (eventline
+    #:data authors
+    #:fill "#0986FF"
+    ;#:zebra-background (list "#d1e8ff" "#dbedff")
+    #:zebra-background (list "#dbedff")
+    #:passive-fill "#ccc"
+    #:rate-lambda
+      (λ (a b)
+        (let* ( (a (map ->number a))
+                (b (map ->number b))
+                (al (length a))
+                (bl (length b)))
+          (if (= al bl)
+                (< (car a) (car b))
+                (> al bl))))
+    ;#:events-order events-order
+    #:top 30
+    #:legend-y-font-size 12
+    #:legend-y-w 170
+    #:legend-x-font-size 10
+    #:legend-x-events '(1 10 20 30 40 50 60 70 80 90 100 110 120 130 140 150 160 170 180)
+    #:vertical-ruler-color "black"
+    #:H 850
+    ;#:H 4000
+    #:W 1595
+    ;#:W 3500
+    #:count-limit 15
+  ))

@@ -4,9 +4,11 @@
 (require json)
 (require "../../lib/all.rkt")
 (require "vk.rkt")
-;(require (file "c:/denis/denis_core/settings/bots.rkt")) 
+;(require (file "c:/denis/denis_core/settings/bots.rkt"))
 
-(provide vk/find-paths vk/id->href vk/ids->hrefs vk/link vk/friends)
+(provide vk/find-paths vk/id->href vk/ids->hrefs vk/link vk/friends vk/username)
+
+(define status-output (make-parameter #t))
 
 (define (find-friends user)
   (when (status-output) (display ".") (flush-output))
@@ -70,14 +72,19 @@
 (define vk/friends find-friends)
 
 ;; user properties
-(define (request-username id)
-  (when (status-output) (display ".") (flush-output))
+(define (request-username id #:glue (glue " "))
+  (when (status-output) (display "+") (flush-output))
   (let ((res (string->jsexpr
                 (get-url (format "https://api.vk.com/method/users.get?user_ids=~a&v=5.52" id)))))
     (if (@. res.error)
       "n/a"
       (let ((u (car (@. res.response))))
-        (format "~a ~a" (@. u.first_name) (@. u.last_name))))))
+        (format "~a~a~a"
+                  (replace-all (@. u.first_name) " " glue)
+                  glue
+                  (replace-all (@. u.last_name) " " glue))))))
+
+(define vk/username request-username)
 
 (define (memoized-request-username)
   (let ((users-hash (hash)))

@@ -18,8 +18,6 @@
 (define X0 (/ PLOT_W 2))
 (define Y0 (/ PLOT_H 2))
 
-
-
 (define (get-reverse-links graph key)
   (for/fold
     ((res (list)))

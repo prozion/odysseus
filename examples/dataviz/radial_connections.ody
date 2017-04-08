@@ -5,7 +5,7 @@
     'Ea '(Ss Sp Ef Qo)
     'Ra '(Qo Sp Ci)
     'Ci '(Ef Ba Aa Qo Sp)
-    'Du '(Po Ci Ae Ea)
+    'Du '(Po Ci Ea)
     'Ae '(Du Sp Ra)
     'Qo '(Ba Ci Ss Po Du)
     'Po '(Ea Ae)
@@ -33,8 +33,25 @@
     'Ge '(Be Dr Ah Am)
     'Pa '(Aa Ef Ea Sp)))
 
+;(define doublets
+;  (@
+;    'a '(b c d e f)
+;    'b '(f k g j)
+;    'c '(d b g)
+;    'd '(b j)
+;    'e '(a g)
+;    'f '(h i d)
+;    'g '(b a f)
+;    'h '(k a i)
+;    'i '(j)
+;    'j '(i e f)
+;    'k '(b d i f)))
+
 (.svg
   (radial-connections
     #:data doublets
-    #:labels 3
+    #:labels 1
+    #:link-opacity 0.3
+    #:dots 2
+    #:link-curveness 0.9
   ))
