@@ -244,9 +244,6 @@
   (check-equal? (nlist-ref '(1 (2 3) (4 5) (6 (7 8 (9))) 10) '(2)) '(4 5))
   (check-equal? (nlist-ref '(1 (2 3) (4 5) (6 (7 8 (9))) 10) '(1 0)) 2)
 
-  (check-equal? (dupstr "a" 5) "aaaaa")
-  (check-equal? (dupstr "foo " 3) "foo foo foo ")
-
   (check-equal? (partition '(1 2 3 4 5 6 7 8 9) 3) '((1 2 3) (4 5 6) (7 8 9)))
   (check-equal? (partition '(1 2 3 4 5 6 7 8 9) 4) '((1 2 3 4) (5 6 7 8)))
   (check-equal? (partition '(1 2 3 4 5) 1) '((1) (2) (3) (4) (5)))

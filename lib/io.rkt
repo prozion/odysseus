@@ -1,8 +1,10 @@
 #lang racket
 
-(provide (all-defined-out))
-
 (require compatibility/defmacro)
+(require "hash.rkt")
+(require "regexp.rkt")
+
+(provide (all-defined-out))
 
 (define debug
   (lambda args (apply string-append
@@ -13,6 +15,11 @@
           ((list? el) (list->string el)) ; list of chars to string
           (else el)))
       args))))
+
+(define (write-data-to-file filename v)
+  (write-to-file v filename #:exists 'replace))
+
+(define var->file write-data-to-file)
 
 (define (write-file filename v)
   (display-to-file v filename #:exists 'replace))
@@ -32,5 +39,7 @@
     v)))
 
 (define (read-data-from-file filepath namespace-anchor)
-  (parameterize ([current-namespace (namespace-anchor->namespace namespace-anchor)])
-    (load filepath)))
+  (if (file-exists? filepath)
+    (parameterize ([current-namespace (namespace-anchor->namespace namespace-anchor)])
+      (load filepath))
+    #f))

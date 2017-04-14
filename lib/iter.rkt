@@ -7,7 +7,7 @@
     [(_ (s start-value) (i sequence) body)
       (datum->syntax stx
         `(for/fold
-          ([s ,#'start-value])
+          ([,#'s ,#'start-value])
           ([,#'i ,#'sequence] [$idx (range (length ,#'sequence))])
           ,#'body))
     ]))

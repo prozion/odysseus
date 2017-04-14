@@ -25,7 +25,7 @@
                                     ((hash-ref acc x #f) (hash-ref acc x))
                                     (else
                                       (let ((res (post-lambda x)))
-                                        (set! acc (hash-insert acc (cons x res)))
+                                        (set! acc (hash-insert-fuse acc (cons x res)))
                                         res))))
                           #f))
         (result (for/fold
@@ -37,7 +37,7 @@
           (for/fold
             ((r result))
             (((k v) result))
-            (hash-insert
+            (hash-insert-fuse
               (hash-delete r k)
                 (cons (post-lambda2 k) (map post-lambda2 v))))
           result)))

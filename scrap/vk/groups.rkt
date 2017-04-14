@@ -5,7 +5,7 @@
 (require compatibility/defmacro)
 (require "../../lib/all.rkt")
 (require "vk.rkt")
-;(require (file "c:/denis/denis_core/settings/bots.rkt"))
+;(require (file "c:/denis/denis_core/settings/APIs.rkt"))
 
 (provide (all-defined-out))
 

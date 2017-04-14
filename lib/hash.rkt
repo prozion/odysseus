@@ -19,8 +19,21 @@
     ;; remove all pairs with nil-type values:
     (clean (λ (x) (nil? (cdr x))) (hash->list (apply @ body)))))
 
-(define (map/hash f h)
-  (for/hash (((k v) (in-hash h))) (values k (f v))))
+(define (hash->alist h)
+  (map
+    (λ (x) (list (car x) (cdr x)))
+    (hash->list h)))
+
+(define (hash-map f h)
+  (for/hash (((k v) (in-hash h))) (f k v)))
+
+(define (deep-hash-map f h)
+  (for/hash (((k v) (in-hash h)))
+    (if (hash? v)
+      (values k (deep-hash-map f v))
+      (f k v))))
+
+(define map-hash hash-map)
 
 (define (hash-length h)
   (length (hash-keys h)))
@@ -94,10 +107,18 @@
         (hash-substitute (hash-substitute h1 (car arg)) (cdr arg))))
     (else h1)))
 
-(define (hash-insert-hard h1 pair)
-  (make-hash (cons pair (hash->list h1))))
-
 (define (hash-insert h1 pair)
+  (cond
+    ((not (pair? pair)) h1)
+    ((not (hash? h1)) (make-hash (list pair)))
+    ((hash-ref h1 (car pair) #f) h1)
+    (else
+      (hash-set h1 (car pair) (cdr pair)))))
+
+; use hash-set for hash-insert-force
+; ...
+
+(define (hash-insert-fuse h1 pair)
   (cond
     ((not (pair? pair)) h1)
     ((not (hash? h1))  (hash (car pair) (cdr pair)))
@@ -139,7 +160,7 @@
         (for/fold
           ((a h1))
           (([k v] (in-hash h2)))
-          (hash-insert a (cons k v)))))
+          (hash-insert-fuse a (cons k v)))))
     (else (hash-union (car hs) (apply hash-union (cdr hs))))))
 
 (define (hasher-by-names . body)
@@ -172,3 +193,9 @@
                 (regexp-match reg key)
                 #f)))
       (hash->list h))))
+
+(define (hash->ordered-list h keys-order)
+  (for/list
+    (((k v) (in-hash h))
+    (i keys-order))
+    (hash-ref h i #f)))

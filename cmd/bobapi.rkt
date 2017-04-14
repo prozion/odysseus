@@ -8,7 +8,7 @@
 (require "../reports/csv.rkt")
 (require "../scrap/bobapi.rkt")
 
-(require "../../settings/bots.rkt")
+(require "../../settings/APIs.rkt")
 
 (provide (all-defined-out))
 

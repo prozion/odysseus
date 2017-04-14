@@ -30,4 +30,10 @@
           (car match-position))))))
 
 (define (re-substitute astr re repstr)
-  (string-replace astr (->re re) repstr))
+  (cond
+    ((and (list? re) (list? repstr))
+      (if (or (null? (cdr re)) (null? (cdr repstr)))
+        (re-substitute astr (car re) (car repstr))
+        (re-substitute (re-substitute astr (car re) (car repstr)) (cdr re) (cdr repstr))))
+    (else
+      (string-replace astr (->re re) repstr))))

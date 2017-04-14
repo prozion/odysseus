@@ -14,4 +14,5 @@
 ; total lisp lines: 2115
 ; total over all projects: 6946
 
-; total with tests Odysseus: 4627
+; total with tests Odysseus: 4627, 5167
+; total without .ody 4776

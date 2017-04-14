@@ -7,9 +7,11 @@
 ; interval - post near Miners cave
 ; math - harrison in the Cannibal castle
 ; seqs - army camp near emerald city
+; strings - post near Marrans country
 ; type - harrison in Chewers country
 ; regexp - circulating unit
 ; time - post in the mountains towards Gyngeme rocks and outward regiment
+; optimize - post near Magic Forest
 
 (module+ test
 

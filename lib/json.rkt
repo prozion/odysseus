@@ -1,8 +1,10 @@
 #lang racket
 
+(require "base.rkt")
 (require "seqs.rkt")
 (require "alist.rkt")
 (require "hash.rkt")
+(require "regexp.rkt")
 
 (require json)
 
@@ -29,5 +31,21 @@
     (if first-time "}" "")))
 
 (define (json->alist jsonstr)
-  (hash->list
-    (string->jsexpr jsonstr)))
+  (cond
+    ((nil? jsonstr) (list empty))
+    (else
+      (hash->list
+        (string->jsexpr jsonstr)))))
+
+(define (json->hash jsonstr)
+  (cond
+    ((nil? jsonstr) (hash))
+    (else
+        (string->jsexpr jsonstr))))
+
+(define (hash->json h (q #f))
+  (alist->json
+    (hash->alist
+      (hash-map
+        (λ (k v) (values k (if q (str q v q) v)))
+        h))))

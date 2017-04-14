@@ -4,9 +4,9 @@
 (require json)
 (require "../../lib/all.rkt")
 (require "vk.rkt")
-;(require (file "c:/denis/denis_core/settings/bots.rkt"))
+;(require (file "c:/denis/denis_core/settings/APIs.rkt"))
 
-(provide vk/find-paths vk/id->href vk/ids->hrefs vk/link vk/friends vk/username)
+(provide vk/find-paths vk/id->href vk/ids->hrefs vk/link vk/friends vk/username vk/user-properties)
 
 (define status-output (make-parameter #t))
 
@@ -16,7 +16,7 @@
                     (get-url (format "https://api.vk.com/method/friends.get?user_id=~a&v=5.52" user)))))
     (if (@. res.error)
       null
-      (let ((items (map str (@. res.response.items))))
+      (let ((items (@. res.response.items)))
         (if (and (friends-limit) (> (length items) (friends-limit)))
           (take items (friends-limit))
           items)))))
@@ -72,7 +72,7 @@
 (define vk/friends find-friends)
 
 ;; user properties
-(define (request-username id #:glue (glue " "))
+(define (request-username id (glue " "))
   (when (status-output) (display "+") (flush-output))
   (let ((res (string->jsexpr
                 (get-url (format "https://api.vk.com/method/users.get?user_ids=~a&v=5.52" id)))))
@@ -86,21 +86,13 @@
 
 (define vk/username request-username)
 
-(define (memoized-request-username)
-  (let ((users-hash (hash)))
-    (λ (user)
-      (let* ((hashed (hash-ref users-hash user #f))
-            (res (or hashed (request-username user))))
-        (set! users-hash (hash-insert users-hash (cons user res)))
-        res))))
-
 ;; output
 (define (vk/id->href id)
   (format "<a href=\"~a\" target=\"_blank\">~a</a>" (vk/link id) (request-username id)))
 
 (define (vk/ids->hrefs paths)
   (when (status-output) (display "\nrequesting names"))
-  (let ((m-request-username (memoized-request-username))) ; function with static hash through closure
+  (let ((m-request-username (memoize request-username))) ; function with static hash through closure
     (map
       (λ (x) (map
                 (λ (id) (format "<a href=\"~a\" target=\"_blank\">~a</a>" (vk/link id) (m-request-username id)))
@@ -109,3 +101,13 @@
 
 (define (vk/link id)
   (format "https://vk.com/id~a" id))
+
+(define memo-get-url (memoize get-url))
+
+(define (vk/user-properties id)
+  (let* ((fields "first_name,last_name,domain,sex,bdate,city,home_town,country,contacts")
+        (res (json->hash (memo-get-url (format "https://api.vk.com/method/users.get?user_ids=~a&fields=~a&v=5.52" id fields)))))
+    (when (status-output) (display "+") (flush-output))
+    (if (@. res.error)
+      (hash 'id id 'error #t 'status "user info scrap error")
+      (car (@. res.response)))))

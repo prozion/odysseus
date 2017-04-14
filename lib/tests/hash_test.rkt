@@ -5,6 +5,7 @@
   (require rackunit)
   (require "../checks.rkt")
   (require "../hash.rkt")
+  (require "../alist.rkt")
   (require "../regexp.rkt")
 
   (define h (hash 'a (hash 'aa 10 'ab 20) 'b (hash 'ba (hash 'baa 300 'bab 30))))
@@ -32,6 +33,8 @@
   (check-equal? (hash-pair (hash 'a 10 'b 20) 'a) (cons 'a 10))
   (check-equal? (hash-pair (hash (hash 'u 3 'w 30) 100 'b 20) (hash 'u 3 'w 30)) (cons (hash 'u 3 'w 30) 100))
 
+  (check-true (alist? (hash->alist (hash 'a 1 'b 2))))
+
   (check-equal? (@. h.a.aa) 10)
   (check-equal? (@. h.c) #f)
   (check-true
@@ -43,6 +46,22 @@
     (check-hash-equal?
       (@clean 'a 1 'b 2 'c "")
       (hash 'a 1 'b 2)))
+
+; hash-map
+  (check-true
+    (check-hash-equal?
+      (hash-map
+        (λ (k v) (values k (* v 2)))
+        (hash 'a 80 'b 70))
+      (hash 'a 160 'b 140)))
+
+; deep-hash-map
+  (check-true
+    (check-hash-equal?
+      (deep-hash-map
+        (λ (k v) (values k (* v 2)))
+        (hash 'a (hash 'aa 10 'aaa 100) 'b 70))
+      (hash 'a (hash 'aa 20 'aaa 200) 'b 140)))
 
 ; hash-substitute
   (check-true
@@ -59,17 +78,6 @@
     (check-hash-equal?
       (hash-substitute (hash 'a 80 'b 70) (list (cons 'b 130) (cons 'a 10) (cons 'c 2)))
       (hash 'a 10 'b 130 'c 2)))
-
-; hash-insert-hard
-  (check-true
-    (check-hash-equal?
-      (hash-insert-hard (hash 'a 40 'b 14) (cons 'b 55))
-      (hash 'a 40 'b 14)))
-
-  (check-true
-    (check-hash-equal?
-      (hash-insert-hard (hash 'a 10 'b 20) (cons 'c 50))
-      (hash 'a 10 'b 20 'c 50)))
 
 ; hash-insert
   (check-true
@@ -89,12 +97,63 @@
 
   (check-true
     (check-hash-equal?
+      (hash-insert (hash 'a 10 'b 20) (cons 'b 100))
+      (hash 'a 10 'b 20)))
+
+  (check-true
+    (check-hash-equal?
       (hash-insert (hash 'a 10 'b 20) (cons 'c '(30 20)))
       (hash 'a 10 'b 20 'c '(30 20))))
 
   (check-true
     (check-hash-equal?
-      (hash-insert (hash 'a 10 'b 20 'c 40) (cons 'c 70))
+      (hash-insert (hash 'a 10 'b 20 'c '(5 10)) (cons 'c '(30 20)))
+      (hash 'a 10 'b 20 'c '(5 10))))
+
+  (check-true
+    (check-hash-equal?
+      (hash-insert (hash 'a 10 'b 20 'c (hash 'ca 5 'cb 10)) (cons 'c (hash 'cc 30 'cd 20)))
+      (hash 'a 10 'b 20 'c (hash 'ca 5 'cb 10))))
+
+; hash-insert-fuse
+  (check-true
+    (check-hash-equal?
+      (hash-insert-fuse (hash 'a 10 'b 20) null)
+      (hash 'a 10 'b 20)))
+
+  (check-true
+    (check-hash-equal?
+      (hash-insert-fuse null (cons 'c 30))
+      (hash 'c 30)))
+
+  (check-true
+    (check-hash-equal?
+      (hash-insert-fuse (hash 'a 10 'b 20) (cons 'c 30))
+      (hash 'a 10 'b 20 'c 30)))
+
+  (check-true
+    (check-hash-equal?
+      (hash-insert-fuse (hash 'a 10 'b 20) (cons 'c '(30 20)))
+      (hash 'a 10 'b 20 'c '(30 20))))
+
+  (check-true
+    (check-hash-equal?
+      (hash-insert-fuse (hash 'a 10 'b 20 'c '(5 10)) (cons 'c '(30 20)))
+      (hash 'a 10 'b 20 'c '(5 10 30 20))))
+
+  (check-true
+    (check-hash-equal?
+      (hash-insert-fuse (hash 'a 10 'b 20 'c (hash 'ca 5 'cb 10)) (cons 'c (hash 'cc 30 'cd 20)))
+      (hash 'a 10 'b 20 'c (hash 'ca 5 'cb 10 'cc 30 'cd 20))))
+
+  (check-true
+    (check-hash-equal?
+      (hash-insert-fuse (hash 'a 10 'b 20 'c (hash 'ca 5 'cb 10)) (cons 'c (hash 'ca 30 'cd 20)))
+      (hash 'a 10 'b 20 'c (hash 'ca 5 'cb 10 'cd 20))))
+
+  (check-true
+    (check-hash-equal?
+      (hash-insert-fuse (hash 'a 10 'b 20 'c 40) (cons 'c 70))
       (hash 'a 10 'b 20 'c 40)))
 
 ; hash-delete
@@ -231,4 +290,12 @@
         (hash
           "02.1986" "a1"
           "05.1986" "a4")))
+
+(check-equal?
+  (hash->ordered-list (hash 'b 20 'a 10 'c 30) '(a c b))
+  '(10 30 20))
+
+(check-equal?
+  (hash->ordered-list (hash 'b 20 "a" 10 8 17 'c 30) '("a" b c 8))
+  '(10 20 30 17))          
 )

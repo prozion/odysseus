@@ -30,11 +30,6 @@
         (else (cons ,f (gen-r (- count 1))))))
     (gen-r n)))
 
-; (define (foo n) (nlet foo-iter (x y) (cond ... (else (foo-iter (add1 x) (sub1 y))))) (foo-iter 0 n))
-;(define-macro (nlet n letargs . body)
-;  `(define (,n ,@letargs)
-;      ,@body))
-
 ; (the y-axis-pos 'left y-axis-left) -> (if (equal? y-axis-pos 'left) y-axis-left 0)
 (define-syntax (the stx)
   (syntax-case stx ()
@@ -68,3 +63,15 @@
 
 (define-macro ($ name . args)
   `(define ,name (list ,@args)))
+
+; <name> will consume both inline arguments and arguments as list
+; def -> (name arguments)
+(define-macro (define-poly def . body)
+  (let ((name (car def))
+        (arguments-list-name (cadr def)))
+  `(define (,name . args)
+    (let ((lambda-args (λ ,arguments-list-name ,@body)))
+      (cond
+        ((null? args) (lambda-args))
+        ((list? (car args)) (apply lambda-args (car args)))
+        (else (apply lambda-args args)))))))

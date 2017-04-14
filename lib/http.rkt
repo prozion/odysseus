@@ -1,13 +1,44 @@
 #lang racket
 
 (require net/url)
-;(require net/http-client)
+(require net/base64)
+(require "regexp.rkt")
+(require "seqs.rkt")
 
 (provide (all-defined-out))
 
-(define (get-url url)
+(define percent-encoding-table
+      '(("\\!"  "#"	  "\\$"	"&"	  "'"	  "\\("	"\\)"	"\\*"	"\\+"	","	  "/"	  ":"	  ";"	  "="	  "\\?"	"@"	  "\\["	"\\]" "%")
+        ("%21"	"%23"	"%24"	"%26"	"%27"	"%28"	"%29"	"%2A"	"%2B"	"%2C"	"%2F"	"%3A"	"%3B"	"%3D"	"%3F"	"%40"	"%5B"	"%5D" "%25")))
+
+(define (url-encode astr)
+  (re-substitute
+    astr
+    (first percent-encoding-table)
+    (second percent-encoding-table)))
+
+(define (url-encode/bytes astr)
+  (string->bytes/utf-8 (url-encode astr)))
+
+(define (url-decode astr)
+  (re-substitute
+    astr
+    (second percent-encoding-table)
+    (map
+      (λ (x) (exclude-all x "\\"))
+      (first percent-encoding-table))))
+
+(define (string->base64 astr)
+  (string->bytes/utf-8
+    (rtrim
+      (bytes->string/utf-8 (base64-encode (string->bytes/utf-8 astr)))
+      3)))
+
+;;;;
+
+(define (get-url url (header null))
   (port->string
-    (get-pure-port (string->url url))))
+    (get-pure-port (string->url url) header)))
 
 (define (get-url-bytes url)
   (port->bytes
@@ -15,11 +46,6 @@
 
 ; http/1.1 spec: https://tools.ietf.org/html/rfc2616
 (define (post-url url headers body)
-  (port->bytes
-    (post-pure-port (string->url url) headers)))  
-
-;(define (post-url url post-data (user-data #f))
-;  (let* ( (post #"") ; home=Cosby&favorite+flavor=flies
-;          (header (list "" ""))) ; Content-Type: application/json" Authorization: Basic c2lsaWNvbjpGNjIxRjQ3MC05NzMxLTRBMjUtODBFRi02N0E2RjdDNUY0Qjg=
-;    (port->string
-;      (post-pure-port (string->url url) post header))))
+  (let ((body (if (bytes? body) body (string->bytes/utf-8 body))))
+    (port->bytes
+      (post-pure-port (string->url url) body headers))))

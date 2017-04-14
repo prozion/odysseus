@@ -395,13 +395,6 @@
     ((= (length indexes) 1) (list-ref lst (car indexes)))
     (else (nlist-ref (list-ref lst (car indexes)) (cdr indexes)))))
 
-;; generation
-(define (dupstr txt n)
-  (implode
-    (map
-      (λ (x) txt)
-      (range 0 n))))
-
 (define (partition seq n)
   (define (partition-iter seq res)
     (cond
@@ -429,18 +422,18 @@
             (lshift seq n))))))
   (partition-iter seq empty))
 
-(define (flatten lnlst)
-  (cond
-    (((not-> list?) lnlst) lnlst)
-    ((null? lnlst) lnlst)
-    (else
-      (foldl
-        (λ (a b) (merge b
-                        (if (list? a)
-                          (flatten a)
-                          (list a))))
-        '()
-        lnlst))))
+;(define (flatten lnlst)
+;  (cond
+;    (((not-> list?) lnlst) lnlst)
+;    ((null? lnlst) lnlst)
+;    (else
+;      (foldl
+;        (λ (a b) (merge b
+;                        (if (list? a)
+;                          (flatten a)
+;                          (list a))))
+;        '()
+;        lnlst))))
 
 (define (transpose llst)
   (cond

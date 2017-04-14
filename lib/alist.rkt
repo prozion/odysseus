@@ -2,6 +2,7 @@
 
 (require (prefix-in base: "base.rkt"))
 (require "seqs.rkt")
+(require "strings.rkt")
 (require "debug.rkt")
 (require compatibility/defmacro)
 (require (for-syntax racket/list))
