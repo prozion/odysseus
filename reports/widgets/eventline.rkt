@@ -62,7 +62,7 @@
                     res)))
           (items (if rate-lambda
                       (sort (hash-keys data) (make-rate-lambda rate-lambda data))
-                      (hash-keys data))) ;; STX sort
+                      (hash-keys data))) 
           (items (if top (lshift items top) items))
           (items-number (length items))
           (legend-x-h 20)

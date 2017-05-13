@@ -34,6 +34,15 @@
   (check-equal? (hash-pair (hash (hash 'u 3 'w 30) 100 'b 20) (hash 'u 3 'w 30)) (cons (hash 'u 3 'w 30) 100))
 
   (check-true (alist? (hash->alist (hash 'a 1 'b 2))))
+  (check-equal? (hash->alist (hash 'a 1 'b 2)) '((a 1) (b 2)))
+
+  (check-equal? (hash-print (hash 'a 1 'b 2)) "a=1, b=2")
+  (check-equal? (hash-print (hash 'a 1 'b 2 'c 10) #:delimeter " AND ") "a=1 AND c=10 AND b=2")
+  (check-equal? (hash-print (hash 'a 1 'b 2) #:delimeter " AND " #:prefix "n.") "n.a=1 AND n.b=2")
+  (check-equal? (hash-print (hash 'a 1 'b 2) #:delimeter ", " #:prefix "n." #:equal-sign ": " ) "n.a: 1, n.b: 2")
+  (check-equal? (hash-print (hash 'a 1 'b "Polyphem") #:delimeter ", " #:prefix "n." #:equal-sign ": " ) "n.a: 1, n.b: 'Polyphem'")
+
+  (check-equal? (hash-print-json (hash 'a 1 'b 2)) "{a: 1, b: 2}")
 
   (check-equal? (@. h.a.aa) 10)
   (check-equal? (@. h.c) #f)
@@ -161,6 +170,11 @@
     (check-hash-equal?
       (hash-delete (hash 'a 10 'b 20 'c 40) 'c)
       (hash 'a 10 'b 20)))
+
+  (check-true
+    (check-hash-equal?
+      (hash-delete (hash 'a 10 'b 20 'c 40) 'd)
+      (hash 'a 10 'b 20 'c 40)))
 
   (check-true
     (check-hash-equal?
@@ -297,5 +311,11 @@
 
 (check-equal?
   (hash->ordered-list (hash 'b 20 "a" 10 8 17 'c 30) '("a" b c 8))
-  '(10 20 30 17))          
+  '(10 20 30 17))
+
+(check-equal? (hash-length (hash 'a 10 'b '(1 2 3) 3 7)) 3)
+
+(check-equal?
+  (hash-length (hash-take (hash 'a 1 'b 2 'c 3 'd 4 'e 5) 2))
+  2)
 )

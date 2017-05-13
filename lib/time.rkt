@@ -65,6 +65,7 @@
 (define (date->days d)
   (let*
       ((date-lst (split d "."))
+      ;(day (->number (first (split (first date-lst) "-")))) ; take first day in the days interval
       (day (->number (first date-lst)))
       (month (->number (second date-lst)))
       (year (->number (third date-lst)))

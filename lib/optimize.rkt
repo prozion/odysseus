@@ -1,6 +1,7 @@
 #lang racket
 
 (require compatibility/defmacro)
+(require "base.rkt")
 (require "seqs.rkt")
 (require "hash.rkt")
 
@@ -25,3 +26,22 @@
 (define (opt/uniques/unordered lst)
   (hash-keys
     (make-hash (map (λ (x) (cons x #t)) lst))))
+
+(define (opt/implode lst (sep ""))
+  (let* ((lst-length (length lst))
+        (res-lst
+          (for/fold
+            ((s null))
+            (
+              (i (reverse lst))
+              (c (in-range lst-length)))
+            (cond
+              ((= c (dec lst-length))
+                (if (not (null? i))
+                  (cons (format "~a" i) s)
+                  s))
+              ((null? i) (cons sep s))
+              (else
+                (cons sep (cons (format "~a" i) s)))
+                ))))
+    (apply string-append res-lst)))

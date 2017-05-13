@@ -16,8 +16,8 @@
 ;    ((hash? seq) template)
 ;    (else (format (re-substitute template '("~(l|h)") '("~a")) seq))))
 
-(define (str/escape astr)
-  (let ((replace-syms '("\\" "\"")))
+(define (str/escape astr (escapees empty))
+  (let ((replace-syms (merge (list "\\" "\"") escapees)))
     (for/fold
       ((res astr))
       ((sym replace-syms))

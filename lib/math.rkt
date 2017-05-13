@@ -82,3 +82,15 @@
           (pushr x0 (op (last x0) x)))
         (list (car lst))
         (cdr lst)))))
+
+; sum up sequence
+; (sum-seq (lambda (n) (/ 1.0 (* n n n))) 1e7) -> Apery's constant
+(define (sum-seq f k (s 0))
+  (cond
+    ((= k 0) s)
+    (else (sum-seq f (dec k) (+ s (f k))))))
+
+(define (reqsum f k (s 0))
+  (cond
+    ((= 0 k) s)
+    (else (reqsum f (dec k) (+ s (f s))))))

@@ -24,6 +24,22 @@
     (λ (x) (list (car x) (cdr x)))
     (hash->list h)))
 
+(define (hash-print h #:delimeter (delimeter ", ") #:prefix (prefix "") #:equal-sign (equal-sign "="))
+  (let ((hl (hash-length h)))
+    (for/fold
+      ((s ""))
+      (((k v) (in-hash h)) (i hl))
+      (let ((vp (cond
+                  ((string? v) (str "'" v "'"))
+                  (else v))))
+      (if (< i (dec hl))
+        (str s prefix k equal-sign vp delimeter)
+        (str s prefix k equal-sign vp))))))
+
+(define (hash-print-json h #:prefix (prefix ""))
+  (format "{~a}"
+          (hash-print h #:delimeter ", " #:prefix prefix #:equal-sign ": ")))
+
 (define (hash-map f h)
   (for/hash (((k v) (in-hash h))) (f k v)))
 
@@ -199,3 +215,13 @@
     (((k v) (in-hash h))
     (i keys-order))
     (hash-ref h i #f)))
+
+(define (hash-take h n)
+  (let ((hl (hash-length h)))
+    (cond
+      ((>= n hl) h)
+      (else (for/hash
+              ( ((k v) (in-hash h))
+                (i (in-range hl))
+                #:break (= i n))
+              (values k v))))))

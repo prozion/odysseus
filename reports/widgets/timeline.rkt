@@ -75,6 +75,7 @@
                 (dates (sort
                           (hash-keys track-events) d<))
                 (y (* (+ track-h gap) $idx)))
+            (printf "[widgets/timeline.rkt] dates number: ~a~n" (length dates))
             (str
               s
               (g (@ 'transform (svg/translate y-axis-w 0))
