@@ -94,3 +94,9 @@
   (cond
     ((= 0 k) s)
     (else (reqsum f (dec k) (+ s (f s))))))
+
+(define (lg a x)
+  (/ (log x) (log a)))
+
+(define (sec x)
+  (/ 1 (cos x)))

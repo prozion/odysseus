@@ -115,6 +115,17 @@
             (+ intsum h_fractsum m)))
         100)))
 
+; minutes and seconds to decimals
+(define (ms->decimals m s)
+  (+ (/ m 60.0) (/ s 3600)))
+
+(define (decimals->ms x)
+  (let* ((i (int x))
+        (f (fract x))
+        (m (*f 60 f))
+        (s (*f 3600 (- f (/ m 60)))))
+    (list i m s)))        
+
 ; 2017-01-19T18:00:00 -> (hash 'year "2017" 'month "01" 'day "19" 'hour "18" 'min "00" 'sec "00")
 (define (parse-time timestr)
   (let* ((ts (split timestr "T"))

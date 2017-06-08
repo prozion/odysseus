@@ -125,7 +125,7 @@
   (let*
       ((data (if
                 datafile
-                (csv-file->list datafile #:headers headers)
+                (csv-file->list-columns datafile #:headers headers)
                 data))
       (headers (remove (first data) index-seq))
       (xs (map ->number (second data)))

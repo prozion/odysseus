@@ -2,6 +2,7 @@
 
 (require "base.rkt")
 (require "type.rkt")
+(require "math.rkt")
 
 (require "debug.rkt")
 

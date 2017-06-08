@@ -225,3 +225,8 @@
                 (i (in-range hl))
                 #:break (= i n))
               (values k v))))))
+
+; '((foo 1 2 3 4) (bar 10 20 30)) -> #(foo:#(a:1 b:2 c:3) bar:#(a:10 b:20 c:30))
+(define (list->hash lst header (key-index 1))
+  (let ((header (remove header key-index)))
+    (for/hash ((i lst)) (values (nth i key-index) (apply hash (interleave header (remove i key-index)))))))

@@ -4,17 +4,26 @@
 
 (provide (all-defined-out))
 
-(define (csv-file->list filename #:delimeter (delimeter ",") #:headers (headers #t))
-  (let
-      ((first-break-list
-        (map
-          (λ (x) (split x delimeter))
-          (split (read-file filename) "\n"))))
+(define (csv-file->list-rows filename #:delimeter (delimeter ","))
+  (map
+    (λ (x) (split x delimeter))
+    (split (read-file filename) "\n")))
+
+(define (csv-file->list-columns filename #:delimeter (delimeter ",") #:headers (headers #t))
+  (let ((first-break-list (csv-file->list-rows filename #:delimeter delimeter)))
     (if headers
       (merge  (list (first first-break-list))
               (transpose (rest first-break-list)))
-      (push  empty
+      (push   empty
               (transpose first-break-list)))))
+
+(define (csv-file->hash filename #:delimeter (delimeter ",") #:headers (headers #t) #:key-index (key-index 1))
+  (let* ((content (csv-file->list-rows filename #:delimeter delimeter))
+        (h (if (not headers)
+              (range 1 (inc (length (first content))))
+              (first content)))
+        (content (if (not headers) content (rest content))))
+    (list->hash content h key-index)))
 
 (define (list->csv-file filename lst #:delimeter (delimeter ",") #:headers (headers #t) #:quoted (quoted #t))
   (let* ((content
@@ -44,3 +53,6 @@
       llst
       #:headers headers
       #:delimeter delimeter)))
+
+(define (join-csv csv-file-1 csv-file-2 result-csv-file)
+  #t)

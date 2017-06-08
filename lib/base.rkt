@@ -11,6 +11,9 @@
 (define (int a)
   (inexact->exact (floor a)))
 
+(define (fract a)
+  (- a (int a)))
+
 (define dec sub1)
 (define inc add1)
 
@@ -38,9 +41,6 @@
 
 (define (rand n)
   (add1 (random n)))
-
-(define (lg x a)
-  (/ (log x) (log a)))
 
 (define nil?
   (λ (v) (or

@@ -24,6 +24,9 @@
   (check-equal? (int 23.0) 23)
   (check-equal? (int 23.9) 23)
 
+  (check-= (fract 23.0) 0 1e-9)
+  (check-= (fract 23.9) 0.9 1e-9)
+
   (check-equal? (dec 5) 4)
 
   (check-equal? (inc 5) 6)
