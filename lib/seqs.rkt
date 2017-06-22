@@ -300,7 +300,7 @@
     (remove seq (indexof seq el))))
 
 (define (exclude-all seq el)
-  (let ((index (indexof seq el)))
+  (let ((index (indexof seq el)))   
     (cond
       ((> index 0) (exclude-all (exclude seq el) el))
       (else seq))))

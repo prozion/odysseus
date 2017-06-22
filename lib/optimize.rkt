@@ -45,3 +45,9 @@
                 (cons sep (cons (format "~a" i) s)))
                 ))))
     (apply string-append res-lst)))
+
+(define (opt/exclude-all seq el)
+  (cond
+    ((string? seq)
+      (string-replace seq el ""))
+    (else (exclude-all seq el))))

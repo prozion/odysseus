@@ -5,6 +5,17 @@
 
 (provide (all-defined-out))
 
+(define (write-html-file filename title body #:lead (lead ""))
+  (let* ( (html-format (read-file (string-append (getenv "odysseus") "/templates/advanced.fhtml")))
+          (body (cond
+                  ((string? body) body)
+                  ((list2? body) (div-iter body ""))
+                  ((list? body) (format "<ul>~a</ul>" (li-iter body "")))
+                  (else "unknown format")))
+          (res (format html-format title title lead body)))
+  (display "\nready!")
+  (write-file filename res)))
+
 (define (div-iter body res)
   (cond
     ((empty? body) res)
@@ -22,17 +33,6 @@
   (cond
     ((empty? body) res)
     (else (li-iter (cdr body) (format "~a~n<li>~a</li>~n" res (str (car body)))))))
-
-(define (write-html-file filename title body #:lead (lead ""))
-  (let* ( (html-format (read-file (string-append (getenv "odysseus") "/templates/advanced.fhtml")))
-          (body (cond
-                  ((string? body) body)
-                  ((list2? body) (div-iter body ""))
-                  ((list? body) (format "<ul>~a</ul>" (li-iter body "")))
-                  (else "unknown format")))
-          (res (format html-format title title lead body)))
-  (display "\nready!")
-  (write-file filename res)))
 
 
   (define (html-color s color)

@@ -318,4 +318,24 @@
 (check-equal?
   (hash-length (hash-take (hash 'a 1 'b 2 'c 3 'd 4 'e 5) 2))
   2)
+
+(check-true
+  (check-hash-equal?
+    (hash-group-by
+      (hash
+        1 (hash 'place "Оленёк" 'project "edu" 'budget 1000)
+        2 (hash 'place "Якутск" 'project "tran" 'budget 3000)
+        3 (hash 'place "Оленёк" 'project "tran" 'budget 2500)
+        4 (hash 'place "Якутск" 'project "soc" 'budget 100)
+        5 (hash 'place "Якутск" 'project "soc" 'budget 800))
+      'place)
+    (hash
+      "Оленёк" (hash
+                  1 (hash 'place "Оленёк" 'project "edu" 'budget 1000)
+                  3 (hash 'place "Оленёк" 'project "tran" 'budget 2500))
+      "Якутск" (hash
+                  2 (hash 'place "Якутск" 'project "tran" 'budget 3000)
+                  4 (hash 'place "Якутск" 'project "soc" 'budget 100)
+                  5 (hash 'place "Якутск" 'project "soc" 'budget 800)))))
+
 )

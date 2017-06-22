@@ -129,3 +129,7 @@
 (make-single-tag path)
 (make-tag g)
 (make-tag text)
+
+(make-single-tag image)
+;(define (image file #:x (x 0) #:y (y 0) #:width (width 100) #:height (height 100))
+;  (image-tag 'x x 'y y 'width width 'height height 'xlink:href file))

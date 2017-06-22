@@ -2,11 +2,13 @@
 
 (require net/url)
 (require "../lib/all.rkt")
+(require "../scrap/csv.rkt")
 ;(require "../lib/seqs.rkt" "../lib/http.rkt" "../lib/hash.rkt")
 (require json)
 
 (provide (all-defined-out))
 
+; Способ устарел, сейчас можно публиковать как csv в Publish to the web (13.06.2017)
 ; необходимо открыть гугл таблицу через File > Publish to the web..., иначе будет выдавать 403 Forbidden - ошибку доступа
 ; узнать worksheet id можно из этого xml: https://spreadsheets.google.com/feeds/worksheets/spreadsheet_id/private/full
 ; в поиск вбить "full/" и посмотреть все id после выделенных фрагментов, выбрать тот id, который ближе к <title>название_листа</title>
@@ -29,6 +31,14 @@
   (hash-path (nth json-list row)
     (string->symbol (str "gsx$" column-name))
     (string->symbol "$t")))
+
+(define (google-spreadsheet/get-csv csv-url #:delimeter (delimeter ","))
+  (let ((content (get-url csv-url)))
+    (csv->hash content)))
+
+(define (google-spreadsheet/get-tsv csv-url)
+  (let ((content (get-url csv-url)))
+    (csv->hash content #:delimeter "\t")))
 
 ;(define res (google-spreadsheet/get-json "12GjbHIlT739wOMcRTSBwfbjpUsaHvLgGAd1EEobKEaY" "od6"))
 ;;(define res (google-spreadsheet/get-json "1CMuhp9ZTSGlCp0Ly0Czkb-4JhVBHJOQ5sxUILv7o5Do" "ot9n3e7"))

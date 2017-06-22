@@ -4,10 +4,14 @@
 
 (provide (all-defined-out))
 
+(define (csv->list-rows csv-str #:delimeter (delimeter ","))
+  (let ((csv-str (opt/exclude-all csv-str "\r")))
+    (map
+      (λ (x) (split x delimeter))
+      (split csv-str "\n"))))
+
 (define (csv-file->list-rows filename #:delimeter (delimeter ","))
-  (map
-    (λ (x) (split x delimeter))
-    (split (read-file filename) "\n")))
+  (csv->list-rows (read-file filename) #:delimeter delimeter))
 
 (define (csv-file->list-columns filename #:delimeter (delimeter ",") #:headers (headers #t))
   (let ((first-break-list (csv-file->list-rows filename #:delimeter delimeter)))
@@ -17,13 +21,16 @@
       (push   empty
               (transpose first-break-list)))))
 
-(define (csv-file->hash filename #:delimeter (delimeter ",") #:headers (headers #t) #:key-index (key-index 1))
-  (let* ((content (csv-file->list-rows filename #:delimeter delimeter))
+(define (csv->hash csv-str #:delimeter (delimeter ",") #:headers (headers #t) #:key-index (key-index 1))
+  (let* ((content (csv->list-rows csv-str #:delimeter delimeter))
         (h (if (not headers)
               (range 1 (inc (length (first content))))
               (first content)))
         (content (if (not headers) content (rest content))))
     (list->hash content h key-index)))
+
+(define (csv-file->hash filename #:delimeter (delimeter ",") #:headers (headers #t) #:key-index (key-index 1))
+  (csv->hash (csv-file->list-rows filename)))
 
 (define (list->csv-file filename lst #:delimeter (delimeter ",") #:headers (headers #t) #:quoted (quoted #t))
   (let* ((content
@@ -47,7 +54,6 @@
                     (λ (k v) (values k (hash->ordered-list v headers)))
                     h))
                 headers)))
-    (println "hash->csv-file 1")
     (list->csv-file
       filename
       llst

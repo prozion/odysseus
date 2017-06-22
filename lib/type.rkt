@@ -50,6 +50,17 @@
 (define (->number x (delta 0))
   (cond
     ((number? x) x)
+    ((false? x) 0)
     ((string? x)
-      (+ delta (string->number (implode (filter string->number (explode x))))))
+      (if (string->number x)
+        (string->number x)
+        (let* ( (filtered (implode (filter string->number (explode x))))
+                (filtered (if (equal? filtered "") "0" filtered)))
+          (+ delta (string->number filtered)))))
+    (else x)))
+
+(define (->symbol x)
+  (cond
+    ((number? x) (string->symbol (number->string x)))
+    ((string? x) (string->symbol x))
     (else x)))

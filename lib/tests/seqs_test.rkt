@@ -181,6 +181,7 @@
 
   (check-equal? (exclude-all '(1 2 "c" 4 5 "c" 7) "c") '(1 2 4 5 7))
   (check-equal? (exclude-all "Tell me, O muse, of that ingenious hero" "o") "Tell me, O muse, f that ingenius her")
+  (check-equal? (exclude-all "Tell me,\r\n O muse,\r of that ingenious hero\r" "\r") "Tell me,\n O muse, of that ingenious hero")    
 
   (check-equal? (insert "" 0 "") "")
   (check-equal? (insert "" 0 "a") "")

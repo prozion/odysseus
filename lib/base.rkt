@@ -99,3 +99,9 @@
 
 (define (inie a b x)
   (and (<= a x) (< x b)))
+
+; TODO: implement with macro
+;(define (get-value n lambda-values . args)
+;  (call-with-values
+;    (apply lambda-values args)
+;    (λ vs (list-ref vs (inc n)))))
