@@ -51,3 +51,24 @@
       (λ (x) (apply (curry format frmt) x))
       alst)
     "\n"))
+
+(define (clist-add clst pair f)
+  (let* ((i (indexof (map car clst) (car pair)))
+        (old-pair (nth clst i)))
+    (if (= i 0)
+      (pushr clst pair)
+      (insert
+        (remove clst i)
+        i
+        (cons (car old-pair) (f (cdr old-pair) (cdr pair)))))))
+
+(define (clist-sort clst f)
+  (sort
+    clst
+    (λ (a b) (f (car a) (cdr a) (car b) (cdr b)))))
+
+(define (pairwise lst1 lst2)
+  (for/fold
+    ((s (list)))
+    ((i lst1) (j lst2))
+    (pushr s (cons i j))))

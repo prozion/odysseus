@@ -300,7 +300,7 @@
     (remove seq (indexof seq el))))
 
 (define (exclude-all seq el)
-  (let ((index (indexof seq el)))   
+  (let ((index (indexof seq el)))
     (cond
       ((> index 0) (exclude-all (exclude seq el) el))
       (else seq))))
@@ -421,6 +421,20 @@
             res
             (lshift seq n))))))
   (partition-iter seq empty))
+
+  (define (break-seq seq break-points)
+    (define (break-seq-it res-acc seq-rest break-points)
+      (cond
+        ((empty? break-points) (pushr res-acc seq-rest))
+        (else (break-seq-it
+                (pushr res-acc (lshift seq-rest (car break-points)))
+                (ltrim seq-rest (car break-points))
+                (map
+                  (curryr - (car break-points))
+                  (cdr break-points)))))) ;; STX curryr
+    (cond
+      ((null? break-points) (list seq))
+      (else (break-seq-it (list) seq break-points))))
 
 ;(define (flatten lnlst)
 ;  (cond

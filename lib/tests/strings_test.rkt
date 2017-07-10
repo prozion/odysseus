@@ -11,4 +11,7 @@
   ;(check-equal? (format-n "hello ~a" "world") "hello world")
   ;(check-equal? (format-n "hello ~l(, )" '("world" "verden")) "hello world, verden")
 
+(check-equal? (strnumber->number "3") 3)
+(check-= (strnumber->number "3,0") 3.0 1e-6)
+(check-= (strnumber->number "2 100,50") 2100.5 1e-6)
 )

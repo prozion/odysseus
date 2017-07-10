@@ -181,7 +181,7 @@
 
   (check-equal? (exclude-all '(1 2 "c" 4 5 "c" 7) "c") '(1 2 4 5 7))
   (check-equal? (exclude-all "Tell me, O muse, of that ingenious hero" "o") "Tell me, O muse, f that ingenius her")
-  (check-equal? (exclude-all "Tell me,\r\n O muse,\r of that ingenious hero\r" "\r") "Tell me,\n O muse, of that ingenious hero")    
+  (check-equal? (exclude-all "Tell me,\r\n O muse,\r of that ingenious hero\r" "\r") "Tell me,\n O muse, of that ingenious hero")
 
   (check-equal? (insert "" 0 "") "")
   (check-equal? (insert "" 0 "a") "")
@@ -255,6 +255,10 @@
   (check-equal? (partition-all '(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15) 6) '((1 2 3 4 5 6) (7 8 9 10 11 12) (13 14 15)))
   (check-equal? (partition-all '(1 2 3 4 5) 1) '((1) (2) (3) (4) (5)))
   (check-equal? (partition-all '(1 2 3 4 5) 0) '(1 2 3 4 5))
+
+  (check-equal? (break-seq '(1 2 3 4 5 6) '()) '((1 2 3 4 5 6)))
+  (check-equal? (break-seq '(1 2 3 4 5 6) '(4)) '((1 2 3 4) (5 6)))
+  (check-equal? (break-seq '(1 2 3 4 5 6) '(3 5)) '((1 2 3) (4 5) (6)))
 
   (check-equal? (flatten '((1 2 3) (4 5 6))) '(1 2 3 4 5 6))
   (check-equal? (flatten '((1 (2 (3))) (4 ((5)) 6) 7)) '(1 2 3 4 5 6 7))

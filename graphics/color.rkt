@@ -12,10 +12,6 @@
 ;(provide (rgb->hsv rgb->hsl hsv->rgb hsl->rgb))
 (provide (all-defined-out))
 
-(define (rand-color)
-  (let ((hex "0123456789abcdef"))
-    (str "#" (implode (gen (nth hex (rand 16)) 6)))))
-
 (define (str->rgb str)
   (map hex->dec (list (slice str 2 3) (slice str 4 5) (slice str 6 7))))
 
@@ -25,6 +21,59 @@
           (~a (dec->hex (nth lst 2)) #:pad-string "0" #:width 2)
           (~a (dec->hex (nth lst 3)) #:pad-string "0" #:width 2)))
   ;(format "#~X~X~X" (nth lst 1) (nth lst 2) (nth lst 3)))
+
+(define cmyk-based-colors
+  (list "#00aeef" "#ec008c" "#fff200" ; 100 0 0
+        "#2e3192" "#00a651" "#ed1c24" ; 100 100 0
+        "#0072bc" "#00a99d" "#ed145b" "#92278f" "#8dc63f" "#f7941d" ; 100 50 0
+        "#8781bd" "#82ca9c" "#f69679" ; 50 50 0
+        "#343465" "#006f45" "#947f3a" ; 100 100 50
+        "#6dcff6" "#f49ac1" "#fff799" ; 50 0 0
+        "#03558b" "#008b6b" "#682f79" "#c02646" "#c3602f" "#529546" ; 100 75 25
+        "#1c9ad6" "#00bac6" "#f16687" "#bd60a5" "#c8dd69" "#fec35a" ; 75 25 0
+        "#000000" "#bcbec0" "#808285" "#414042" ; 0 0 0 x
+  ))
+
+(define rgb-based-colors
+  (map
+    rgb->str
+    '((255 0 0) (0 255 0) (0 0 255)
+      (255 255 0) (255 0 255) (0 255 255)
+      (255 125 0) (255 0 125) (0 255 125) (125 255 0) (125 0 255) (0 125 255)
+      (180 125 0) (180 0 125) (0 180 125) (125 180 0) (0 125 180) (125 0 180)
+      (100 100 0) (100 0 100) (0 100 100)
+      (255 70 70) (70 255 70) (70 70 255)
+      (255 200 50) (255 50 200) (200 255 50) (50 255 200) (50 200 255) (200 50 255)
+      (200 200 200) (100 100 100) (50 50 50)
+      (50 0 0) (0 50 0) (0 0 50)
+      (50 50 0) (50 0 50) (0 50 50)
+  )))
+
+
+; colors autogeneration
+(define (generate-hsv-colors len)
+  (for/fold
+    ((s (list)))
+    ((i (range len)))
+    (pushr
+      s
+      (grade-color
+        (hsv->rgb (list 0 100 100))
+        (dec (length s))
+        len
+        #:delta-v -20
+        #:delta-s -60
+        ))))
+
+; TODO: perception model
+;Есть формула яркости цвета:
+;Br = (r * 77 + g * 150 + b * 28) / 255
+;Применяется для перевода в GrayScale. Эти же коэффициенты определяют заметность изменения значения разных цветовых каналов.
+;Можно сделать просто - считаешь, что цвета заполняют параллелепипед со сторонами 77, 150 и 28, первый цвет берёшь хоть случайный, для каждого следующего ищешь в параллелепипеде точку, наиболее удалённую от всех уже занятых, таким образом первые цвета будут очень контрастными, чем дальше, тем контрастность будет падать. 
+
+(define (rand-color)
+  (let ((hex "0123456789abcdef"))
+    (str "#" (implode (gen (nth hex (rand 16)) 6)))))
 
 ; TODO: add contract with normalized values of r,g,b: (<= 0 x 1)
 (define (hue col)
@@ -113,6 +162,9 @@
                     ((4) (list t p v))
                     ((5) (list v p q)))])
     (map (curry *r 255) (list r g b))))
+
+(define (hsv->rgbstr col)
+  (rgb->str (hsv->rgb col)))
 
 ; http://www.niwa.nu/2013/05/math-behind-colorspace-conversions-rgb-hsl/
 (define (hsl->rgb col)

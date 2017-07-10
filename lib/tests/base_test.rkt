@@ -12,6 +12,8 @@
 ; regexp - circulating unit
 ; time - post in the mountains towards Gyngeme rocks and outward regiment
 ; optimize - post near Magic Forest
+; bytes - outpost near Stella country
+; stats - outpost near Villina country
 
 (module+ test
 
