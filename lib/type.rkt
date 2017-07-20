@@ -2,6 +2,7 @@
 
 (require "alist.rkt")
 (require "seqs.rkt")
+(require "base.rkt")
 
 (provide (all-defined-out))
 
@@ -26,7 +27,7 @@
     (not (empty? x))
     (andmap cons? x)))
 
-(define (type? x)
+(define (type x)
   (cond
     ((number? x) 'number)
     ((string? x) 'string)
@@ -52,15 +53,27 @@
     ((number? x) x)
     ((false? x) 0)
     ((string? x)
-      (if (string->number x)
-        (string->number x)
-        (let* ( (filtered (implode (filter string->number (explode x))))
-                (filtered (if (equal? filtered "") "0" filtered)))
-          (+ delta (string->number filtered)))))
+      (let ((filtered (string-replace x (regexp ",") ".")))
+        (cond
+           ((string->number filtered) (string->number filtered))
+           (else
+            (let* (
+                    (filtered (implode
+                                        (filter
+                                          (λ (x) (or (string->number x) (equal? x ".")))
+                                          (explode filtered))))
+                    (filtered (if (equal? filtered "") "0" filtered)))
+              (+ delta (string->number filtered)))))))
     (else x)))
+
+(define (->int x)
+  (int (->number x)))
 
 (define (->symbol x)
   (cond
     ((number? x) (string->symbol (number->string x)))
     ((string? x) (string->symbol x))
     (else x)))
+
+(define (atom? x)
+  (indexof? '(number string) (type x)))

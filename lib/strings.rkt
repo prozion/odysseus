@@ -2,6 +2,7 @@
 
 (require "seqs.rkt")
 (require "regexp.rkt")
+(require compatibility/defmacro)
 
 (provide (all-defined-out))
 
@@ -31,3 +32,6 @@
         (res (bytes->string/utf-8 (list->bytes res)))
         (res (string->number res)))
     res))
+
+(define-macro (when/str condition . expression)
+  `(if ,condition (string-append ,@expression) ""))    

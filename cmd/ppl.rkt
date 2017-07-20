@@ -53,6 +53,9 @@
     [("-p" "--person") p
                     "search by person's name and surname"
 										(set! person p)]
+    [("-n" "--name") n
+                    "same as -p"
+										(set! person n)]
     [("-v" "--verify") v
                     "verify uniqueness for values in specified field"
 										(set! verifyf v)]

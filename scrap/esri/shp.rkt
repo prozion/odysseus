@@ -19,10 +19,12 @@
                 'xmax (@ 'pos 52 'type 'double 'mode 'little)
                 'ymax (@ 'pos 60 'type 'double 'mode 'little)
               )
+
             'record-header
               (@
                 'record-number (@ 'pos 0 'type 'integer 'mode 'big)
                 'content-length (@ 'pos 4 'type 'integer 'mode 'big))
+
             'null-shape-record
               (@
                 'shape-type (@ 'pos 0 'type 'integer 'mode 'little)) ; 0
@@ -45,15 +47,25 @@
                 'numpoints (@ 'pos 40 'type 'integer 'mode 'little)
                 'parts (@ 'pos 44 'type 'integer 'mode 'little 'rep 'numparts)
                 'points (@ 'pos '44+4*numparts 'type 'point 'mode 'little 'char-mode 'little 'rep 'numpoints))
+            'polygon-record
+              (@
+                'shape-type (@ 'pos 0 'type 'integer 'mode 'little) ; 5
+                'box (@ 'pos 4 'type 'double 'mode 'little 'rep 4)
+                'numparts (@ 'pos 36 'type 'integer 'mode 'little)
+                'numpoints (@ 'pos 40 'type 'integer 'mode 'little)
+                'parts (@ 'pos 44 'type 'integer 'mode 'little 'rep 'numparts)
+                'points (@ 'pos '44+4*numparts 'type 'point 'mode 'little 'char-mode 'little 'rep 'numpoints))
 ))
 
+; b1-16 -> pair
 (define (bytes->point bstr #:char-mode (char-mode 'little) #:word-mode (word-mode 'little))
   (let* (
           (b1 (bytes-slice bstr 1 8))
-          (b2 (bytes-slice bstr 9 16)))
-    (map
-      (λ (x) (bytes->double x #:char-mode char-mode #:word-mode word-mode))
-      (list b1 b2))))
+          (b2 (bytes-slice bstr 9 16))
+          (bs (map
+                (λ (x) (bytes->double x #:char-mode char-mode #:word-mode word-mode))
+                (list b1 b2))))
+          (cons (first bs) (second bs))))
 
 (define transform-fs (@ 'integer bytes->integer 'double bytes->double 'point bytes->point))
 (define type-sizes (@ 'char 1 'integer 4 'double 8 'point 16))
@@ -71,7 +83,7 @@
         )
     (case type
       ((integer) (bytes->integer (bytes-slice header (inc pos) (+ pos 4)) #:char-mode 'little #:word-mode word-mode))
-      ((double) (bytes->double (bytes-slice header (inc pos) (+ pos 8))  #:char-mode char-mode #:word-mode word-mode))
+      ((double) (bytes->double (bytes-slice header (inc pos) (+ pos 8)) #:char-mode char-mode #:word-mode word-mode))
       (else header))))
 
 (define (read-next-field istream record-type field-name)
@@ -80,29 +92,42 @@
           (parameter-type (@. parameters.type))
           (f (hash-ref transform-fs parameter-type identity))
           (size (hash-ref type-sizes parameter-type 1))
-          (word-mode (@. parameters.mode)))
-    (f (read-bytes size istream) #:word-mode word-mode #:char-mode 'little)))
+          (word-mode (@. parameters.mode))
+          (res
+            (f (read-bytes size istream) #:word-mode word-mode #:char-mode 'little)))
+    res))
 
-(define (read-next-record istream)
+(define (read-next-point-record istream)
   (let* ((record-header (read-bytes 8 istream))
         (content-length (shapefile-parameter record-header 'record-header 'content-length))
         (full-content-length (+ 8 (* 2 content-length)))
-        (_ (read-next-field istream 'polyline-record 'shape-type))
-        (_ (gen (read-next-field istream 'polyline-record 'box) 4))
-        (numparts (read-next-field istream 'polyline-record 'numparts))
-        (numpoints (read-next-field istream 'polyline-record 'numpoints))
-        (parts (for/fold ((s (list))) ((i (range numparts))) (pushr s (read-next-field istream 'polyline-record 'parts))))
+        (_ (read-next-field istream 'point-record 'shape-type))
+        (x (read-next-field istream 'point-record 'x))
+        (y (read-next-field istream 'point-record 'y)))
+          (cons x y)))
+
+(define (read-next-poly-record istream #:record-type (record-type 'polyline-record))
+  (let* ((record-header (read-bytes 8 istream))
+        (content-length (shapefile-parameter record-header 'record-header 'content-length))
+        (full-content-length (+ 8 (* 2 content-length)))
+        (_ (read-next-field istream record-type 'shape-type))
+        (_ (gen (read-next-field istream record-type 'box) 4))
+        (numparts (read-next-field istream record-type 'numparts))
+        (numpoints (read-next-field istream record-type 'numpoints))
+        (_ (println numpoints))
+        (parts (for/fold ((s (list))) ((i (range numparts))) (pushr s (read-next-field istream record-type 'parts))))
         (points
           (for/fold
             ((s (list)))
             ((i (range numpoints)))
             (pushr
               s
-              (read-next-field istream 'polyline-record 'points))))
-        (points (break-seq points (cdr parts))))
+              (read-next-field istream record-type 'points))))
+        (points (break-seq points parts))
+        )
     (hash 'points points 'size full-content-length)))
 
-; file-> (listof (listof double double))
+; file-> (listof ... (listof double double))
 (define (shapefile->points shapefile)
   (let* ((shp-stream (open-input-file shapefile #:mode 'binary))
         (header (read-bytes HEADER-SIZE shp-stream))
@@ -110,7 +135,7 @@
     (define (accumulate-points istream acc read-bytes)
       (cond
         ((>= read-bytes file-length) (hash 'points acc 'read-bytes read-bytes))
-        (else (let ((record (read-next-record istream)))
+        (else (let ((record (read-next-poly-record istream)))
                 (accumulate-points
                   istream
                   (pushr acc (@. record.points))

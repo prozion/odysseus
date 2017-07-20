@@ -432,9 +432,10 @@
                 (map
                   (curryr - (car break-points))
                   (cdr break-points)))))) ;; STX curryr
-    (cond
-      ((null? break-points) (list seq))
-      (else (break-seq-it (list) seq break-points))))
+    (let ((break-points (filter (λ (x) (< 0 x (length seq))) break-points)))
+      (cond
+        ((null? break-points) (list seq))
+        (else (break-seq-it (list) seq break-points)))))
 
 ;(define (flatten lnlst)
 ;  (cond
@@ -448,6 +449,11 @@
 ;                          (list a))))
 ;        '()
 ;        lnlst))))
+
+(define (depth seq)
+  (cond
+    ((list? seq) (if (null? seq) 1 (inc (apply max (map depth seq)))))
+    (else 0)))
 
 (define (transpose llst)
   (cond

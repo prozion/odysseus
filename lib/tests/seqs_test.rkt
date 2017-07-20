@@ -257,12 +257,20 @@
   (check-equal? (partition-all '(1 2 3 4 5) 0) '(1 2 3 4 5))
 
   (check-equal? (break-seq '(1 2 3 4 5 6) '()) '((1 2 3 4 5 6)))
+  (check-equal? (break-seq '(1 2 3 4 5 6) '(0)) '((1 2 3 4 5 6)))
   (check-equal? (break-seq '(1 2 3 4 5 6) '(4)) '((1 2 3 4) (5 6)))
+  (check-equal? (break-seq '(1 2 3 4 5 6) '(6)) '((1 2 3 4 5 6)))
   (check-equal? (break-seq '(1 2 3 4 5 6) '(3 5)) '((1 2 3) (4 5) (6)))
+  (check-equal? (break-seq '(1 2 3 4 5 6) '(0 3 5 6)) '((1 2 3) (4 5) (6)))
 
   (check-equal? (flatten '((1 2 3) (4 5 6))) '(1 2 3 4 5 6))
   (check-equal? (flatten '((1 (2 (3))) (4 ((5)) 6) 7)) '(1 2 3 4 5 6 7))
   (check-equal? (flatten '(1 2 3)) '(1 2 3))
+
+  (check-equal? (depth 3) 0)
+  (check-equal? (depth '(1 2 3)) 1)
+  (check-equal? (depth '(())) 2)
+  (check-equal? (depth '(1 2 (3 4) (5 6 (7) (8 9 (10))) (11 (12 (13 14 (15 16)) 17)))) 5)
 
   (check-equal? (transpose '((1 2 3) (4 5 6) (7 8 9))) '((1 4 7) (2 5 8) (3 6 9)))
 

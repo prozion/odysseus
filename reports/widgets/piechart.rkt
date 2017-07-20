@@ -21,7 +21,7 @@
             #:donut (donut #f)
             #:donut-style (donut-style "fill: white; stroke: black; stroke-width: 0.5")
             #:style (style "stroke: none;")
-            #:style-circle (style-circle "stroke: black; stroke-width: 0")
+            #:style-circle (style-circle "stroke: black; stroke-width: 0; fill: none")
             #:colors (colors #f)
             #:color-raw-model (color-raw-model 'cmyk-based)
 
@@ -67,7 +67,8 @@
                                         x2 y2)
                             'style style)
                       ; if only one part:
-                      (circle 'cx x 'cy y 'r r 'style style))
+                      (circle 'cx x 'cy y 'r r 'style style)
+                      )
                     (if donut
                       (circle 'cx x 'cy y 'r (donut r) 'style donut-style)
                       ""))

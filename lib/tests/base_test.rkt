@@ -1,12 +1,12 @@
 #lang racket
 
 ; alist - harrison in Hurrycap castle
-; base - personal guard in emerald city
+; base - personal guard in Emerald city
 ; controls - harrison in Gyngeme cave
 ; hash - harrison in Blinkers country
 ; interval - post near Miners cave
 ; math - harrison in the Cannibal castle
-; seqs - army camp near emerald city
+; seqs - army camp near Emerald city
 ; strings - post near Marrans country
 ; type - harrison in Chewers country
 ; regexp - circulating unit
@@ -14,6 +14,11 @@
 ; optimize - post near Magic Forest
 ; bytes - outpost near Stella country
 ; stats - outpost near Villina country
+
+; graphics/tests: spies
+; color_test - spies and police in the Emerald city and around
+; svg_test - spy troop in the surrounding mountains
+; layout_test - spy troop across the plain land
 
 (module+ test
 
