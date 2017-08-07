@@ -129,8 +129,14 @@
         [amount (length data)]
         [bar-w (/r (- bars-w (* (- amount 1) bars-gap)) amount)]
         [bars-base bars-h]
-        [labels (if (alist? data) (firsts data) null)]
-        [data (if (alist? data) (seconds data) data)]
+        [labels (cond
+                  ((alist? data) (firsts data))
+                  ((clist? data) (map car data))
+                  (else null))]
+        [data (cond
+                ((alist? data) (seconds data))
+                ((clist? data) (map cdr data))
+                (else data))]
         [data-max (apply max data)]
         [data-min (apply min data)]
         ;; data normalization, first step
@@ -151,7 +157,7 @@
     (g (@ 'class "barchart" 'transform (svg/translate widget-x widget-y))
 
       ;; title block
-      (unless (equal? title-pos 'hidden)
+      (unless (or (not title) (equal? title-pos 'hidden))
         (g
           (@ 'id "title" 'transform (svg/translate title-x title-y))
           (text (@

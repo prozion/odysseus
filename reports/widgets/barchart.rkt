@@ -8,7 +8,7 @@
 (provide (all-defined-out))
 
 ;(barchart
-; #:data '((2006 108671) (2007 107520) (2008 106644))
+; #:data '((2006 . 108671) (2007 . 107520) (2008 . 106644))
 ; #:colors '("black" "grey" "#aa6")
 ; #:gap 1
 ; #:title "Storskog the best!")
@@ -17,7 +17,7 @@
             #:gap (gap 0)
             #:colors (colors '("black"))
             #:xs-orientation (xs-orientation 0)
-            #:title (title ""))
+            #:title (title #f))
   (barchart-2
           data data
           layout (@ 'widget (@ 'x 50 'y 10 'w 1000 'h 600)

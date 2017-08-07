@@ -1,6 +1,5 @@
 #lang racket
 
-(require "alist.rkt")
 (require "seqs.rkt")
 (require "base.rkt")
 
@@ -77,3 +76,14 @@
 
 (define (atom? x)
   (indexof? '(number string) (type x)))
+
+(define (alist? lst)
+  (define (list-of-2? lst)
+    (and (list? lst) (= (length lst) 2)))
+  (cond
+    ((not (list? lst)) #f)
+    ((null? (cdr lst)) (list-of-2? (car lst)))
+    (else (and (list-of-2? (car lst)) (alist? (cdr lst))))))
+
+(define (clist? seq)
+  (andmap cons? seq))

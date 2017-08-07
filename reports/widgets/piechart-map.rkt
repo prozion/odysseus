@@ -14,8 +14,6 @@
 
 (define kukuevsk (@ "name" "Кукуевск" "x" 10 "y" 10))
 
-
-
 (define text-style-0 "font-size: 11; font-weight: bold")
 (define text-style-1 "font-size: 9")
 (define text-style-2 "font-size: 9; fill: #666666")
@@ -95,6 +93,7 @@
       ; names for legend
       ;(existed-projects (opt/uniques all-projects))
       (existed-programs (map car programs-by-number))
+      ;(nonexisted-programs (minus all-programs existed-programs))
 
       ; colors, starting from frequent to rare programs
       (programs-colors
@@ -309,15 +308,29 @@
                                 (text
                                   (@ 'x (+ x dx dxx) 'y (+ y dy dyy 10) 'style (format "~a; font-weight: bold; fill: #900; text-anchor: ~a" text-style-1 text-anchor)) total-budget)
                                 (when/str project-description
-                                  (for/fold/idx
-                                    (ss "")
-                                    (pd (sort project-descriptions (λ (a b) (> (->number (car a)) (->number (car b))))))
-                                    (str
-                                      ss
-                                      (text
-                                        (@ 'x (+ x dx dxx) 'y (+ y dy dyy 5 (* (inc $idx) 15)) 'style (format "~a; font-weight: normal; fill: #333; text-anchor: ~a" text-style-1 text-anchor)) (cdr pd))
-                                      (text
-                                        (@ 'x (+ x dx dxx (text-length (cdr pd) #:font-size 9) 10) 'y (+ y dy dyy 5 (* (inc $idx) 15)) 'style (format "~a; font-weight: bold; fill: #999; text-anchor: ~a" text-style-1 text-anchor)) (->int (car pd))))))
+                                  (let ((anchor-k (λ (x)
+                                                    (case x
+                                                      (("start") 1)
+                                                      (("middle") 0.5)
+                                                      (("end") -1)
+                                                      (else 1)
+                                                    )))
+                                        (font-size 7)
+                                        (ladder-factor (λ (num i)
+                                                          (if (> num 10)
+                                                            (if (< i (/ num 2))
+                                                              (* i 5)
+                                                              (* (- num i) 5))
+                                                            0))))
+                                    (for/fold/idx
+                                      (ss "")
+                                      (pd (sort project-descriptions (λ (a b) (> (->number (car a)) (->number (car b))))))
+                                      (str
+                                        ss
+                                        (text
+                                          (@ 'x (+ x dx dxx (ladder-factor (length project-descriptions) $idx)) 'y (+ y dy dyy 10 (* (inc $idx) 10)) 'style (format "~a; font-size: ~a; font-weight: normal; fill: #333; text-anchor: ~a"  text-style-1 font-size text-anchor)) (cdr pd))
+                                        (text
+                                          (@ 'x (+ x dx dxx (* (anchor-k text-anchor) (+ (text-length (cdr pd) #:font-size font-size) 10 (ladder-factor (length project-descriptions) $idx)))) 'y (+ y dy dyy 10 (* (inc $idx) 10)) 'style (format "~a; font-size: ~a; font-weight: bold; fill: #999; text-anchor: ~a"  text-style-1 font-size text-anchor)) (->int (car pd)))))))
 
                               )
                               ; bbox debug rectangles:

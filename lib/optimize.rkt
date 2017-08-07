@@ -51,3 +51,9 @@
     ((string? seq)
       (string-replace seq el ""))
     (else (exclude-all seq el))))
+
+(define (opt/split seq sep)
+  (cond
+    ((string? seq)
+      (string-split seq sep))
+    (else (split seq sep))))

@@ -3,6 +3,7 @@
 (require "base.rkt")
 (require "seqs.rkt")
 (require "alist.rkt")
+(require "type.rkt")
 (require "hash.rkt")
 (require "regexp.rkt")
 

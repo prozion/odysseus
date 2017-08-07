@@ -36,9 +36,9 @@
   (let ((content (get-url csv-url)))
     (csv->hash content)))
 
-(define (google-spreadsheet/get-tsv csv-url)
+(define (google-spreadsheet/get-tsv csv-url #:columns-exclude (columns-exclude null))
   (let ((content (get-url csv-url)))
-    (csv->hash content #:delimeter "\t")))
+    (csv->hash content #:delimeter "\t" #:columns-exclude columns-exclude)))
 
 ;(define res (google-spreadsheet/get-json "12GjbHIlT739wOMcRTSBwfbjpUsaHvLgGAd1EEobKEaY" "od6"))
 ;;(define res (google-spreadsheet/get-json "1CMuhp9ZTSGlCp0Ly0Czkb-4JhVBHJOQ5sxUILv7o5Do" "ot9n3e7"))

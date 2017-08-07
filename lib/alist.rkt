@@ -3,19 +3,12 @@
 (require (prefix-in base: "base.rkt"))
 (require "seqs.rkt")
 (require "strings.rkt")
+(require "type.rkt")
 (require "debug.rkt")
 (require compatibility/defmacro)
 (require (for-syntax racket/list))
 
 (provide (all-defined-out))
-
-(define (alist? lst)
-  (define (list-of-2? lst)
-    (and (list? lst) (= (length lst) 2)))
-  (cond
-    ((not (list? lst)) #f)
-    ((null? (cdr lst)) (list-of-2? (car lst)))
-    (else (and (list-of-2? (car lst)) (alist? (cdr lst))))))
 
 ; (firsts '((a 2) (b 10))) -> '(a b)
 (define (firsts alst)
@@ -61,6 +54,11 @@
         (remove clst i)
         i
         (cons (car old-pair) (f (cdr old-pair) (cdr pair)))))))
+
+(define (clist-ref clst k (not-found #f))
+  (cond ((null? clst) not-found)
+        ((equal? k (car (car clst))) (cdr (car clst)))
+        (else (clist-ref (cdr clst) k not-found)))) 
 
 (define (clist-sort clst f)
   (sort

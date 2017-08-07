@@ -41,9 +41,14 @@
     (hash-ref h i #f)))
 
 ; '((foo 1 2 3 4) (bar 10 20 30)) -> #(foo:#(a:1 b:2 c:3) bar:#(a:10 b:20 c:30))
-(define (list->hash lst header (key-index 1))
+(define (list->hash lst header #:key-index (key-index 1) #:columns-exclude (columns-exclude null))
   (let ((header (remove header key-index)))
-    (for/hash ((i lst)) (values (nth i key-index) (apply hash (interleave header (remove i key-index)))))))
+    (for/hash ((i lst))
+      (values
+        (nth i key-index)
+        (hash-remove-keys
+          (apply hash (interleave header (remove i key-index)))
+          columns-exclude)))))
 
 ;; ACCESS
 ; (@. h.a.b.c)
@@ -248,3 +253,8 @@
     ([res ""])
     ([(k v) (in-hash h)])
     (string-append res (format format-str k v))))
+
+(define (hash-remove-keys h keys)
+  (cond
+    ((null? keys) h)
+    (else (hash-remove-keys (hash-remove h (car keys)) (cdr keys)))))

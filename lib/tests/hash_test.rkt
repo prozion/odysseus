@@ -6,6 +6,7 @@
   (require "../checks.rkt")
   (require "../hash.rkt")
   (require "../alist.rkt")
+  (require "../type.rkt")
   (require "../regexp.rkt")
 
   (define h (hash 'a (hash 'aa 10 'ab 20) 'b (hash 'ba (hash 'baa 300 'bab 30))))
@@ -35,6 +36,11 @@
 
   (check-true (alist? (hash->alist (hash 'a 1 'b 2))))
   (check-equal? (hash->alist (hash 'a 1 'b 2)) '((a 1) (b 2)))
+
+  (check-true
+    (check-hash-equal?
+      (list->hash '((1 1 2 3 4) (2 5 6 7 8)) (list 'key 'a 'b 'c 'd) #:columns-exclude '(b d))
+      (hash 1 (hash 'a 1 'c 3) 2 (hash 'a 5 'c 7))))  
 
   (check-equal? (hash-print (hash 'a 1 'b 2)) "a=1, b=2")
   (check-equal? (hash-print (hash 'a 1 'b 2 'c 10) #:delimeter " AND ") "a=1 AND c=10 AND b=2")
@@ -187,6 +193,13 @@
       (hash-revert (hash 'a 'aa 'b 'bb 'aba 30))
       (hash 'aa 'a 'bb 'b 30 'aba)))
 
+  (check-true
+    (check-hash-equal?
+      (hash-revert
+        (hash 'a 10))
+      (hash
+          10 'a)))
+
 ; hash-union
   (check-true
     (check-hash-equal?
@@ -337,5 +350,11 @@
                   2 (hash 'place "Якутск" 'project "tran" 'budget 3000)
                   4 (hash 'place "Якутск" 'project "soc" 'budget 100)
                   5 (hash 'place "Якутск" 'project "soc" 'budget 800)))))
+
+  (check-true
+    (check-hash-equal?
+      (hash-remove-keys (hash 'a 10 'b 20 'c 30 'd 40 'e 50) '(a c d))
+      (hash 'b 20 'e 50)))
+
 
 )

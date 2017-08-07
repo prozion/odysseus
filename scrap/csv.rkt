@@ -7,8 +7,8 @@
 (define (csv->list-rows csv-str #:delimeter (delimeter ","))
   (let ((csv-str (opt/exclude-all csv-str "\r")))
     (map
-      (λ (x) (split x delimeter))
-      (split csv-str "\n"))))
+      (λ (x) (opt/split x delimeter))
+      (opt/split csv-str "\n"))))
 
 (define (csv-file->list-rows filename #:delimeter (delimeter ","))
   (csv->list-rows (read-file filename) #:delimeter delimeter))
@@ -21,13 +21,14 @@
       (push   empty
               (transpose first-break-list)))))
 
-(define (csv->hash csv-str #:delimeter (delimeter ",") #:headers (headers #t) #:key-index (key-index 1))
-  (let* ((content (csv->list-rows csv-str #:delimeter delimeter))
+(define (csv->hash csv-str #:delimeter (delimeter ",") #:headers (headers #t) #:key-index (key-index 1) #:columns-exclude (columns-exclude null))
+  (let* (
+        (content (csv->list-rows csv-str #:delimeter delimeter))
         (h (if (not headers)
               (range 1 (inc (length (first content))))
               (first content)))
         (content (if (not headers) content (rest content))))
-    (list->hash content h key-index)))
+    (list->hash content h #:key-index key-index #:columns-exclude columns-exclude)))
 
 (define (csv-file->hash filename #:delimeter (delimeter ",") #:headers (headers #t) #:key-index (key-index 1))
   (csv->hash (csv-file->list-rows filename)))
