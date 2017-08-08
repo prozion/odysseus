@@ -26,12 +26,17 @@
       (string-replace astr sym (str "\\" sym)))))
 
 (define (strnumber->number x)
-  (let* ((res (re-substitute x '("," " ") '("." "")))
-        (res (bytes->list (string->bytes/utf-8 res)))
-        (res (exclude-all (exclude-all res 160) 194))
-        (res (bytes->string/utf-8 (list->bytes res)))
-        (res (string->number res)))
-    res))
+  (cond
+    ((number? x) x)
+    ((string? x)
+      (let* (
+            (res (re-substitute x '("," " ") '("." "")))
+            (res (bytes->list (string->bytes/utf-8 res)))
+            (res (exclude-all (exclude-all res 160) 194))
+            (res (bytes->string/utf-8 (list->bytes res)))
+            (res (string->number res)))
+        res))
+    (else x)))
 
 (define-macro (when/str condition . expression)
-  `(if ,condition (string-append ,@expression) ""))    
+  `(if ,condition (string-append ,@expression) ""))

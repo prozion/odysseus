@@ -15,7 +15,9 @@
 
 (define (dots-map
           #:gdocs-places gdocs-places
-          #:map-base (map-base "fareast_greyscale_3x.png")
+          ;#:map-base (map-base "fareast_greyscale_3x.png")
+          #:map-base (map-base "fareast_south_green_3x")
+          #:map-ft ft
           #:value-parameter value-parameter
           #:default-value-parameter (default-value-parameter 0)
           #:fade (fade 0)
@@ -25,7 +27,7 @@
           #:hue-range (hue-range '(0 . 0))
           #:light-range (light-range '(50 . 50))
         )
-  (let* ((ft (make-lonlat-xy-transformation #:lon0 150 #:lat0 60 #:proj 'merc #:kx (/ 20 1.7) #:ky (/ -0.00035 1.7) #:dy 349 #:dx 613)) ; mapbase: 1/1.7
+  (let* (
         (places (google-spreadsheet/get-tsv gdocs-places))
         (places (hash-clean (λ (k v) (equal? (hash-ref v value-parameter) "")) places))
         (max-value (apply max (map (λ (x) (strnumber->number (hash-ref x value-parameter default-value-parameter))) (hash-values places))))
@@ -38,8 +40,8 @@
         ((s ""))
         (((k v) places))
         (let* (
-              (lon (strnumber->number (hash-ref v "lon" 0)))
-              (lat (strnumber->number (hash-ref v "lat" 0)))
+              (lon (strnumber->number (hash-ref v "lon" "0")))
+              (lat (strnumber->number (hash-ref v "lat" "0")))
               (xy (ft (cons lon lat)))
               (x (car xy))
               (y (cdr xy))
