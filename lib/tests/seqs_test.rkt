@@ -75,6 +75,8 @@
   (check-equal? (indexof-all "Hercules" "e") '(2 7))
   (check-equal? (indexof-all '(11 8 -22  8 30 80 -5 8) 8) '(2 4 8))
 
+  (check-equal? (count-element '(11 8 -22  8 30 80 -5 8) 8) 3)
+
   (check-true (regexp-indexof? '("doo" "fowl" "island") "doo"))
   (check-true (regexp-indexof? '("doo" "fowl" "island") "i.*d"))
   (check-true (regexp-indexof? '("doo" "fowl" "island") "do{2}"))
@@ -102,6 +104,7 @@
 
   (check-equal? (lpush '() 100) '(100))
   (check-equal? (lpush '(1 2 3) 100) '(100 1 2 3))
+  (check-equal? (lpush '((1 2 3)) '(100 200)) '((100 200) (1 2 3)))
 
   (check-equal? (lpush-unique '(1 2 3) 100) '(100 1 2 3))
   (check-equal? (lpush-unique '(1 2 3) 3) '(1 2 3))

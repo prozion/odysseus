@@ -27,7 +27,7 @@
         (h (if (not headers)
               (range 1 (inc (length (first content))))
               (first content)))
-        (content (if (not headers) content (rest content))))
+        (content (if (not headers) content (rest content))))     
     (list->hash content h #:key-index key-index #:columns-exclude columns-exclude)))
 
 (define (csv-file->hash filename #:delimeter (delimeter ",") #:headers (headers #t) #:key-index (key-index 1))

@@ -14,4 +14,7 @@
   (check-equal? (opt/implode '(1 2 3 4)) "1234")
   (check-equal? (opt/implode '(1 2 3 4) "+") "1+2+3+4")
   (check-equal? (opt/implode (list null null null) ",") ",,")
+
+  (check-equal? (opt/split "a,b,c,,d,,,e" ",") '("a" "b" "c" "" "d" "" "" "e"))
+  (check-equal? (opt/split "a,b,c,,d,,,e," ",") '("a" "b" "c" "" "d" "" "" "e" ""))
 )

@@ -1,7 +1,8 @@
 #lang racket
 
 (require "../../lib/all.rkt")
-(require "piechart.rkt")
+(require "../piechart.rkt")
+(require "_common.rkt")
 (require "../../scrap/csv.rkt")
 (require "../../scrap/google.rkt")
 (require "../../scrap/esri/shp.rkt")
@@ -14,10 +15,15 @@
 
 (define kukuevsk (@ "name" "Кукуевск" "x" 10 "y" 10))
 
-(define text-style-0 "font-size: 11; font-weight: bold")
-(define text-style-1 "font-size: 9")
-(define text-style-2 "font-size: 9; fill: #666666")
-(define text-style-3 "font-size: 7; fill: #000000")
+;(define text-style-0 "font-size: 11; font-weight: bold")
+;(define text-style-1 "font-size: 9")
+;(define text-style-2 "font-size: 9; fill: #666666")
+;(define text-style-3 "font-size: 7; fill: #000000")
+
+(define text-style-0 "font-size: 8; font-weight: bold")
+(define text-style-1 "font-size: 6")
+(define text-style-2 "font-size: 6; fill: #666666")
+(define text-style-3 "font-size: 4; fill: #000000")
 
 (define (total-column-fgen key)
   (λ (pair)
@@ -25,18 +31,23 @@
       ((s 0))
       (((k v) (cdr pair)))
       (begin
-        ;(println s)
+        ;(printf "~a ~a~n" s (hash-ref v key))
         (+ s (strnumber->number (hash-ref v key)))))))
+
+(define colnames-default (@ 'total-budget "Общий бюджет" 'federal-budget "Федеральный бюджет" 'regional-budget "Общий местный бюджет" 'state-project "ГП" 'project-description "Краткое описание проекта"))
 
 (define (piecharts-map
           #:gdocs-projects gdocs-projects
           #:gdocs-places gdocs-places
+          #:geobase (geobase "geobase.png")
+          #:ft ft
 
           #:title (title "")
           #:description (description "")
 
           #:legend1 (legend1 #t)
           #:legend2 (legend2 #t)
+          #:barchart-legend (barchart-legend #f)
           #:legend-title (legend-title "")
           #:legend-circles (legend-circles #f)
           #:max-value-type (max-value-type 'absolute)
@@ -48,33 +59,44 @@
 
           #:selected-programs (selected-programs #f)
 
-          #:piechart-by-category (piechart-by-category "Общий бюджет")
+          #:column-names (colnames #f)
+          #:program-names (program-names #f)
+
+          #:piechart-by-category (piechart-by-category (@. colnames-default.total-budget))
           #:filter-by (filter-by #f)
           #:minimal-value (minimal-value 0)
 
           ;#:piechart-colors (piechart-colors #f)
           #:piechart-colors-clist (piechart-colors-clist #f)
           #:piechart-opacity (piechart-opacity 1)
+          #:font-size (font-size 10)
         )
   (let*
     (
-      (ft (make-lonlat-xy-transformation #:lon0 150 #:lat0 60 #:proj 'merc #:kx (/ 20 1.7) #:ky (/ -0.00035 1.7) #:dy 352 #:dx 613)) ; mapbase: 1/1.7
-      (total-budget (λ (ps) (for/fold ((s 0)) ((p (hash-values ps))) (+ s (strnumber->number (hash-ref p "Общий бюджет" 0))))))
-      (place:total-budget (total-column-fgen "Общий бюджет"))
-      (place:total-federal-budget (total-column-fgen "Федеральный бюджет"))
-      (place:total-regional-budget (total-column-fgen "Общий местный бюджет"))
+      (colnames (if colnames
+                          (hash-union colnames colnames-default)
+                          colnames-default))
+      (total-budget (λ (ps) (for/fold ((s 0)) ((p (hash-values ps))) (+ s (strnumber->number (hash-ref p (@. colnames.total-budget) 0))))))
+      (place:total-budget (total-column-fgen (@. colnames.total-budget)))
+      (place:total-federal-budget (total-column-fgen (@. colnames.federal-budget)))
+      (place:total-regional-budget (total-column-fgen (@. colnames.regional-budget)))
       ;(gp-colors (make-gp-colors piechart-colors))
       (places
           (google-spreadsheet/get-tsv gdocs-places))
+      (places (hash-filter
+                  (λ (k v)
+                    (let ((type (hash-ref v "type" "none")))
+                      (indexof? '("city" "hamlet" "locality" "neighbourhood" "town" "village") type)))
+                  places))
       (projects (google-spreadsheet/get-tsv gdocs-projects))
         ;"https://docs.google.com/spreadsheets/d/1vvtBIgQL6Zcw41_TyrskmUkUVWU98EUdXkUq76KNuuA/pub?gid=256594381&single=true&output=tsv"))
-      (projects (hash-filter (λ (k v) (not (equal? (hash-ref v "_disabled") "1"))) projects))
+      (projects (hash-filter (λ (k v) (not (equal? (hash-ref v "_disabled" #f) "1"))) projects))
 
       (max-value-absolute (total-budget projects))
 
       ;; take only projects of certain programs
       (projects (if selected-programs
-                      (hash-filter (λ (k v) (indexof? selected-programs (hash-ref v "ГП"))) projects)
+                      (hash-filter (λ (k v) (indexof? selected-programs (hash-ref v (@. colnames.state-project)))) projects)
                       projects))
       ;; take only projects that are marked in some column by some values
       (projects (if filter-by
@@ -83,10 +105,12 @@
                     projects)
                   projects))
 
+      (projects-hash projects) ; for barchart legend and total numbers
+
       (max-value-relative (total-budget projects))
 
       (all-programs (map
-                        (λ (x) (hash-ref x "ГП"))
+                        (λ (x) (hash-ref x (@. colnames.state-project)))
                         (hash-values projects)))
       (programs-by-number (clist-sort (frequency all-programs) (λ (k1 v1 k2 v2) (> v1 v2))))
 
@@ -101,12 +125,14 @@
           (λ (x) (indexof? existed-programs (car x)))
           piechart-colors-clist))
 
+
       ;; group by place
       (projects (sort
                   (hash->list
                     (hash-group-by projects "Город"))
                   (λ (a b)
                     (> (place:total-budget a) (place:total-budget b)))))
+
       (projects (clean (λ (x) (equal? (car x) "")) projects)) ; remove projects without location
 
       (max-value (if (equal? max-value-type 'relative) max-value-relative max-value-absolute))
@@ -131,7 +157,9 @@
     )
       (str
         ;;; map background
-        (image 'xlink:href "fareast_greyscale_3x.png" 'x 0 'y 0 'width "1191" 'height "842")
+        (when/str
+          geobase
+          (image 'xlink:href geobase 'x 0 'y 0 'width "1191" 'height "842"))
 
         ;;; title
         (rect 'x (@. title.x) 'y (@. title.y) 'width (@. title.w) 'height (@. title.h) 'style "fill: white; opacity: 0.8")
@@ -181,11 +209,11 @@
                     'style (format "~a; text-anchor: middle" text-style-1))
                   i)
               ))))
+        ;;; legend II
         (when/str legend2
-          ;;; legend II
           (rect 'x (@. legend2.x) 'y (@. legend2.y) 'width (@. legend2.w) 'height (+ 100 (* 10 2 (length existed-programs))) 'style "stroke: #f2f2e8; stroke-width: 3; fill: none;") ; fill: #f2f2e8;
           (text
-            (@ 'x (+ (@. legend2.x) 30) 'y (+ (@. legend2.y) 20) 'style "font-size: 16; font-weight: bold; font-family: Calibri; fill: #828281")
+            (@ 'x (+ (@. legend2.x) 30) 'y (+ (@. legend2.y) 20) 'style (format "font-size: ~a; font-weight: bold; font-family: Calibri; fill: #828281" font-size))
             (@. legend2.title))
           (let* ((l (length programs-colors)))
             (for/fold/idx
@@ -196,7 +224,7 @@
                   (x (+ (if (< $idx (/ l 2)) 10 (/ (@. legend2.w) 2.0))
                         (@. legend2.x)))
                   (w 24)
-                  (h 14)
+                  (h 12)
                   (gap 4)
                   (y (+ (if (< $idx (/ l 2))
                           (@. legend2.y)
@@ -212,7 +240,50 @@
                   s
                   (g
                     (rect 'x x 'y y 'width w 'height h 'style style)
-                    (text (@ 'x text-x 'y text-y 'style "font-size: 10") txt)))))))
+                    (text (@ 'x text-x 'y text-y 'style text-style-2) txt)))))))
+
+        ;; barchart legend
+        (when/str barchart-legend
+          (letrec ((aggregate-projects (λ (projects f)
+                                          (for/fold
+                                            ((s null))
+                                            (((k v) projects))
+                                            (f s v))))
+                (agg-programs-budget (λ (s v)
+                                        (cond
+                                          ((null? s) (agg-programs-budget (apply hash (interleave all-programs (gen 0 (length all-programs)))) v))
+                                          (else
+                                            (let* (
+                                                  (cur-gp (hash-ref v (@. colnames.state-project) "?"))
+                                                  (cur-budget (hash-ref s cur-gp 0))
+                                                  (res (hash-substitute s (cons cur-gp (+ cur-budget (strnumber->number (hash-ref v (@. colnames.total-budget) 0)))))))
+                                              res)))))
+                (ps (hash->sorted-clist (aggregate-projects projects-hash agg-programs-budget))))
+            (for/fold/idx
+              (s "")
+              (p ps)
+              (let* ((x0 900)
+                    (y0 400)
+                    (label-x 200)
+                    (gap 3)
+                    (h 15)
+                    (base-w 20)
+                    (w (cdr p))
+                    (w (+ base-w (int (/ w 2000))))
+                    (y (+ y0 (* (+ h gap) $idx)))
+                    (yt (+ y (* h 0.7)))
+                    )
+                (str
+                  s
+                  (text (@ 'x (+ x0 -10) 'y yt 'style (format "font-family: Arial; font-size: ~a; font-weight: normal; text-anchor: end" font-size)) (car p))
+                  (rect 'x x0 'y y 'height h 'width w 'style (format "fill: ~a" (clist-ref piechart-colors-clist (car p) "black")))
+                  (line 'x1 (+ x0 base-w) 'y1 y 'x2 (+ x0 base-w) 'y2 (+ y h) 'style "stroke-width: 1; stroke: white")
+                  (text (@ 'x (+ x0 w 10) 'y yt 'style (format "font-family: Arial; font-weight: bold; font-size: ~a" font-size)) (inexact->exact (ceiling (cdr p))))
+                )
+              )
+            )
+          )
+        )
 
         ;;; objects on the map
         (hash-ref
@@ -222,7 +293,7 @@
             (let*
                 ((k (car p))
                 (v (cdr p))
-                (place (hash-ref places k kukuevsk))
+                (place (find-place places k kukuevsk))
                 ;(x (->number (hash-ref place "x" 0)))
                 ;(y (->number (hash-ref place "y" 0)))
                 (lon (->number (hash-ref place "lon" 0)))
@@ -230,8 +301,8 @@
                 (xy (ft (cons lon lat)))
                 (x (car xy))
                 (y (cdr xy))
-                (w (* 2.0 (text-length k)))
-                (h (* 2.0 (text-height k)))
+                (w (* 2.0 (text-length k #:font-size font-size)))
+                (h (* 2.0 (text-height k #:font-size font-size)))
                 (style (format "opacity: ~a; stroke: black; stroke-width: 0.5" piechart-opacity))
                 (data
                     (sort
@@ -239,14 +310,14 @@
                         (λ (b)
                           (hash
                             'color
-                              (hash-ref (make-hash programs-colors) (hash-ref b "ГП") "#000000")
+                              (hash-ref (make-hash programs-colors) (hash-ref b (@. colnames.state-project)) "#000000")
                             'data-parameter
                               (strnumber->number (hash-ref b piechart-by-category))))
                         (hash-values v))
                       (λ (c d) (> (hash-ref c 'data-parameter) (hash-ref d 'data-parameter)))))
                 (data-parameters (map (λ (x) (hash-ref x 'data-parameter)) data))
                 (project-descriptions (map
-                                        (λ (x) (cons (hash-ref x piechart-by-category 0) (hash-ref x "Краткое описание проекта")))
+                                        (λ (x) (cons (hash-ref x piechart-by-category 0) (hash-ref x (@. colnames.project-description))))
                                         (hash-values v)))
                 (colors (map (λ (x) (hash-ref x 'color)) data))
                 (parameter-sum (apply + data-parameters))
@@ -272,11 +343,11 @@
                 (total-budget (int (place:total-budget p)))
                 (is-special (indexof? specials k))
                 (text-style (if is-special text-style-0 text-style-1))
-                (dyy (if is-special (* 2 dyy) dyy))
+                (dyy (if is-special (* 1.8 dyy) dyy))
 
                 (svg-str (hash-ref s 's))
                 )
-              ;(when (equal? k "Депутатский") (println gp-colors)) ;)println (hash-ref gp-colors (hash-ref (hash-ref v "508") "ГП") "#000000")
+              ;(when (equal? k "Депутатский") (println gp-colors)) ;)println (hash-ref gp-colors (hash-ref (hash-ref v "508") (@. colnames.state-project)) "#000000")
                   ;(printf "~a~n" (filter (λ (x) (indexof? (list "Находка" "Чугуевка") (car x))) debugs))
                   ;(when (and
                   ;        (indexof? (map car debugs) "Находка" )
@@ -302,11 +373,11 @@
                                 #:style-circle "stroke: black; stroke-width: 0.5; fill: none"
                                 #:style style)
                               (g
-                                (line 'x1 x 'y1 y 'x2 (+ x dx) 'y2 (+ y dy) 'style "stroke-width: 0.5; stroke: black")
+                                (line 'x1 x 'y1 y 'x2 (+ x dx) 'y2 (+ y dy) 'style "stroke-width: 0.3; stroke: black; opacity: 0.42")
                                 (text (@ 'x (+ x dx dxx) 'y (+ y dy dyy) 'style (format "~a; text-anchor: ~a" text-style text-anchor))
                                   k)
                                 (text
-                                  (@ 'x (+ x dx dxx) 'y (+ y dy dyy 10) 'style (format "~a; font-weight: bold; fill: #900; text-anchor: ~a" text-style-1 text-anchor)) total-budget)
+                                  (@ 'x (+ x dx dxx) 'y (+ y dy dyy font-size) 'style (format "~a; font-weight: bold; fill: #900; text-anchor: ~a" text-style-1 text-anchor)) total-budget)
                                 (when/str project-description
                                   (let ((anchor-k (λ (x)
                                                     (case x

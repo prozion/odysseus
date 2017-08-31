@@ -2,15 +2,11 @@
 
 (require compatibility/defmacro)
 (require "../lib/all.rkt")
+(require "geometry.rkt")
 
 (provide (all-defined-out))
 
 ;; geometric functions
-
-(define (distance x1 y1 x2 y2)
-  (sqrt (+
-          (sqr (- x2 x1))
-          (sqr (- y2 y1)))))
 
 (define (get-proportion interval value max-value)
   (let* ((inverse (> (car interval) (cdr interval)))

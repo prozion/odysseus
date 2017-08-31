@@ -34,8 +34,10 @@
             (res (bytes->list (string->bytes/utf-8 res)))
             (res (exclude-all (exclude-all res 160) 194))
             (res (bytes->string/utf-8 (list->bytes res)))
-            (res (string->number res)))
+            (res (string->number res))
+            (res (if res res 0)))
         res))
+    ((false? x) 0)
     (else x)))
 
 (define-macro (when/str condition . expression)

@@ -49,11 +49,16 @@
 (define (opt/exclude-all seq el)
   (cond
     ((string? seq)
-      (string-replace seq el ""))
+        (string-replace seq el ""))
     (else (exclude-all seq el))))
 
 (define (opt/split seq sep)
   (cond
     ((string? seq)
-      (string-split seq sep))
+      (let ((seq (if (regexp-match ;; after fail to read the last empty field of _disabled in the googledoc table
+                        (pregexp (format "[^~a]~a$" sep sep))
+                        seq)
+                    (string-append seq sep)
+                    seq)))
+        (string-split seq sep)))
     (else (split seq sep))))

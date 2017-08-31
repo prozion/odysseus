@@ -136,6 +136,9 @@
                 (+ index el-passed 1))))))
   (indexof-all-iter seq el empty 0))
 
+(define (count-element seq el)
+  (length (indexof-all seq el)))
+
 (define (regexp-indexof? seq regxp)
   (ormap
     (λ (x) (regexp-match? (pregexp regxp) x))

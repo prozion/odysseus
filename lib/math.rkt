@@ -73,3 +73,8 @@
 
 (define (sec x)
   (/ 1 (cos x)))
+
+(define (distance x1 y1 x2 y2)
+  (sqrt (+
+          (sqr (- x2 x1))
+          (sqr (- y2 y1)))))

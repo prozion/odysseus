@@ -21,3 +21,8 @@
         n
         dr) ; start sum value
       365.0)))
+
+; TODO: extract travel memories:
+(define (extract-by-tags timeline tags)
+  (for (((k v) timeline))
+    (println (last v))))

@@ -58,12 +58,15 @@
 (define (clist-ref clst k (not-found #f))
   (cond ((null? clst) not-found)
         ((equal? k (car (car clst))) (cdr (car clst)))
-        (else (clist-ref (cdr clst) k not-found)))) 
+        (else (clist-ref (cdr clst) k not-found))))
 
 (define (clist-sort clst f)
   (sort
     clst
     (λ (a b) (f (car a) (cdr a) (car b) (cdr b)))))
+
+(define (hash->sorted-clist h)
+  (clist-sort (hash->list h) (λ (cara cdra carb cdrb) (> cdra cdrb))))        
 
 (define (pairwise lst1 lst2)
   (for/fold
