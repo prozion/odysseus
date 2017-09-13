@@ -5,6 +5,7 @@
 
 (provide (all-defined-out))
 
+; calculates mass of molecule
 (define (mol/mass mol)
   (let* ((flatten-mol (flatten mol))
         (flatten-mol (clean
@@ -35,7 +36,8 @@
 ; '(C (== O) (-- -OH))
 (define -COOH `(C (== O) (-- ,-OH))) ; carboxyl
 
-(define citrate `(C (-- ,-OH) (--  ,-COOH)
+(define citrate `(C (-- ,-OH)
+                    (--  ,-COOH)
                     (-- C (-- H) (-- H) (--  ,-COOH))
                     (-- C (-- H) (-- H) (--  ,-COOH))))
 
@@ -51,3 +53,19 @@
                         (-- (C (-- H)
                           (== (C (-- H)
                 (-- C/a)))))))))))))
+
+; implement chaining?
+ ;like: (chain
+ ;        (chain -OH -- C -- -COOH)
+ ;        --
+ ;        (chain -CH2 -- -COOH)
+ ;        --
+ ;        (chain -CH2 -- -COOH))
+ ; or
+ ;      (~~
+ ;        (~~ -OH -- C+ -- -COOH)
+ ;        --
+ ;        (~~ -CH2+ -- -COOH)
+ ;        --
+ ;        (~~ -CH2+ -- -COOH))
+ ; where + after the symbol of chemical element denotes a point in which chain attaches to its next link

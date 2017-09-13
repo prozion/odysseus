@@ -19,6 +19,7 @@
 
 (define BONDS (list '-- '== '≡≡ '··))
 
+; remove postfix modifiers to get pure element
 (define (strip-off sym)
   (string->symbol (nth (split (symbol->string sym) "/") 1)))
 

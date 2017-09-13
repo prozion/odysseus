@@ -11,10 +11,15 @@
   ;(check-equal? (format-n "hello ~a" "world") "hello world")
   ;(check-equal? (format-n "hello ~l(, )" '("world" "verden")) "hello world, verden")
 
-(check-equal? (strnumber->number "3") 3)
-(check-= (strnumber->number "3,0") 3.0 1e-6)
-(check-= (strnumber->number "2 100,50") 2100.5 1e-6)
+  (check-equal? (strnumber->number "3") 3)
+  (check-= (strnumber->number "3,0") 3.0 1e-6)
+  (check-= (strnumber->number "2 100,50") 2100.5 1e-6)
 
-(check-equal? (when/str (> 3 2) (format "~a ~a " "hello" 3) "world") "hello 3 world")
-(check-equal? (when/str (< 3 2) (format "~a ~a " "hello" 3) "world") "")
+  (check-equal? (format-number "d ddd" 3504) "3 504")
+  (check-equal? (format-number "ddd ddd" 38504) "38 504")
+  (check-equal? (format-number "ddd" 38504) "38504")
+  (check-equal? (format-number "d. d. d" 38504) "385. 0. 4")
+
+  (check-equal? (when/str (> 3 2) (format "~a ~a " "hello" 3) "world") "hello 3 world")
+  (check-equal? (when/str (< 3 2) (format "~a ~a " "hello" 3) "world") "")
 )

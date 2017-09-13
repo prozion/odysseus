@@ -62,9 +62,9 @@
               (lon (strnumber->number (hash-ref ga-place "lon" 0)))
               (lat (strnumber->number (hash-ref ga-place "lat" 0)))
               (xy (ft (cons lon lat)))
-              (x0 (car xy))
+              (x (car xy))
               (y (cdr xy))
-              (x (- x0 bars-width))
+              ;(x (- x0 bars-width))
               (budgets (for/fold
                           ((bs (cons 0 0))) ; state-budgets . private-budgets
                           ((p (hash-values (hash-ref projects-by-ga ga))))
@@ -72,28 +72,48 @@
                             (+ (car bs) (strnumber->number (hash-ref p (@. colnames.total-budget) "0")))
                             (+ (cdr bs) (strnumber->number (hash-ref p (@. colnames.private-budget) "0"))))))
               (scale-factor (* 1.0 scale-factor))
-              (w-state (/ (car budgets) scale-factor))
-              (w-private (/ (cdr budgets) scale-factor))
+              (state-budget (car budgets))
+              (private-budget (cdr budgets))
+              (w-state (/ state-budget scale-factor))
+              (w-private (/ private-budget scale-factor))
+              (state-budget-print (format-number "ddd ddd ddd" (int state-budget)))
+              (private-budget-print (format-number "ddd ddd ddd" (int private-budget)))
+              (state-color (first bi-colors))
+              (private-color (second bi-colors))
+              (r (sqrt (+ w-state w-private)))
+              (ga-name (hash-ref ga-place "ga" "???"))
               )
-                (when/str
-                  (or (> (car budgets) 0) (> (cdr budgets) 0))
-                      ;(g (@ 'transform (svg/rotate rotation x y))
-                        ;(circle 'cx x 'cy y0 'r 10 'style "fill: #666; opacity: 0.4")
-                        ;(rect 'x (- x w-state) 'y y 'width w-state 'height bars-width 'style (format "fill: ~a; ~a" (nth bi-colors 1) bars-style))
-                        ;(rect 'x x 'y y 'width w-private'height bars-width 'style (format "fill: ~a; ~a" (nth bi-colors 2) bars-style)))
-                      (g
-                        (circle 'cx x0 'cy y 'r 7 'style "fill: none; stroke: #666; stroke-width: 1.2; opacity: 0.8")
-                        (rect 'x x 'y (- y w-state) 'width bars-width 'height w-state  'style (format "fill: ~a; ~a" (nth bi-colors 1) bars-style))
-                        (rect 'x (+ x bars-width) 'y (- y w-private) 'width bars-width 'height w-private  'style (format "fill: ~a; ~a" (nth bi-colors 2) bars-style)))
-                      ;(g
-                      ;  (circle 'cx x 'cy y 'r (sqrt w-state) 'style (format "fill: ~a; ~a" (nth bi-colors 1) bars-style))
-                      ;  (circle 'cx x'cy y 'r (sqrt w-private) 'style (format "fill: ~a; ~a" (nth bi-colors 2) bars-style)))
-                      ;(piechart
-                      ;  #:x x
-                      ;  #:y y
-                      ;  #:r (sqrt (+ w-state w-private))
-                      ;  #:data (list w-private w-state)
-                      ;  #:gap 1
-                      ;  #:colors (reverse bi-colors)
-                      ;  #:style "opacity: 0.8;")
-              )))))))
+                (str
+                  ;(for/fold/idx
+                  ;  (s "")
+                  ;  (i '(1000 5000 10000 20000 50000 100000 500000 1000000))
+                  ;  (str
+                  ;    s
+                  ;    (text (@ 'x 2050 'y (* 50 $idx)) i)
+                  ;    (circle 'cx 2000 'cy (* 50 $idx) 'r (sqrt (/ i scale-factor)) 'style "fill: green")))
+                  (when/str
+                    (or (> (car budgets) 0) (> (cdr budgets) 0))
+                        ;(g (@ 'transform (svg/rotate rotation x y))
+                          ;(circle 'cx x 'cy y0 'r 10 'style "fill: #666; opacity: 0.4")
+                          ;(rect 'x (- x w-state) 'y y 'width w-state 'height bars-width 'style (format "fill: ~a; ~a" (nth bi-colors 1) bars-style))
+                          ;(rect 'x x 'y y 'width w-private'height bars-width 'style (format "fill: ~a; ~a" (nth bi-colors 2) bars-style)))
+                        ;(g
+                        ;  (circle 'cx x0 'cy y 'r 7 'style "fill: none; stroke: #666; stroke-width: 1.2; opacity: 0.8")
+                        ;  (rect 'x x 'y (- y w-state) 'width bars-width 'height w-state 'style (format "fill: ~a; ~a" (nth bi-colors 1) bars-style))
+                        ;  (rect 'x (+ x bars-width) 'y (- y w-private) 'width bars-width 'height w-private  'style (format "fill: ~a; ~a" (nth bi-colors 2) bars-style)))
+                        ;(g
+                        ;  (circle 'cx x 'cy y 'r (sqrt w-state) 'style (format "fill: ~a; ~a" (nth bi-colors 1) bars-style))
+                        ;  (circle 'cx x'cy y 'r (sqrt w-private) 'style (format "fill: ~a; ~a" (nth bi-colors 2) bars-style)))
+                        (g
+                          (text (@ 'x (+ x 3) 'y (- y 3) 'style "font-size: 8; font-family: Arial") ga-name)
+                          (text (@ 'x (+ x 3) 'y (+ y 10) 'style (format "font-size: 8; font-weight: bold; font-family: Arial; fill: ~a" (color/shadow private-color -30))) private-budget-print)
+                          (text (@ 'x (+ x 5 (text-length private-budget-print #:font-size 8)) 'y (+ y 10) 'style (format "font-size: 8; font-weight: bold; font-family: Arial; fill: ~a" (color/shadow state-color -30))) state-budget-print)
+                          (piechart
+                            #:x x
+                            #:y y
+                            #:r r
+                            #:data (list w-private w-state)
+                            #:gap 1
+                            #:colors (reverse bi-colors)
+                            #:style "opacity: 0.5;"))
+              ))))))))

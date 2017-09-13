@@ -30,6 +30,9 @@
   ;(circle 'cx x 'cy y 'r r ...)
   (let* (
           (data (if data data (gen 1 12)))
+          (min-data (apply min (filter (λ (x) (> x 0)) data)))
+          (instead-of-zero (* min-data 1e-6))
+          (data (map (λ (x) (if (<= x 0) instead-of-zero x)) data))
           (colors
             (if (list? colors)
               colors

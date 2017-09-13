@@ -40,5 +40,18 @@
     ((false? x) 0)
     (else x)))
 
+(define (format-number format-str number)
+  (define (format-number-iter format-str number-str res-str)
+      (cond
+        ((null? number-str) res-str)
+        ((null? format-str) (str (implode (reverse number-str)) res-str))
+        (else
+          (let ((cur-f (car format-str))
+                (cur-d (car number-str)))
+            (cond
+              ((equal? cur-f "d") (format-number-iter (cdr format-str) (cdr number-str) (str cur-d res-str)))
+              (else (format-number-iter (cdr format-str) number-str (str cur-f res-str))))))))
+  (format-number-iter (reverse (split format-str)) (reverse (split (number->string number))) ""))
+
 (define-macro (when/str condition . expression)
   `(if ,condition (string-append ,@expression) ""))
