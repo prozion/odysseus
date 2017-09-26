@@ -40,10 +40,12 @@
     ((false? x) 0)
     (else x)))
 
-(define (format-number format-str number)
+(define (format-number format-str number #:filler (filler ""))
   (define (format-number-iter format-str number-str res-str)
       (cond
-        ((null? number-str) res-str)
+        ((null? number-str) (str
+                              (dupstr filler (count-element format-str "d"))
+                              res-str))
         ((null? format-str) (str (implode (reverse number-str)) res-str))
         (else
           (let ((cur-f (car format-str))

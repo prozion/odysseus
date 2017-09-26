@@ -41,7 +41,11 @@
   (check-false (d< "07.04.2017" "28.08.1979"))
 
   (check-false (d= "07.04.2017" "28.08.1979"))
-  (check-true (d= "7.04.2017" "07.04.2017")) 
+  (check-true (d= "7.04.2017" "07.04.2017"))
+
+  (check-equal? (day-month "07.04.2017") "07.04")
+  (check-equal? (day-month "06.06.198x") "06.06")
+  (check-equal? (day-month "06.10") "06.10")
 
   ;(check-equal? (datetime-diff "15.03.2017 1:56:48" "07.04.2017 4:12:50") ...)
 )

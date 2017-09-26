@@ -3,6 +3,8 @@
 (require "base.rkt")
 (require "type.rkt")
 (require "seqs.rkt")
+(require "strings.rkt")
+(require "regexp.rkt")
 
 (provide (all-defined-out))
 
@@ -124,7 +126,7 @@
         (f (fract x))
         (m (*f 60 f))
         (s (*f 3600 (- f (/ m 60)))))
-    (list i m s)))        
+    (list i m s)))
 
 ; 2017-01-19T18:00:00 -> (hash 'year "2017" 'month "01" 'day "19" 'hour "18" 'min "00" 'sec "00")
 (define (parse-time timestr)
@@ -145,3 +147,19 @@
 (define (time-reformat timestr)
   (th->string
     (parse-time timestr)))
+
+(define (current-date)
+  (let* ((curdate (seconds->date (current-seconds)))
+        (day (format-number "dd" (date-day curdate) #:filler "0"))
+        (month (format-number "dd" (date-month curdate) #:filler "0"))
+        (year (date-year curdate)))
+    (format "~a.~a.~a" day month year)))
+
+(define (day-month adate)
+  (let* ((parts (get-matches
+                  "([0-9x]{2}).([0-9x]{2})(.([0-9x]{4}[~?]?))?"
+                  adate))
+        (parts (if (notnil? parts) (car parts) #f)))
+    (if parts
+      (str (second parts) "." (third parts))
+      "")))
