@@ -12,11 +12,11 @@
       (process
         (in (simple-chemical A))
           []
-        (out (simple-chemical-B)))
+        (out (simple-chemical B)))
       (process
         (in (simple-chemical B))
           []
-        (out (simple-chemical-C)))))
+        (out (simple-chemical C)))))
 
   (check-hash-equal?
     (run-pd rules (hash 'A 1 'B 0 'C 0))
