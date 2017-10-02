@@ -1,0 +1,28 @@
+#lang racket
+
+(require "../../sbgn/pd.rkt")
+
+(define ATP (simple-chemical ATP))
+(define ADP (simple-chemical ADP))
+
+(sbgn/pd
+  (process
+    (in (macromolecule RAF #:P #f) ATP)
+      [(catalysis (macromolecule RAS #:tag 'RAS))]
+    (out (macromolecule RAF #:P #t) ADP))
+  (process
+    (in (macromolecule MEK #:P1 #f #:P2 #f) ATP)
+      [(catalysis (macromolecule RAF #:P #t))]
+    (out (macromolecule MEK #:P1 #t #:P2 #f) ADP))
+  (process
+    (in (macromolecule MEK #:P1 #t #:P2 #f) ATP)
+      [(catalysis (macromolecule RAF #:P #t))]
+    (out (macromolecule MEK #:P1 #t #:P2 #t) ADP))
+  (process
+    (in (macromolecule MAPK #:P1 #f #:P2 #f) ATP)
+      [(catalysis (macromolecule MEK #:P1 #t #:P2 #t))]
+    (out (macromolecule ERK #:P1 #t #:P2 #f) ADP))
+  (process
+    (in (macromolecule ERK #:P1 #t #:P2 #f) ATP)
+      [(catalysis (macromolecule MEK #:P1 #t #:P2 #t))]
+    (out (macromolecule ERK #:P1 #t #:P2 #t #:tag 'ERK) ADP)))
