@@ -2,7 +2,6 @@
 
 (require "../lib/seqs.rkt")
 (require "../lib/base.rkt")
-(require "../lib/controls.rkt")
 
 (provide (all-defined-out))
 
@@ -30,3 +29,10 @@
       #"["
       (hash-ref colors c #"37")
       #"m")))
+
+(define-syntax (pretty-catch stx)
+  (syntax-case stx ()
+    ((_ place code)
+      #'(with-handlers
+          ((exn:fail? (λ (err) (set-text-color 'red) (printf "error in ~a: ~a~n" place (exn-message err)) (set-text-color 'default) (exit))))
+          code))))

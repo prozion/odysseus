@@ -42,11 +42,11 @@
           (else #t))))
     (>plain-n x y (first-pri))))
 
-(define (fractize a b n #:crop (crop #f))
-  (let ((res (fractize-2 a b n 0.3)))
-    (if crop
-      (take res n)
-      res)))
+(define-catch (fractize a b n #:crop (crop #f))
+    (let ((res (fractize-2 a b n 0.3)))
+      (if crop
+        (take res n)
+        res)))
 
 ; (fractize 1 16 3) -> '(5 10 15)
 ;(define (fractize-1 a b n)
@@ -56,16 +56,19 @@
 ;          [start-a (car plains)])
 ;    (range start-a b step)))
 
-(define (fractize-2 a b n p)
-  (let* (
-          [delta (*c (- b a) p)]
-          [plains (sort (range a (+ a delta 1)) >plain)]
-          [steps (filter
-                    (λ (x) (and
-                              (<= a (+ a (* x (dec n))) b)
-                              (<= (- b delta) (+ a (* x n)) (+ b delta))))
-                    (sort (range 1 (inc delta)) >plain))])
-      (range (car plains) (+ b delta 1) (car steps))))
+(define-catch (fractize-2 a b n p)
+    (let* (
+            [delta (*c (- b a) p)]
+            [plains (sort (range a (+ a delta 1)) >plain)]
+            [steps1 (sort (range 1 (inc delta)) >plain)]
+            [steps2 (filter
+                      (λ (x) (and
+                                (<= a (+ a (* x (dec n))) b)
+                                (<= (- b delta) (+ a (* x n)) (+ b delta))))
+                      steps1)]
+            [steps (if (nil? steps2) steps1 steps2)])
+        (println steps1)
+        (range (car plains) (+ b delta 1) (car steps))))
 
 (define (find-first-digit x)
   (cond ((= x 0) 0)

@@ -50,7 +50,9 @@
   font-size)
 
 (define (h-centrify w t #:font-family (font-family FONT_FAMILY))
-  (let ([tl (text-length t #:font-family font-family)])
+  (let* ( (t (if (hash? t) (hash-ref t 'text "") t))
+          (font-size (if (hash? t) (hash-ref t 'font-size FONT_SIZE) FONT_SIZE))
+          [tl (text-length t #:font-size font-size #:font-family font-family)])
     (/r (- w tl) 2)))
 
 (define (v-centrify h #:font-size (font-size FONT_SIZE))

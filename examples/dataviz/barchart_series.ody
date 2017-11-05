@@ -1,0 +1,46 @@
+; build-svg -o heatmap.ody result.svg
+
+(let*
+    (
+      (y-gap 5)
+      (MAX 120)
+      (cols 256)
+      (strs 64)
+      (H (/r 1000 strs))
+      (data (gen
+              (gen (random (+ (*r MAX 0.1) (random (*r 0.9 MAX)))) cols)
+              strs)
+            ))
+      ;(data (list
+      ;        (gen (random MAX) 12)
+      ;        (gen (random MAX) 12)
+      ;        (gen (random MAX) 12)
+      ;        (gen (random 10) 12)
+      ;        (gen (random MAX) 12)
+      ;        (gen (random 50) 12))))
+  (.svg
+    (g
+      (car
+        (for/fold/idx
+          (s (cons "" 0))
+          (i data)
+          (let ((height (*r H (/ (apply max i) MAX))))
+            (catch
+                "barcharts_series.ody"
+                (cons
+                  (str
+                    (car s)
+                    (barchart
+                      #:height height
+                      #:width 1800
+                      #:y0 (cdr s)
+                      ;#:y-ticks '(0 25 50 75 100)
+                      #:y-ticks '(0 100)
+
+                      #:data (nth data (inc $idx))
+                      #:max-extent 100
+
+                      #:colors '("#74B200")
+                      #:gap 1))
+                  (+ height (cdr s) y-gap)))
+    ))))))

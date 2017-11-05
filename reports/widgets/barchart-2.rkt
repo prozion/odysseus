@@ -3,6 +3,7 @@
 (require compatibility/defmacro)
 (require "../../graphics/svg.rkt")
 (require "../../graphics/fonts.rkt")
+(require "../../graphics/console.rkt")
 (require "../../graphics/layout.rkt")
 (require "../../lib/all.rkt" (for-syntax "../../lib/syntax.rkt" "../../lib/hash.rkt" "../../lib/controls.rkt"))
 
@@ -14,11 +15,13 @@
   (let* ( [@args (zor (apply hash body) (hash))]
           [data (hash-ref @args 'data null)]
           [title (hash-ref @args 'title "")]
+          [scales (hash-ref @args 'scales (hash))]
           [layout (hash-ref @args 'layout (hash))]
           [labels (hash-ref @args 'labels (hash))]
           [styles (hash-ref @args 'styles (hash))]
           [normalize-mode (hash-ref @args 'normalize-mode ''trunc-at-zero)])
     `(barchart-f
+        #:scales ,scales
         #:layout ,layout
         #:labels ,labels
         #:styles ,styles
@@ -33,6 +36,7 @@
 ; $layout = (widget: (x y w h), title: (h pos[top|bottom]), y-axis: (w pos[left|right]), x-axis: (h pos[top|bottom]), bars: (gap))
 ; $styles = (bars: (class), title: (font-family font-weight font-size), y-axis-text (font-family font-weight font-size), x-axis-text (font-family font-weight font-size)
 (define (barchart-f
+            #:scales @scales
             #:layout @layout
             #:labels @labels
             #:styles @styles
@@ -63,6 +67,8 @@
             'x-axis (hash 'font-size 12))]
         [@styles (hash-union @styles default-styles)]
 
+        [max-extent (hash-path @layout 'max-extent)]
+
         [widget-x (hash-path @layout 'widget 'x)]
         [widget-y (hash-path @layout 'widget 'y)]
         [widget-w (hash-path @layout 'widget 'w)]
@@ -88,6 +94,7 @@
         [y-axis-label-direction (hash-path @labels 'y-axis 'label-direction)]
         [y-axis-start (hash-path @labels 'y-axis 'start)]
         [y-axis-tick-offset (@. @labels.y-axis.tick-offset)]
+        [y-ticks (hash-path @labels 'y-axis 'ticks)]
 
         [x-axis-pos (hash-path @layout 'x-axis 'pos)]
         [x-axis-x (the y-axis-pos 'left Y-AXIS_W)]
@@ -137,7 +144,7 @@
                 ((alist? data) (seconds data))
                 ((clist? data) (map cdr data))
                 (else data))]
-        [data-max (apply max data)]
+        [data-max (or max-extent (apply max data))]
         [data-min (apply min data)]
         ;; data normalization, first step
         [data-n1
@@ -155,101 +162,109 @@
 
     ;; barchart widget
     (g (@ 'class "barchart" 'transform (svg/translate widget-x widget-y))
-
       ;; title block
-      (unless (or (not title) (equal? title-pos 'hidden))
-        (g
-          (@ 'id "title" 'transform (svg/translate title-x title-y))
-          (text (@
-                  'x (h-centrify title-w (@ 'text title 'font-size title-font-size))
-                  'y (v-centrify TITLE_H title-font-size)
-                  'font-size title-font-size)
-                title)))
+      (catch
+        "barchart-2/title block"
+        (unless (or (not title) (equal? title-pos 'hidden))
+          (g
+            (@ 'id "title" 'transform (svg/translate title-x title-y))
+            (text (@
+                    'x (h-centrify title-w title) ;(@ 'text title 'font-size title-font-size))
+                    'y (v-centrify TITLE_H #:font-size title-font-size)
+                    'font-size title-font-size)
+                  title))))
 
       ;; y-axis block
-      (unless (equal? y-axis-pos 'hidden)
-        (g
-          (@ 'id "y-axis" 'transform (svg/translate y-axis-x y-axis-y))
-          (let* ( (label-x 0)
-                  (label-y (+ (v-centrify y-axis-h) (/r (text-length y-axis-label #:font-size y-axis-font-size) 2)))
-                  (ang (the y-axis-label-direction 'vertical "-90")))
-
-            (str
-              (text (@ 'x label-x 'y label-y 'font-size y-axis-font-size
-                        'transform (svg/rotate ang label-x label-y)) ; TODO: make it more elegant, don't transform when not vertical
-                    y-axis-label)
-
-              (let ((ticks (fractize
-                              (or y-axis-start (apply min data-n1))
-                              (apply max data-n1)
-                              (inc (/c bars-h 60)))))
-
-                (for/fold/idx
-                  (s "")
-                  (tick ticks)
-                    (let* ((tick-y (- y-axis-h (* scale-factor tick)))
-                          (tick-w (if (> Y-AXIS_W 60) 15 (* 0.25 Y-AXIS_W)))
-                          (tick-offset y-axis-tick-offset)
-                          (tick-label-offset (+ (* 2 tick-offset) tick-w))
-                          (tick-label-length (text-length (str tick) #:font-size y-axis-font-size)))
-                      (if (> tick-y 0)
-                        (str s
-                          (text (@
-                                  'x (- Y-AXIS_W tick-label-offset tick-label-length)
-                                  'y (+ tick-y (/r y-axis-font-size 2))
-                                  'font-size y-axis-font-size) (str tick))
-                          (line 'x1 (- Y-AXIS_W tick-w tick-offset)
-                                'y1 tick-y
-                                'x2 (- Y-AXIS_W tick-offset)
-                                'y2 tick-y))
-                        s))))))))
+      (catch
+        "barchart-2/y-axis block"
+        (unless (equal? y-axis-pos 'hidden)
+          (g
+            (@ 'id "y-axis" 'transform (svg/translate y-axis-x y-axis-y))
+            (let* ( (label-x 0)
+                    (label-y (+ (v-centrify y-axis-h) (/r (text-length y-axis-label #:font-size y-axis-font-size) 2)))
+                    (ang (the y-axis-label-direction 'vertical "-90")))
+              (str
+                (text (@ 'x label-x 'y label-y 'style (format "font-size: ~a" y-axis-font-size)
+                          'transform (svg/rotate ang label-x label-y)) ; TODO: make it more elegant, don't transform when not vertical
+                      y-axis-label)
+                (let ((ticks (if y-ticks
+                                  y-ticks
+                                  (fractize
+                                    (or y-axis-start (apply min data-n1))
+                                    (apply max data-n1)
+                                    (inc (/c bars-h 60))))))
+                  (catch
+                    "barchart-2/y-axis block/for block"
+                    (for/fold/idx
+                      (s "")
+                      (tick ticks)
+                        (let* ((tick-y (- y-axis-h (* scale-factor tick)))
+                              (tick-w (if (> Y-AXIS_W 60) 15 (* 0.25 Y-AXIS_W)))
+                              (tick-offset y-axis-tick-offset)
+                              (tick-label-offset (+ (* 2 tick-offset) tick-w))
+                              (tick-label-length (text-length (str tick) #:font-size y-axis-font-size)))
+                          (if (>= tick-y 0)
+                            (str s
+                              (text (@
+                                      'x (- Y-AXIS_W tick-label-offset tick-label-length)
+                                      'y (+ tick-y (/r y-axis-font-size 2))
+                                      'style (format "font-size: ~a" y-axis-font-size)) (str tick))
+                              (line 'x1 (- Y-AXIS_W tick-w tick-offset)
+                                    'y1 tick-y
+                                    'x2 (- Y-AXIS_W tick-offset)
+                                    'y2 tick-y))
+                            s))))))))))
 
       ;; x-axis block
-      (unless (equal? x-axis-pos 'hidden)
-        (g
-          (@ 'id "x-axis" 'transform (svg/translate x-axis-x  x-axis-y))
-          (text (@
-                  'x (h-centrify x-axis-w (@ 'text x-axis-label 'font-size x-axis-font-size))
-                  'y X-AXIS_H
-                  'font-size x-axis-font-size)
-                x-axis-label)
-          (unless (nil? labels)
-            (for/fold/idx
-              (s "")
-              (lbl (map str labels))
-                (str s
-                    (let ((x (+
-                                (* $idx bar-w)
-                                (* (dec $idx) bars-gap)))
-                                ;(h-centrify bar-w (@ 'text lbl 'font-size x-axis-font-size))))
-                          (y (+ x-axis-tick-offset x-axis-font-size)))
-                      (text
-                        (@
-                          'x x
-                          'y y
-                          'font-size x-axis-font-size
-                          'transform (svg/rotate x-axis-orientation x y))
-                        lbl)))))))
+      (catch
+        "barchart-2/x-axis block"
+        (unless (equal? x-axis-pos 'hidden)
+          (g
+            (@ 'id "x-axis" 'transform (svg/translate x-axis-x x-axis-y))
+            (text (@
+                    'x (h-centrify x-axis-w (@ 'text x-axis-label 'font-size x-axis-font-size))
+                    'y X-AXIS_H
+                    'font-size x-axis-font-size)
+                  x-axis-label)
+            (unless (nil? labels)
+              (for/fold/idx
+                (s "")
+                (lbl (map str labels))
+                  (str s
+                      (let ((x (+
+                                  (* $idx bar-w)
+                                  (* (dec $idx) bars-gap)))
+                                  ;(h-centrify bar-w (@ 'text lbl 'font-size x-axis-font-size))))
+                            (y (+ x-axis-tick-offset x-axis-font-size)))
+                        (text
+                          (@
+                            'x x
+                            'y y
+                            'font-size x-axis-font-size
+                            'transform (svg/rotate x-axis-orientation x y))
+                          lbl))))))))
 
       ;; bars block
-      (g
-        (@ 'id "bars" 'transform (svg/translate bars-x bars-y))
-        (for/fold/idx
-          (s "")
-          (h data-n2)
-            (str s
-                (rect x (* $idx (+ bar-w bars-gap))
-                  y (- bars-base h)
-                  width bar-w
-                  height h
-                  ;class (if (list? bar-class)
-                  ;            (list-ref bar-class (+c 0 $idx (length bar-class)))
-                  ;            bar-class)
-                  style (format
-                          "fill:~a"
-                          (if (list? bar-colors)
-                              (list-ref bar-colors (+c 0 $idx (length bar-colors)))
-                              bar-colors))
-                  ;onmouseover (str "hover(evt, " (alist->json (list '("fill" "blue") '("opacity" "0.5"))))
-                  ;onmouseout "hout(evt)"
-                  )))))))
+      (catch
+        "barchart-2/bars block"
+        (g
+          (@ 'id "bars" 'transform (svg/translate bars-x bars-y))
+          (for/fold/idx
+            (s "")
+            (h data-n2)
+              (str s
+                  (rect x (* $idx (+ bar-w bars-gap))
+                    y (- bars-base h)
+                    width bar-w
+                    height h
+                    ;class (if (list? bar-class)
+                    ;            (list-ref bar-class (+c 0 $idx (length bar-class)))
+                    ;            bar-class)
+                    style (format
+                            "fill:~a"
+                            (if (list? bar-colors)
+                                (list-ref bar-colors (+c 0 $idx (length bar-colors)))
+                                bar-colors))
+                    ;onmouseover (str "hover(evt, " (alist->json (list '("fill" "blue") '("opacity" "0.5"))))
+                    ;onmouseout "hout(evt)"
+                    ))))))))

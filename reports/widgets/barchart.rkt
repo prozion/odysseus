@@ -14,21 +14,34 @@
 ; #:title "Storskog the best!")
 (define (barchart
             #:data (data #f)
+            #:max-extent (max-extent #f)
+
             #:gap (gap 0)
             #:colors (colors '("black"))
             #:xs-orientation (xs-orientation 0)
-            #:title (title #f))
-  (barchart-2
-          data data
-          layout (@ 'widget (@ 'x 50 'y 10 'w 1000 'h 600)
-                    'title (@ 'h 50 'pos 'top)
-                    'y-axis (@ 'w 100 'pos 'left)
-                    'x-axis (@ 'h 40 'pos 'bottom)
-                    'bars (@ 'gap gap))
-          labels (@ 'x-axis (@ 'text "" 'orientation xs-orientation)
-                    'y-axis (@ 'text "" 'start 0))
-          styles (@ 'bar (@ 'colors colors)
-                    'x-axis (@ 'font-size 12)
-                    'y-axis (@ 'font-size 12))
-          normalize-mode 'trunc-at-zero
-          title title))
+            #:title (title "")
+
+            #:height (height 0)
+            #:width (width 1000)
+            #:y0 (y0 0)
+            #:y-ticks (y-ticks #f))
+  (let* (
+        (x 50)
+        (y (+ 10 y0))
+        (h height)
+        (w width))
+    (barchart-2
+            data data
+            layout (@ 'widget (@ 'x x 'y y 'w w 'h h)
+                      'title (@ 'h (/r h 10) 'pos 'top)
+                      'y-axis (@ 'w 100 'pos 'left)
+                      'x-axis (@ 'h (/r h 10) 'pos 'bottom)
+                      'bars (@ 'gap gap))
+            scales (@ 'max-extent max-extent)
+            labels (@ 'x-axis (@ 'text "" 'orientation xs-orientation)
+                      'y-axis (@ 'text "" 'start 0 'ticks y-ticks))
+            styles (@ 'bar (@ 'colors colors)
+                      'x-axis (@ 'font-size 10)
+                      'y-axis (@ 'font-size 10))
+            normalize-mode 'trunc-at-zero
+            title title)))

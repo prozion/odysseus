@@ -3,7 +3,7 @@
 (require compatibility/defmacro)
 (require "base.rkt")
 
-(provide (all-defined-out))
+(provide (except-out (all-defined-out) while-fun))
 
 ; ((-> floor sqrt random) 10)
 (define (-> . fs)
@@ -75,3 +75,22 @@
         ((null? args) (lambda-args))
         ((list? (car args)) (apply lambda-args (car args)))
         (else (apply lambda-args args)))))))
+
+(define (random-word size #:prefix (prefix ""))
+  (let* ((letters "abcdefghijklmnopqrstuvwxyz")
+        (letters (map string (string->list letters))))
+    (define (random-word-iter size result)
+      (if (<= size 0)
+        result
+        (random-word-iter (dec size) (string-append result (list-ref letters (random (length letters)))))))
+    (string-append prefix (random-word-iter size ""))))
+
+(define (while-fun condition body)
+  (when (condition)
+    (body)
+    (while-fun condition body)))
+
+(define-syntax-rule (while condition body ...)
+  (while-fun
+      (lambda () condition)
+      (lambda () body ...)))
