@@ -108,16 +108,16 @@
 
 (define-syntax (catch stx)
   (syntax-case stx ()
-    ((_ place code)
+    ((_ place code ...)
       #'(with-handlers
           ((exn:fail? (λ (err) (printf "error in ~a: ~a~n" place (exn-message err)) (exit))))
-          code))))
+          code ...))))
 
 (define-syntax (define-catch stx)
   (syntax-case stx ()
-    ((_ (name args ...) body)
+    ((_ (name args ...) body ...)
       (with-syntax ((plain-name (datum->syntax stx (symbol->string (syntax->datum #'name)))))
         #'(define (name args ...)
             (catch
               plain-name
-              body))))))
+              body ...))))))

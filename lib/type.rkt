@@ -8,7 +8,7 @@
 (define (scalar? x)
   (or (number? x) (string? x) (symbol? x) (null? x)))
 
-(define (cons? x)
+(define (simple-cons? x) 
   (and (pair? x) (not (list? x))))
 
 (define (cons-ext? x)
@@ -20,11 +20,17 @@
     (not (empty? x))
     (andmap list? x)))
 
-(define (list-of-cons? x)
+(define (list-of-simple-cons? x)
   (and
     (list? x)
     (not (empty? x))
-    (andmap cons? x)))
+    (andmap simple-cons? x)))
+
+(define (list-of-seqs? x)
+  (and
+    (list? x)
+    (not (empty? x))
+    (andmap pair? x)))
 
 (define (type x)
   (cond
@@ -32,7 +38,7 @@
     ((string? x) 'string)
     ((bytes? x) 'bytes)
     ((alist? x) 'alist)
-    ((list-of-cons? x) 'list-of-cons)
+    ((list-of-simple-cons? x) 'list-of-cons)
     ((list2? x) 'list2)
     ((list? x) 'list)
     ((pair? x) 'pair)
@@ -86,4 +92,4 @@
     (else (and (list-of-2? (car lst)) (alist? (cdr lst))))))
 
 (define (clist? seq)
-  (andmap cons? seq))
+  (andmap simple-cons? seq))

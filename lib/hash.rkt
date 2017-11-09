@@ -150,7 +150,7 @@
   ;(printf "arg: ~a~n(car arg): ~a~nresulted hash: ~a~n" arg (car arg) (hash-delete h1 (car arg)))
   (cond
     ((null? arg) h1)
-    ((cons? arg)
+    ((simple-cons? arg)
       (hash-insert
         (hash-delete h1 (car arg))
         arg))
@@ -158,7 +158,7 @@
       (hash-insert
         (hash-delete h1 (car arg))
         arg))
-    ((list-of-cons? arg)
+    ((list-of-simple-cons? arg)
       (if (null? (cdr arg))
         (hash-substitute h1 (car arg))
         (hash-substitute (hash-substitute h1 (car arg)) (cdr arg))))
@@ -166,6 +166,9 @@
 
 (define (hash-insert h1 pair)
   (cond
+    ((null? pair) h1)
+    ;((list-of-simple-cons? pair) (hash-insert (hash-insert h1 (car pair)) (cdr pair))) ; doesn't catch mixed lists of cons and lists
+    ((list-of-seqs? pair) (hash-insert (hash-insert h1 (car pair)) (cdr pair))) ; each element of list is either cons or list
     ((not (pair? pair)) h1)
     ((not (hash? h1)) (make-hash (list pair)))
     ((hash-ref h1 (car pair) #f) h1)
@@ -191,7 +194,7 @@
     (else
       (let ((h1-part-v (hash-ref h1 (car pair) #f)))
         (cond
-          ((not h1-part-v) (make-hash (cons pair (hash->list h1))))
+          ((not h1-part-v) (make-immutable-hash (cons pair (hash->list h1))))
           (else
             (hash-insert
               (hash-delete h1 (car pair))

@@ -14,10 +14,10 @@
   (check-equal? (scalar? (hash)) #f)
   (check-equal? (scalar? (hash 'a 1 'b 2)) #f)
 
-  (check-pred cons? (cons 1 2))
-  (check-equal? (cons? (list 1 2)) #f)
-  (check-equal? (cons? (list 1)) #f)
-  (check-equal? (cons? (list)) #f)
+  (check-pred simple-cons? (cons 1 2))
+  (check-equal? (simple-cons? (list 1 2)) #f)
+  (check-equal? (simple-cons? (list 1)) #f)
+  (check-equal? (simple-cons? (list)) #f)
 
   (check-pred cons-ext? (cons 1 2))
   (check-equal? (cons-ext? (list 1 2)) #t)
@@ -33,9 +33,9 @@
 
   (check-false (list2? '((1 2 3 4) (3 4 5) 10 (8 9))))
 
-  (check-pred list-of-cons? (list (cons 1 2) (cons 4 5)))
-  (check-equal? (list-of-cons? (list (cons 1 2) (cons 4 5) 10)) #f)
-  (check-equal? (list-of-cons? '((1 2) (4 5))) #f)
+  (check-pred list-of-simple-cons? (list (cons 1 2) (cons 4 5)))
+  (check-equal? (list-of-simple-cons? (list (cons 1 2) (cons 4 5) 10)) #f)
+  (check-equal? (list-of-simple-cons? '((1 2) (4 5))) #f)
 
   (check-equal? (type 3) 'number)
   (check-equal? (type "a str") 'string)
