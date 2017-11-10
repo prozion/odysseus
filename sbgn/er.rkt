@@ -27,15 +27,8 @@
         (__names (list)))
     (syntax-parameterize ((ER (make-rename-transformer #'__er))
                           (NAMES (make-rename-transformer #'__names)))
-          ((λ () body ...)))))
-
-; print environment hash
-(define-syntax (probe stx)
-  (syntax-case stx ()
-    ((_)
-      #'ER)
-    ((_ object-name)
-      #'(printf "~a: ~a~n" 'object-name (hash-ref (hash-ref ER 'object-name) 'charge)))))
+          ((λ () body ...))
+          ER)))
 
 (define-syntax-rule (node name kind parameters ...)
   (set!
@@ -48,7 +41,7 @@
           (if (> (length '(parameters ...)) 0)
             (apply hash '(parameters ...))
             (hash))
-          (hash ':_kind kind ':charge 'undefined))))))
+          (hash '_kind kind 'charge #f))))))
 
 (define-syntax-rule (add-link kind from to name)
   (let ((to-list (if (list? to) to (list to))))
@@ -58,7 +51,7 @@
         ER
         (cons
           name
-          (hash ':from from ':to to-list ':_kind kind))))))
+          (hash '_from from '_to to-list '_kind kind))))))
 
 (define-syntax (link stx)
   (syntax-case stx ()
@@ -113,11 +106,13 @@
 ; evaluation
 (define-syntax experiment
   (syntax-rules (start)
-    ((experiment (start nodes ...))
-      (let ((__count-steps 0)
+    ((experiment h (start nodes ...) body ...)
+      (let ((__er h)
+            (__count-steps 0)
             (__next-process-list '()))
         (syntax-parameterize
-          ((COUNT-STEPS (make-rename-transformer #'__count-steps))
+          ((ER (make-rename-transformer #'__er))
+          (COUNT-STEPS (make-rename-transformer #'__count-steps))
           (PROCS (make-rename-transformer #'__next-process-list)))
             (begin
               ; initialize system:
@@ -135,7 +130,32 @@
                             (let ((charge (hash-ref v 'charge #f)))
                               (values k (hash-substitute v (cons 'charge (resolve-state charge))))))
                           ER))
+              body ...
               ))))))
+
+; print environment hash
+(define-syntax (probe stx)
+  (syntax-case stx (state :)
+    ((_)
+      #'ER)
+    ((_ object-name)
+      #'(hash-ref ER 'object-name))
+    ((_ object-name state)
+      #'(hash-ref (hash-ref ER 'object-name) 'charge))
+    ((_ object-name : varname)
+      #'(hash-ref (hash-ref ER 'object-name) 'varname))))
+
+; print environment hash
+(define-syntax (probe-print stx)
+  (syntax-case stx (state :)
+    ((_)
+      #'ER)
+    ((_ object-name)
+      #'(hash-ref ER 'object-name))
+    ((_ object-name state)
+      #'(printf "~a: ~a~n" 'object-name (hash-ref (hash-ref ER 'object-name) 'charge)))
+    ((_ object-name : varname)
+      #'(printf "~a: ~a~n" 'object-name (hash-ref (hash-ref ER 'object-name) 'varname)))))
 
 ; pick random lambda to propagate charge until either
 ; - no more lambdas in the list
@@ -152,27 +172,54 @@
               )))))
 
 (define (node? el)
-  (case (hash-ref el ':_kind #f)
+  (case (hash-ref el '_kind #f)
     ((entity perturbing-agent) #t)
     (else #f)))
 
 (define (link? el)
-  (case (hash-ref el ':_kind #f)
-    ((interaction modulation stimulation necessary-stimulation absolute-stimulation inhibition absolute-inhibition assignment) #t)
+  (case (hash-ref el '_kind #f)
+    ((interaction modulation stimulation necessary-stimulation absolute-stimulation inhibition absolute-inhibition) #t)
     (else #f)))
+
+(define (assignment? el)
+  (equal? (hash-ref el '_kind #f) 'assignment))
+
+(define (link+? el)
+  (or (link? el) (assignment? el)))
+
+(define (compound-name? id)
+  (ormap (λ (x) (indexof? (symbol->string id) x)) '(":")))
+
+(define (parse-node-form id)
+  (let ((res (map string->symbol (string-split (symbol->string id) #rx":"))))
+    (cons
+      (car res)
+      (if (empty? (cdr res)) #f (cadr res)))))
+
+(define (node-pure-name id)
+  (car (parse-node-form id)))
+
+(define (points-to-var-name id)
+  (cdr (parse-node-form id)))
+
+(define (element-type element)
+  (hash-ref element '_kind #f))
 
 (define-catch (make-neurones h #:charge (charge #f))
   (for/fold
     ((h-res h))
     ((cur-k (hash-keys h)))
     (let*
-        ((dendrones
+        ((element (hash-ref h cur-k))
+        (tos (hash-ref element '_to empty))
+        (pured-tos (map node-pure-name tos))
+        (dendrones
           (hash-keys
             (hash-filter
               (λ (k v)
                 (and
                   (link? v)
-                  (indexof? (hash-ref v ':to empty) cur-k)))
+                  (indexof? (hash-ref v '_to empty) cur-k)))
               h)))
         (axones
           (hash-keys
@@ -180,28 +227,60 @@
               (λ (k v)
                 (and
                   (link? v)
-                  (equal? (hash-ref v ':from #f) cur-k)))
+                  (equal? (hash-ref v '_from #f) cur-k)))
               h)))
-        (synapses
-              (filter
-                (λ (x) (link? (hash-ref h x)))
-                (hash-ref (hash-ref h cur-k) ':to empty))))
-      (hash-substitute
-        h-res
-        (cons
-          cur-k
-          (hash-union
-            (hash-ref h-res cur-k)
-            (hash
-              'charge charge
-              'dendrones dendrones
-              'axones axones
-              'synapses synapses)))))))
+        (synapses (filter
+                    (λ (x) (link+? (hash-ref h x)))
+                    pured-tos))
+        (synapses (if (assignment? element)
+                        pured-tos
+                        synapses))
+        (points-to-var (if (assignment? element) (car (map points-to-var-name tos)) #f)))
+          (hash-substitute
+                h-res
+                (cons
+                  cur-k
+                  (hash-union
+                    (hash-ref h-res cur-k)
+                    (hash
+                      'charge charge
+                      'dendrones dendrones
+                      'axones axones
+                      'synapses synapses
+                      'points-to-var points-to-var)))))))
 
-(define-catch (propagate-charge h element-key #:delta-charge (delta-charge 0) #:start? (start? #f))
+(define-catch (propagate-charge h element-key #:delta-charge (delta-charge 0) #:start? (start? #f) #:var (var #f))
+  (let ((element (hash-ref h element-key)))
+    (cond
+      ((link+? element) (propagate-charge-link h element-key #:delta-charge delta-charge #:start? start?))
+      ((node? element) (propagate-charge-node h element-key #:delta-charge delta-charge #:start? start? #:var var))
+      (else (values h null)))))
+
+(define-catch (propagate-charge-node h element-key #:delta-charge (delta-charge 0) #:start? (start? #f) #:var (var #f))
   (let* (
         (element (hash-ref h element-key))
-        (kind (hash-ref element ':_kind))
+        (axones (hash-ref element 'axones))
+        (axone-delta-charge 1)
+        (var-name (string->symbol (format ":~a" var)))
+        (var-value (hash-ref element var-name #f))
+        (new-element-value (if var (cons var-name delta-charge) (cons var-name var-value)))
+        (h-new (hash-substitute
+                  h
+                  (cons
+                    element-key
+                    (hash-substitute
+                      element
+                      new-element-value))))
+        (new-process-lambdas
+            (map (λ (axone)
+              (λ (h) (propagate-charge h axone #:delta-charge axone-delta-charge))) axones)))
+    (values h-new new-process-lambdas)))
+
+(define-catch (propagate-charge-link h element-key #:delta-charge (delta-charge 0) #:start? (start? #f))
+  (let* (
+        (element (hash-ref h element-key))
+        (kind (hash-ref element '_kind))
+        (points-to-var (hash-ref element 'points-to-var #f)) ; name of variable at to-element
         (dendrones (hash-ref element 'dendrones))
         (axones (hash-ref element 'axones))
         (synapses (hash-ref element 'synapses))
@@ -265,6 +344,13 @@
                       ((< charge -10) 0)
                       ((<= -50 charge 0) 0)
                       ((> charge 0) -1)))
+                  ((assignment)
+                    (let ((value-to-set (hash-ref element '_from)))
+                      (cond
+                        ((not charge) #f)
+                        ((< charge -10) #f)
+                        ((<= -50 charge 0) #f)
+                        ((> charge 0) value-to-set))))
                   (else 0)))
         ; equivalent to neccessary stimulation
         (axone-delta-charge
@@ -272,11 +358,18 @@
                   ((not charge) -100)
                   ((< charge -10) -100)
                   ((>= charge -10) 100)))
-        (h-new (hash-substitute h (cons element-key (hash-substitute element (cons 'charge charge)))))
+        (new-element-value (cons 'charge charge))
+        (h-new (hash-substitute
+                  h
+                  (cons
+                    element-key
+                    (hash-substitute
+                      element
+                      new-element-value))))
         (new-process-lambdas
           (append
             (map (λ (synapse)
-                    (λ (h) (propagate-charge h synapse #:delta-charge synapse-delta-charge))) synapses)
+                    (λ (h) (propagate-charge h synapse #:delta-charge synapse-delta-charge #:var points-to-var))) synapses)
             (map (λ (axone)
                     (λ (h) (propagate-charge h axone #:delta-charge axone-delta-charge))) axones)))
         )
