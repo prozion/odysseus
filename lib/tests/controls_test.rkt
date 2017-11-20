@@ -5,8 +5,28 @@
   (require rackunit)
   (require "../controls.rkt")
 
+  (check-= ((-> sin sqrt) 4) (sin 2) 1e-6)
+
+  (check-= (->> sin sqrt 4) (sin 2) 1e-6)
+
+  (check-equal? (gen 1 5) '(1 1 1 1 1))
+
   (check-equal? (zor 3) 3)
   (check-equal? (zor 0 (- 2 2) (/ 0 5) 10 0) 10)
 
-  (check-equal? (gen 1 5) '(1 1 1 1 1))
+  (let ((x 10))
+    (check-equal? (the x 10 100) 100))
+  (let ((x 10))
+    (check-equal? (the x 8 100) 0))
+
+  (let ((x 10))
+    (check-equal? (thenot x 10 100) 0))
+  (let ((x 10))
+    (check-equal? (thenot x 8 100) 100))
+
+  (check-equal? (ifthe (λ (x) (> x 5)) 9 sqr sqrt) 81)
+  (check-equal? (ifthe (λ (x) (< x 5)) 9 sqr sqrt) 3)
+
+  ($ foo 1 2 3 4 5)
+  (check-equal? foo '(1 2 3 4 5))
 )

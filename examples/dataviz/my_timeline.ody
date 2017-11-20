@@ -41,23 +41,25 @@
   ("01.01.2017" "17")
 ))
 
+;(define inprecious-day "(0x|1x|2x|3x|xx)")
 
 (.svg
   (timeline
     #:mind "28.08.1979"
-    #:maxd "15.10.2017"
+    #:maxd "12.11.2017"
     #:title "Дни в моей жизни, которые я помню"
     ;#:title "My days I remember"
     #:zebra-background '("#f0f0f0")
     #:y-axis #f
-    #:fill "#a00"
+    #:event-color "#000"
     #:W 2000
     #:x-ticks ticks
     #:data (@
-              "Denis Shirshov"
+              'exact
               (hash-filter
                       (λ (k v) (or
                                   (re-matches? "^\\d\\d?\\.\\d\\d\\.\\d\\d\\d\\d$" k)))
                                   ;(re-matches? "^\\d\\d-\\d\\d\\.\\d\\d\\.\\d\\d\\d\\d$" k)))
                       ds_timeline))
+    #:overlap-tracks #t
   ))

@@ -1,6 +1,8 @@
 #lang racket
 
 (require compatibility/defmacro)
+(require racket/stxparam)
+(require (for-syntax racket/syntax))
 (require "base.rkt")
 
 (provide (except-out (all-defined-out) while-fun))
@@ -49,6 +51,15 @@
                 0)))
     ([_ var test result]
       (syntax (if (not (equal? var test)) result 0)))))
+
+(define-syntax (ifthe stx)
+  (syntax-case stx ()
+    ([_ testlambda expr iflambda ifnotlambda]
+      #'(if (testlambda expr) (iflambda expr) (ifnotlambda expr)))
+    ([_ testlambda expr iflambda]
+      #'(begin (if (testlambda expr) (iflambda expr) #f)))
+    ([_ testlambda expr]
+      #'(if (testlambda expr) expr #f))))
 
 (define (zor . body)
   (cond

@@ -9,10 +9,10 @@
     (sbgn:er
 
       ; entities:
-      (entity Sense :exist #t :type 'mt:dna)
-      (entity Antisense :exist #t :type 'mt:dna)
-      (entity Primer-3 :type 'mt:dna)
-      (entity Primer-5 :type 'mt:dna)
+      (entity Sense :exist #f @entity-type 'mt:dna)
+      (entity Antisense :exist #f @entity-type 'mt:dna)
+      (entity Primer-3 @entity-type 'mt:dna)
+      (entity Primer-5 @entity-type 'mt:dna)
       ;
       (perturbing-agent Heat)
       ;;
@@ -28,27 +28,54 @@
       (absolute-inhibition (i3 i1))
       (absolute-inhibition (i3 i2))
       (absolute-inhibition (Heat i1))
-      (absolute-inhibition (Heat i2))
+      (absolute-inhibition ai2 (Heat i2))
       (absolute-inhibition (Heat i3))
-      (necessary-stimulation (i1 assign2))
-      (necessary-stimulation (i2 assign1))
+      (necessary-stimulation ns1 (i1 assign2))
+      (necessary-stimulation ns2 (i2 assign1))
       (assignment assign1 (#t Sense:exist))
       (assignment assign2 (#t Antisense:exist))
     ))
 
+    ;(check-equal?
+    ;  (experiment PCR (start Heat) (probe Antisense : :exist))
+    ;  #f)
+    ;(check-equal?
+    ;  (experiment PCR (start Heat) (probe i3 state))
+    ;  'blocked)
+    ;(check-equal?
+    ;  (experiment PCR (start Heat) (probe assign2 state))
+    ;  'blocked)
+    ;(check-equal?
+    ;  (experiment PCR (start) (probe assign2 state))
+    ;  'exists)
+    ;(check-equal?
+    ;  (experiment PCR (start) (probe i2 state))
+    ;  'exists)
+    ;(check-equal?
+    ;  (experiment PCR (start Heat) (probe ns2 state))
+    ;  'blocked)
+    ;(check-equal?
+    ;  (experiment PCR (start Heat) (probe assign1 state))
+    ;  'blocked)
+    ;(check-equal?
+    ;  (experiment PCR (start) (probe ns2 state))
+    ;  'exists)
     (check-equal?
-      (experiment PCR (start Heat) (probe Antisense : :exist))
-      #f)
+      (experiment PCR (start) (probe Heat state))
+      'not-exists)
     (check-equal?
-      (experiment PCR (start Heat) (probe i3 state))
-      'blocked)
+      (experiment PCR (start) (probe ai2 state))
+      'not-exists)
     (check-equal?
-      (experiment PCR (start Heat) (probe assign2 state))
-      'blocked)
-    (check-equal?
-      (experiment PCR (start) (probe assign2 state))
-      'active)
-    (check-equal?
-      (experiment PCR (start) (probe Antisense : :exist))
-      #t)
+      (experiment PCR (start) (probe ns1 state))
+      'exists)
+    ;(check-equal?
+    ;  (experiment PCR (start) (probe assign1 state))
+    ;  'exists)
+    ;(check-equal?
+    ;  (experiment PCR (start) (probe Sense : :exist))
+    ;  #t)
+    ;(check-equal?
+    ;  (experiment PCR (start) (probe Antisense : :exist))
+    ;  #t)
 )

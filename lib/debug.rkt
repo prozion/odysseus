@@ -1,6 +1,7 @@
 #lang racket
 
 (require compatibility/defmacro)
+(require (for-syntax "strings.rkt"))
 
 (provide (all-defined-out))
 
@@ -31,3 +32,17 @@
 
 (define-macro (__t text)
   `(show-status-in-let debug-output ,text))
+
+(define-syntax (--- stx)
+  (syntax-case stx ()
+    ((_ parameters ...)
+      (with-syntax ((frmt #'(for/fold
+                              ((s "~n"))
+                              ((i (reverse (list parameters ...))))
+                              (string-append "~a " s))))
+        #'(printf frmt parameters ...)))))
+
+
+(define-syntax (---- stx)
+  (syntax-case stx ()
+    ((_ parameters ...) #'(_ (println "stalingrad")))))

@@ -8,7 +8,7 @@
 (define (scalar? x)
   (or (number? x) (string? x) (symbol? x) (null? x)))
 
-(define (simple-cons? x) 
+(define (simple-cons? x)
   (and (pair? x) (not (list? x))))
 
 (define (cons-ext? x)
@@ -19,6 +19,12 @@
     (list? x)
     (not (empty? x))
     (andmap list? x)))
+
+(define (list-of-cons? x)
+  (and
+    (list? x)
+    (not (empty? x))
+    (andmap cons? x)))
 
 (define (list-of-simple-cons? x)
   (and

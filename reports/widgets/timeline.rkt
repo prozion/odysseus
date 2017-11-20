@@ -33,12 +33,13 @@
           #:gap (gap 1)
           #:H (H PLOT_H)
           #:W (W PLOT_W)
-          #:fill (fill "black")
+          #:event-color (event-color "black")
           #:zebra-background (zebra-background (list "#fff" "#f0f0f0"))
           #:tick-color (tick-color "black")
           #:tick-h (tick-h 5)
           ;;
           #:dot (dot #f)
+          #:overlap-tracks (overlap-tracks #f)
         )
   (let* (
           (mind (date->days mind))
@@ -48,7 +49,7 @@
           (screen-h (- H title-h x-axis-h 0.0))
           (screen-w (- W y-axis-w 0.0))
           (tracks (hash-keys data))
-          (track-h (/ screen-h (length tracks)))
+          (track-h (if overlap-tracks screen-h (/ screen-h (length tracks))))
           (y-axis-w (if y-axis y-axis-w SPAN))
           (x-ratio (/ screen-w (- maxd mind)))
           (date->x (λ (adate)
@@ -74,7 +75,7 @@
           (let* ((track-events (hash-ref data track))
                 (dates (sort
                           (hash-keys track-events) d<))
-                (y (* (+ track-h gap) $idx)))
+                (y (if overlap-tracks 0 (* (+ track-h gap) $idx))))
             (printf "[widgets/timeline.rkt] dates number: ~a~n" (length dates))
             (str
               s
@@ -97,22 +98,21 @@
                                       'y y
                                       'width (- x2 x1)
                                       'height track-h
-                                      'style (format "fill: ~a" fill)))
+                                      'style (format "fill: ~a" event-color)))
                         (dot
                                     (circle
                                       'cx x1
                                       'cy (+ y (/ track-h 2))
                                       'r 5
-                                      'style (format "fill: ~a" fill)))
+                                      'style (format "fill: ~a" event-color)))
                         (else
                                     (line
                                       'x1 x1
                                       'y1 y
                                       'x2 x1
                                       'y2 (+ y track-h)
-                                      'style (format "stroke: ~a; opacity: 0.2" fill))))
-
-              ))))
+                                      'style (format "stroke: ~a; opacity: 0.2" event-color)))))))
+              )
               ; label-y
               (when y-axis
                 (text

@@ -158,7 +158,7 @@
       (hash-insert
         (hash-delete h1 (car arg))
         arg))
-    ((list-of-simple-cons? arg)
+    ((list-of-cons? arg)
       (if (null? (cdr arg))
         (hash-substitute h1 (car arg))
         (hash-substitute (hash-substitute h1 (car arg)) (cdr arg))))

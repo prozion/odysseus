@@ -5,7 +5,6 @@
 (require compatibility/defmacro)
 (require "base.rkt")
 (require "controls.rkt")
-(require "debug.rkt")
 (require racket/set)
 
 ;; algebra of operations with strings and lists (arrays)
