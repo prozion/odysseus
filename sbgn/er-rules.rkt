@@ -9,7 +9,7 @@
 (define state-conversion-rules
  '(
   ; (activated blocked %) ; try different resolve solutions (different 'strategies' fixed also in code)
-  ; in old-state new-state
+  ; command old-state new-state
    (activated blocked blocked)
    (blocked blocked blocked)
    (not-exists blocked not-exists)
@@ -56,16 +56,24 @@
    (? ? ?)
 ))
 
-(define (get-new-state in state)
+(define (get-new-state command state)
   (for/or ((rule state-conversion-rules))
     (and
-      (equal? (first rule) in)
+      (equal? (first rule) command)
       (equal? (second rule) state)
       (third rule))))
 
 (define synapse-forming-rules
  '(
    ; state type signal
+   (not-exists interaction nop)
+   (blocked interaction nop)
+   (inhibited interaction nop)
+   (? interaction nop)
+   (nop interaction nop)
+   (exists interaction nop)
+   (catalyzed interaction nop)
+
    (not-exists stimulation nop)
    (blocked stimulation nop)
    (inhibited stimulation nop)
@@ -129,21 +137,17 @@
 (define axone-forming-rules
  '(
   ; state type signal
-   (not-exists link not-exists)
-   (blocked link blocked)
-   (inhibited link inhibited)
-   (? link ?)
-   (nop link nop)
-   (exists link exists)
-   (catalyzed link catalyzed)
-
-   (not-exists node not-exists)
-   (exists node exists)
+   (not-exists not-exists)
+   (blocked blocked)
+   (inhibited inhibited)
+   (? ?)
+   (nop nop)
+   (exists exists)
+   (catalyzed catalyzed)
 ))
 
-(define (get-axone-signal state type)
+(define (get-axone-signal state)
   (for/or ((rule axone-forming-rules))
     (and
       (equal? (first rule) state)
-      (equal? (second rule) type)
-      (third rule))))
+      (second rule))))
