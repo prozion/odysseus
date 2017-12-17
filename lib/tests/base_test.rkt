@@ -132,4 +132,12 @@
   (check-equal? (inie 1 3 2) #t)
   (check-equal? (inie 0 1 0) #t)
   (check-equal? (inie 0 1 1) #f)
+
+  (check-equal? (symbol->list 'asdf) '(a s d f))
+  (check-equal? (symbol->list 'a2) '(a |2|))
+  (check-equal? (symbol->list 'a) '(a))
+  (check-equal? (symbol->list 'foo) '(f o o))
+  (check-equal? (symbol->list (string->symbol "")) '())
+
+
 )

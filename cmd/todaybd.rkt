@@ -4,8 +4,8 @@
 
 (require (file "c:/denis/denis_core/denis_personal/my_people/all.rkt"))
 (require "../lib/all.rkt")
-(require "../pmf/people.rkt")
-(require "../pmf/people_verify.rkt")
+(require "../pis/people.rkt")
+(require "../pis/people_verify.rkt")
 (require "../graphics/console.rkt")
 (require "../reports/csv.rkt")
 

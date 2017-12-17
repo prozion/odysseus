@@ -6,7 +6,7 @@
 (require "../graphics/console.rkt")
 (require "../reports/html.rkt")
 (require "../reports/csv.rkt")
-(require "../pmf/nasevere.rkt")
+(require "../pis/nasevere.rkt")
 
 (require "../../denis_personal/my_knowledge/nasevere/groups.rkt")
 

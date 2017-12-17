@@ -122,7 +122,15 @@
               plain-name
               body ...))))))
 
-(define-syntax (format-symbol stx)
-  (syntax-case stx ()
-    ((_ frmt syms ...) #'(string->symbol (format frmt syms ...)))
-    (else #'null)))
+; has already been implemented in racket/syntax
+;(define-syntax (format-symbol stx)
+;  (syntax-case stx ()
+;    ((_ frmt syms ...) #'(string->symbol (format frmt syms ...)))
+;    (else #'null)))
+
+(define (symbol->list sym)
+  (map
+    string->symbol
+    (filter
+      non-empty-string?
+      (string-split (symbol->string sym) ""))))

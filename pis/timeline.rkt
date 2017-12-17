@@ -26,3 +26,15 @@
 (define (extract-by-tags timeline tags)
   (for (((k v) timeline))
     (println (last v))))
+
+(define-syntax (@@ stx)
+  (syntax-case stx ()
+    ((_ item ...) #'(list (@@-parse-item item) ...))
+    (else #'#f)))
+
+(define-syntax (@@-parse-item stx)
+  (syntax-case stx ()
+    ((_ (date description)) #'(list date description (list)))
+    ((_ (date description tag))
+        #'(list date description (symbol->list tag)))
+    (else #'(list))))

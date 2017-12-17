@@ -94,4 +94,4 @@
                       (bytes-slice bstr 1 double-size)
                       bstr)))
     (normal-bits->double
-      (bytes->normal-bits bstr #:word-mode word-mode #:char-mode char-mode))))
+      (bytes->normal-bits bstr #:word-mode word-mode #:char-mode char-mode))))      
