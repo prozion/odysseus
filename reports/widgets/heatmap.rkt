@@ -38,7 +38,7 @@
     (_ (__t "translated\n"))
     (chunked-data (partition-all translated-data width))
     (_ (__t "partitioned\n"))
-    )
+ )
     (for/fold
       ((s ""))
       (

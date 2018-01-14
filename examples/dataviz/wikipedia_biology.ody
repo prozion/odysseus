@@ -8,7 +8,7 @@
       "DNA_hybridization" (list "RNA")
       "Biochemistry" (list "Macromolecule")
       "Phylogenetics" (list "Phylogenetic_tree")
-      "Sense_(molecular_biology)" (list "Molecular_biology" "Genetics" "Nucleic_acid" "RNA" "DNA" "Intron" )
+      "Sense_(molecular_biology)" (list "Molecular_biology" "Genetics" "Nucleic_acid" "RNA" "DNA" "Intron")
       "Peptide_nucleic_acid" (list "DNA" "RNA" "Polymer")
       "Spo11" (list "Protein")
       "Morpholino" (list "Molecule" "Molecular_biology" "Model_organism" "Interferon")
@@ -43,7 +43,7 @@
     "Molecule" (list "Biochemistry")
     "DNA_oxidation" (list "DNA")
     "Stem_cell" (list "Organism" "Cell_division" "Mitosis" "DNA_damage_theory_of_aging")
-  ))
+))
 
 (define immortalism_subgraph
   (@
@@ -65,4 +65,4 @@
     #:labels 5
     #:l0 40
     #:min-distance 50
-  ))
+))

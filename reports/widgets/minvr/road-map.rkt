@@ -51,7 +51,7 @@
           ;#:piechart-colors (piechart-colors #f)
           #:colors-clist (colors-clist #f)
           #:line-width (line-width 1.5)
-        )
+     )
   (let*
     (
       (places
@@ -76,7 +76,7 @@
 
       (title (@ 'text title 'x 950 'y 5 'w 400 'h 70))
       (description (@ 'text description 'x 910 'y 450 'w 290 'h 100))
-    )
+ )
       (str
         ;;; map background
         (when/str geobase
@@ -103,7 +103,7 @@
               (points (map ft points))
               (program (hash-ref project (@. colnames.state-project) ""))
               ;(_ (println points))
-              )
+           )
                 (when/str
                   (> (length towns) 1)
                     (path
@@ -117,5 +117,5 @@
                       'style (format "stroke: ~a; stroke-width: ~a; opacity: 0.7"
                                     (hash-ref (make-hash colors-clist) program "red")
                                     line-width
-                              )
-              ))))))))
+                           )
+           ))))))))

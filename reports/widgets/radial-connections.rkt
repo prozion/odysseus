@@ -143,7 +143,7 @@
                   ((dα) (abs (- (rad->grad α1) (rad->grad α2))))
                   ((dist) (distance x1 y1 x2 y2))
                   ;((rx) (* 2 dist (sqrt (/ dα 180))))
-                  ;((rx) (* 2 dist ))
+                  ;((rx) (* 2 dist))
                   ((rx) (* 1 (expt dist (+ link-curveness 0.2))))
                   ((ry) rx)
                   ((x-axis-rotation) 0)
@@ -159,7 +159,7 @@
                         (if (> α2 α1)
                           (if (< dα 180) 1 0)
                           (if (< dα 180) 0 1)
-                          ))))))
+                       ))))))
                 (str
                   s2
                   (path
@@ -167,4 +167,4 @@
                         (format "M~a,~a " x1 y1)
                         (format "A ~a ~a ~a ~a ~a ~a ~a" rx ry x-axis-rotation large-arc-flag sweep-flag x2 y2))
                     style (format "stroke:~a; opacity: ~a" "black" link-opacity)))))
-          ))))))
+       ))))))

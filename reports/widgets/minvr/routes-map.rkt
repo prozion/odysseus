@@ -30,7 +30,7 @@
           #:line-width (line-width 1.5)
           #:type:style (type:style #f)
           #:smooth-factor (smooth-factor #f)
-        )
+     )
   (let*
     (
       (places
@@ -39,7 +39,7 @@
       (places (hash-group-by places "name"))
       (routes (google-spreadsheet/get-tsv gdocs-routes))
       (routes (clean-disabled routes))
-    )
+ )
       (str
         ;;; map background
         (when/str geobase
@@ -76,7 +76,7 @@
                                     (cons (strnumber->number (hash-ref x "lon" 0)) (strnumber->number (hash-ref x "lat" 0))))))
                         points))
                     (type (hash-ref route "Тип" ""))
-                    )
+                 )
                       (when/str
                         (> (length points) 1)
                           ; points names for debug purposes
@@ -97,5 +97,5 @@
                                       (points->smooth-path (map cdr named-points) #:fct smooth-factor)
                                       (points->path (map cdr named-points)))
                                 'style style)))
-                      )
+                   )
 )))))))))

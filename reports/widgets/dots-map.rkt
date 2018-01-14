@@ -26,12 +26,12 @@
           #:opacity-range (opacity-range '(1 . 1))
           #:hue-range (hue-range '(0 . 0))
           #:light-range (light-range '(50 . 50))
-        )
+     )
   (let* (
         (places (google-spreadsheet/get-tsv gdocs-places))
         (places (hash-clean (λ (k v) (equal? (hash-ref v value-parameter) "")) places))
         (max-value (apply max (map (λ (x) (strnumber->number (hash-ref x value-parameter default-value-parameter))) (hash-values places))))
-        )
+     )
     (str
       ;;; map background
       (image 'xlink:href map-base 'x 0 'y 0 'width "1191" 'height "842")
@@ -52,7 +52,7 @@
               (hue (get-proportion hue-range value max-value))
               (light (get-proportion light-range value max-value))
               (fill (hsv->rgbstr (list hue 100 light)))
-              )
+           )
         (str
           s
           (circle

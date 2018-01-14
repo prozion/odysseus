@@ -70,7 +70,7 @@
           #:piechart-colors-clist (piechart-colors-clist #f)
           #:piechart-opacity (piechart-opacity 1)
           #:font-size (font-size 10)
-        )
+     )
   (let*
     (
       (colnames (if colnames
@@ -154,7 +154,7 @@
       (M max-value)
       (a (* (sqrt M) (- (/ RM R0) 1))) ; scaling factor
       (find-radius (λ (t) (* R0 (+ 1 (/ (* a (sqrt t)) M)))))
-    )
+ )
       (str
         ;;; map background
         (when/str
@@ -189,7 +189,7 @@
                   (dx (* 1.0 $idx (/ legend-circles-w (length (@. legend1.circles)))))
                   ;(fill (if (= (length existed-programs) 1) (cdar programs-colors) "#333333"))
                   (fill "#333")
-                  )
+               )
               (str
                 s
                 (circle
@@ -208,7 +208,7 @@
                     'y (+ (@. legend1.y) (@. legend1.h) -10)
                     'style (format "~a; text-anchor: middle" text-style-1))
                   i)
-              ))))
+           ))))
         ;;; legend II
         (when/str legend2
           (rect 'x (@. legend2.x) 'y (@. legend2.y) 'width (@. legend2.w) 'height (+ 100 (* 10 2 (length existed-programs))) 'style "stroke: #f2f2e8; stroke-width: 3; fill: none;") ; fill: #f2f2e8;
@@ -235,7 +235,7 @@
                   (text-x (+ x w 10))
                   (txt (car i))
                   (style (format "fill: ~a; stroke: none;" (cdr i)))
-                )
+             )
                 (str
                   s
                   (g
@@ -272,18 +272,18 @@
                     (w (+ base-w (int (/ w 2000))))
                     (y (+ y0 (* (+ h gap) $idx)))
                     (yt (+ y (* h 0.7)))
-                    )
+                 )
                 (str
                   s
                   (text (@ 'x (+ x0 -10) 'y yt 'style (format "font-family: Arial; font-size: ~a; font-weight: normal; text-anchor: end" font-size)) (car p))
                   (rect 'x x0 'y y 'height h 'width w 'style (format "fill: ~a" (clist-ref piechart-colors-clist (car p) "black")))
                   (line 'x1 (+ x0 base-w) 'y1 y 'x2 (+ x0 base-w) 'y2 (+ y h) 'style "stroke-width: 1; stroke: white")
                   (text (@ 'x (+ x0 w 10) 'y yt 'style (format "font-family: Arial; font-weight: bold; font-size: ~a" font-size)) (inexact->exact (ceiling (cdr p))))
-                )
-              )
-            )
-          )
-        )
+             )
+           )
+         )
+       )
+     )
 
         ;;; objects on the map
         (hash-ref
@@ -346,11 +346,11 @@
                 (dyy (if is-special (* 1.8 dyy) dyy))
 
                 (svg-str (hash-ref s 's))
-                )
+             )
               ;(when (equal? k "Депутатский") (println gp-colors)) ;)println (hash-ref gp-colors (hash-ref (hash-ref v "508") (@. colnames.state-project)) "#000000")
                   ;(printf "~a~n" (filter (λ (x) (indexof? (list "Находка" "Чугуевка") (car x))) debugs))
                   ;(when (and
-                  ;        (indexof? (map car debugs) "Находка" )
+                  ;        (indexof? (map car debugs) "Находка")
                   ;        (indexof? (map car debugs) "Чугуевка"))
                   ;  (printf "~a~n" (filter (λ (x) (indexof? (list "Находка" "Чугуевка") (car x))) debugs)))
                   (hash
@@ -360,7 +360,7 @@
                                 (!= 0 (* x y))
                                 (> x 30)
                                 (>= total-budget minimal-value)
-                              )
+                           )
                             (str
                               (piechart
                                 #:x x
@@ -385,7 +385,7 @@
                                                       (("middle") 0.5)
                                                       (("end") -1)
                                                       (else 1)
-                                                    )))
+                                                 )))
                                         (font-size 7)
                                         (ladder-factor (λ (num i)
                                                           (if (> num 10)
@@ -403,16 +403,16 @@
                                         (text
                                           (@ 'x (+ x dx dxx (* (anchor-k text-anchor) (+ (text-length (cdr pd) #:font-size font-size) 10 (ladder-factor (length project-descriptions) $idx)))) 'y (+ y dy dyy 10 (* (inc $idx) 10)) 'style (format "~a; font-size: ~a; font-weight: bold; fill: #999; text-anchor: ~a"  text-style-1 font-size text-anchor)) (->int (car pd)))))))
 
-                              )
+                           )
                               ; bbox debug rectangles:
                               ;(rect 'x (bbox-x curbbox) 'y (bbox-y curbbox) 'width (bbox-w curbbox) 'height (bbox-h curbbox) 'style "fill: #ff00ff; opacity: 0.5")
                               ;(text (@ 'style (format "fill: black; font-size: 11; text-anchor: ~a" text-anchor) 'x (+ x dx 50) 'y (+ y dy 20)) (map int curbbox))
-                            )
+                         )
                             ""))
                     'debugs (pushr debugs (list k curbbox))
                     'places (pushr places (list k (+ x dx) (+ y dy)))
                     'bboxes (pushr bboxes curbbox)
                     'lines (pushr lines (segment x y (+ x dx) (+ y dy)))
-                  )))
+               )))
           's)
 )))

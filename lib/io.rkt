@@ -2,6 +2,9 @@
 
 (require compatibility/defmacro)
 (require "hash.rkt")
+(require "base.rkt")
+(require "seqs.rkt")
+(require "debug.rkt")
 (require "regexp.rkt")
 
 (provide (all-defined-out))
@@ -26,6 +29,19 @@
 
 (define (read-file filename)
   (file->string filename #:mode 'text))
+
+(define (read-lines filename)
+  (file->lines filename #:mode 'text #:line-mode 'linefeed))
+
+(define (read-file-by-lines filename)
+  (let ((ff (open-input-file filename #:mode 'text)))
+    (local ((define (read-line-iter res line)
+              ; (sleep 0.003)
+              ; (--- line)
+              (if (eof-object? line)
+                res
+                (read-line-iter (pushr res line) (read-line ff 'any)))))
+        (read-line-iter (list) (read-line ff 'any)))))
 
 (define (write-file-to-dir #:file file #:dir dir v)
   ; first try thinking that dir is relative, then absolute path, if both are not directories then write to current-directory

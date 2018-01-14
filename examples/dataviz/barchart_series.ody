@@ -10,7 +10,7 @@
       (data (gen
               (gen (random (+ (*r MAX 0.1) (random (*r 0.9 MAX)))) cols)
               strs)
-            ))
+         ))
       ;(data (list
       ;        (gen (random MAX) 12)
       ;        (gen (random MAX) 12)
@@ -43,4 +43,4 @@
                       #:colors '("#74B200")
                       #:gap 1))
                   (+ height (cdr s) y-gap)))
-    ))))))
+ ))))))

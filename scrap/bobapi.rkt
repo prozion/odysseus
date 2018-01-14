@@ -19,7 +19,7 @@
                     ;"Authorization" (format "OAuth oauth_consumer_key=\"~a\",~n
                     ;                        oauth_signature_method=\"PLAINTEXT\",~n
                     ;                        oauth_signature=\"~a\"" bobapi/consumer-key signature)
-                    ))
+                 ))
           (body (url-encode/bytes "grant_type=client_credentials")))
     (post-url url headers body)))
 
@@ -36,6 +36,6 @@
                       ;"Authorization" (format "OAuth oauth_consumer_key=\"~a\",~n
                       ;                        oauth_signature_method=\"PLAINTEXT\",~n
                       ;                        oauth_signature=\"~a\"" bobapi/consumer-key signature)
-                      ))
-      )
+                   ))
+   )
     (get-url url headers)))          

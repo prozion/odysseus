@@ -26,7 +26,7 @@
             #:color-raw-model (color-raw-model 'cmyk-based)
 
             #:debug (debug #f) ; debug info passed here if any
-        )
+     )
   ;(circle 'cx x 'cy y 'r r ...)
   (let* (
           (data (if data data (gen 1 12)))
@@ -71,7 +71,7 @@
                             'style style)
                       ; if only one part:
                       (circle 'cx x 'cy y 'r r 'style style)
-                      )
+                   )
                     (if donut
                       (circle 'cx x 'cy y 'r (donut r) 'style donut-style)
                       ""))

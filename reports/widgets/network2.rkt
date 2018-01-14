@@ -170,7 +170,7 @@
                   x2 (@. neighbour-v.x)
                   y2 (@. neighbour-v.y)
                   style (format "stroke:~a; opacity: 0.1" "black")))))
-        )))))
+     )))))
 
 ; functions to check and debug
 ;; mutual distances in the graph:

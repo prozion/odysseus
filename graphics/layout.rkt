@@ -79,7 +79,7 @@
       (and (<= bx1 ax1 bx2) (<= by1 ay2 by2)) ; sw inside
       (and (<= bx1 ax2 bx2) (<= by1 ay2 by2)) ; se inside
       (and (<= bx1 ax2 bx2) (<= by1 ay2 by2)) ; se inside
-    )))
+ )))
 
 ; finds free spot for label
 (define (next-free-place bboxes x y w h #:segments (segments #f) #:step0 (step0 10) #:step (step 3) #:debug (debug #f))
@@ -116,7 +116,7 @@
                 ;      (λ (l) (segments-cross? lcur l))
                 ;      segments))
                 ;  #f)
-              ))
+           ))
             (hash 'dx dx 'dy dy 'bbox bcur))
           (else
             ;(printf "~a~n   ~a~n      ~a~n         ~a~n            ~a~n~n"
@@ -183,7 +183,7 @@
         (tend1 (hash-ref s1 'tend))
         (tstart2 (hash-ref s2 'tstart))
         (tend2 (hash-ref s2 'tend))
-        )
+     )
     (cond
       ((and (not k1) (not k2)) (or (< tstart1 tstart2 tend1) (< tstart1 tend2 tend1)))
       ;((not k1)
@@ -230,7 +230,7 @@
         (l2 (segment bx1 by1 bx2 by1))
         (l3 (segment bx2 by1 bx2 by2))
         (l4 (segment bx2 by2 bx1 by2))
-        )
+     )
     (or
       (segments-cross? l l1)
       (segments-cross? l l2)

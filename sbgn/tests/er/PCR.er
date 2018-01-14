@@ -34,7 +34,7 @@
       (necessary-stimulation ns2 (i2 assign1))
       (assignment assign1 (#t Sense:exist))
       (assignment assign2 (#t Antisense:exist))
-    ))
+ ))
 
     (check-equal?
       (experiment PCR (start Heat) (probe Antisense : :exist))

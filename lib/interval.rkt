@@ -7,7 +7,7 @@
 (require "debug.rkt")
 
 (provide (all-defined-out))
-;(provide (except-out (all-defined-out) >plain ))
+;(provide (except-out (all-defined-out) >plain))
 
 ; cyclic addition (e.g. for finding contrast values on color circle)
 (define (+c a b base)

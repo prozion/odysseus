@@ -470,7 +470,7 @@
       ((i is))
       (pushr res (apply f (map (λ (x) (nth-cycled x i)) seqs))))))
 
-(define (soft-merge #:op (op +) . args )
+(define (soft-merge #:op (op +) . args)
   (cond
     ((ormap string? args) (apply string-append (map str args)))
     (else (apply op args))))

@@ -32,7 +32,7 @@
         "#03558b" "#008b6b" "#682f79" "#c02646" "#c3602f" "#529546" ; 100 75 25
         "#1c9ad6" "#00bac6" "#f16687" "#bd60a5" "#c8dd69" "#fec35a" ; 75 25 0
         "#000000" "#bcbec0" "#808285" "#414042" ; 0 0 0 x
-  ))
+))
 
 (define rgb-based-colors
   (map
@@ -47,7 +47,7 @@
       (200 200 200) (100 100 100) (50 50 50)
       (50 0 0) (0 50 0) (0 0 50)
       (50 50 0) (50 0 50) (0 50 50)
-  )))
+)))
 
 
 ; colors autogeneration
@@ -63,7 +63,7 @@
         len
         #:delta-v -20
         #:delta-s -60
-        ))))
+     ))))
 
 ; TODO: perception model
 ;Есть формула яркости цвета:
@@ -225,7 +225,7 @@
         (modified-hsv (setn hsv-color 3 ncolor))
         (modified-rgb (hsv->rgb modified-hsv))
         (res (rgb->str modified-rgb))
-      )
+   )
     res))
 
 (define (color/zebra lst delta)

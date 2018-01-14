@@ -125,6 +125,7 @@
   (check-equal? (rtrim "Oslo god morgen" 100) "")
   (check-equal? (rtrim "Oslo god morgen" -5) "") ; add contract!
   (check-equal? (rtrim '(1 2 3 4 5 6 7 8 9) 2) '(1 2 3 4 5 6 7))
+  (check-equal? (rtrim '(1 2 3 4 5 6 7 8 9) 0) '(1 2 3 4 5 6 7 8 9))
 
   (check-equal? (rpush '() 100) '(100))
   (check-equal? (rpush '(1 2 3) 100) '(1 2 3 100))

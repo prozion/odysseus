@@ -41,8 +41,3 @@
                               ((i (reverse (list parameters ...))))
                               (string-append "~a " s))))
         #'(printf frmt parameters ...)))))
-
-
-(define-syntax (---- stx)
-  (syntax-case stx ()
-    ((_ parameters ...) #'(_ (println "stalingrad")))))

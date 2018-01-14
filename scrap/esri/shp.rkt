@@ -18,7 +18,7 @@
                 'ymin (@ 'pos 44 'type 'double 'mode 'little)
                 'xmax (@ 'pos 52 'type 'double 'mode 'little)
                 'ymax (@ 'pos 60 'type 'double 'mode 'little)
-              )
+           )
 
             'record-header
               (@
@@ -80,7 +80,7 @@
           (word-mode (hash-ref field 'mode 'little))
           (char-mode (hash-ref field 'char-mode 'little))
           (type (hash-ref field 'type default-type))
-        )
+     )
     (case type
       ((integer) (bytes->integer (bytes-slice header (inc pos) (+ pos 4)) #:char-mode 'little #:word-mode word-mode))
       ((double) (bytes->double (bytes-slice header (inc pos) (+ pos 8)) #:char-mode char-mode #:word-mode word-mode))
@@ -124,7 +124,7 @@
               s
               (read-next-field istream record-type 'points))))
         (points (break-seq points parts))
-        )
+     )
     (hash 'points points 'size full-content-length)))
 
 ; file-> (listof ... (listof double double))

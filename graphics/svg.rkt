@@ -25,7 +25,7 @@
                       (filter (λ (x) (and (list? x) (equal? (car x) '@))) args)
                       (list '(@)))))
           ;(viewbox (hash-ref params 'viewbox #f))
-          (body (clean (λ (x) (or (equal? x 'xmlns) (equal? x 'xlink) (and (list? x) (equal? (car x) '@)) (equal? x 'styles) (equal? x 'scripts) )) args))
+          (body (clean (λ (x) (or (equal? x 'xmlns) (equal? x 'xlink) (and (list? x) (equal? (car x) '@)) (equal? x 'styles) (equal? x 'scripts))) args))
           (body (if (null? body) "" (car body))))
     `(svg-f ,xmlns ,xlink ,params ,styles ,scripts ,body)))
 

@@ -44,8 +44,8 @@
   (check-equal? (hash-print (hash 'a 1 'b 2)) "a=1, b=2")
   (check-equal? (hash-print (hash 'a 1 'b 2 'c 10) #:delimeter " AND ") "a=1 AND c=10 AND b=2")
   (check-equal? (hash-print (hash 'a 1 'b 2) #:delimeter " AND " #:prefix "n.") "n.a=1 AND n.b=2")
-  (check-equal? (hash-print (hash 'a 1 'b 2) #:delimeter ", " #:prefix "n." #:equal-sign ": " ) "n.a: 1, n.b: 2")
-  (check-equal? (hash-print (hash 'a 1 'b "Polyphem") #:delimeter ", " #:prefix "n." #:equal-sign ": " ) "n.a: 1, n.b: 'Polyphem'")
+  (check-equal? (hash-print (hash 'a 1 'b 2) #:delimeter ", " #:prefix "n." #:equal-sign ": ") "n.a: 1, n.b: 2")
+  (check-equal? (hash-print (hash 'a 1 'b "Polyphem") #:delimeter ", " #:prefix "n." #:equal-sign ": ") "n.a: 1, n.b: 'Polyphem'")
 
   (check-equal? (hash-print-json (hash 'a 1 'b 2)) "{a: 1, b: 2}")
 
@@ -181,6 +181,11 @@
     (check-hash-equal?
       (hash-delete (hash (hash 'aa 10 'ab 20) 10 'b 20 'c 40) (hash 'aa 10 'ab 20))
       (hash 'b 20 'c 40))
+
+; hash-delete-all
+    (check-hash-equal?
+      (hash-delete-all (hash 'a 10 'b 20 'c 40 'd 80) '(c b))
+      (hash 'a 10 'd 80))
 
 ; hash-revert
     (check-hash-equal?

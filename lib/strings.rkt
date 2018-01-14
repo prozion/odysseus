@@ -57,3 +57,7 @@
 
 (define-macro (when/str condition . expression)
   `(if ,condition (string-append ,@expression) ""))
+
+(define (title-case? astr)
+  (let ((astr (if (symbol? astr) (symbol->string astr) astr)))
+    (re-matches? "^[A-ZА-Я].*" astr)))

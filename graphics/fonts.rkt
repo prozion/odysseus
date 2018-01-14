@@ -32,7 +32,7 @@
               "Trebuchet" (@ "normal" 0.52)
               "Open Sans" (@ "normal" 0.5)
               "Verdana" (@ "normal" 0.55)
-            )
+         )
 )
 
 (define (get-font-aspect-ratio . path)

@@ -43,7 +43,7 @@
               ((null? i) (cons sep s))
               (else
                 (cons sep (cons (format "~a" i) s)))
-                ))))
+             ))))
     (apply string-append res-lst)))
 
 (define (opt/exclude-all seq el)

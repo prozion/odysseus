@@ -37,5 +37,5 @@
                                       (if region region "Murmansk")
                                       (if country country "Russia"))))
                                 "~a - ~a    ~a"
-                              )))
+                           )))
 )

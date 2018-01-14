@@ -31,7 +31,7 @@
           #:scale-factor (scale-factor 1000) ; 1 px = 1 миллиард рублей
           #:bars-style (bars-style "")
           #:rotation (rotation 0)
-        )
+     )
   (let*
     (
       (places
@@ -44,7 +44,7 @@
                     (map
                       (λ (v) (hash-ref v (@. colnames.growth-area)))
                       (hash-values projects))))
-    )
+ )
       (str
         ;;; map background
         (when/str geobase
@@ -82,7 +82,7 @@
               (private-color (second bi-colors))
               (r (sqrt (+ w-state w-private)))
               (ga-name (hash-ref ga-place "ga" "???"))
-              )
+           )
                 (str
                   ;(for/fold/idx
                   ;  (s "")
@@ -116,4 +116,4 @@
                             #:gap 1
                             #:colors (reverse bi-colors)
                             #:style "opacity: 0.5;"))
-              ))))))))
+           ))))))))

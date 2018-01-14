@@ -74,7 +74,7 @@
     (e (normal-bits->integer exponent))
     (e (- e 1023))
     (fraction (slice b 13 64))
-  )
+)
     (* sign
       (for/fold/idx (s 1) (i fraction) (+ s (* i (expt 2.0 (- 0 $idx 1)))))
       (expt 2.0 e))

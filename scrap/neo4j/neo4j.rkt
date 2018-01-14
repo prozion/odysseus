@@ -93,7 +93,7 @@
 ; (gdb/import-csv "http://data.rusvegia.com/odysseus/test.csv" #:headers '(name surname rate) #:labels "Test")
 (define (gdb/import-csv csvfile #:headers (headers #f) #:label (label "Node") #:large-dataset (large-dataset #f))
   (let ((req
-          (format "~a LOAD CSV ~a FROM '~a' AS row CREATE (:~a {~a} );"
+          (format "~a LOAD CSV ~a FROM '~a' AS row CREATE (:~a {~a});"
                   (if large-dataset "USING PERIODIC COMMIT" "")
                   (if headers "WITH HEADERS" "")
                   csvfile
@@ -105,6 +105,6 @@
                             headers)
                           ", ")
                         "")
-          )))
+       )))
     ;(println req)
     (neo4j/cypher req)))

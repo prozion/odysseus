@@ -12,7 +12,7 @@
     #<<svg
 <svg></svg>
 svg
-  ))
+))
 
   (check-equal?
     (svg (@ 'xmlns #t))
@@ -20,7 +20,7 @@ svg
     #<<svg
 <svg xmlns="http://www.w3.org/2000/svg"></svg>
 svg
-  ))
+))
 
   (check-equal?
     (svg (@ 'xmlns #t 'xlink #t))
@@ -28,7 +28,7 @@ svg
     #<<svg
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"></svg>
 svg
-  ))
+))
 
   (check-equal? (g) "<g></g>")
   (check-equal? (g (g)) "<g><g></g></g>")
@@ -47,7 +47,7 @@ svg
     #<<svg
 <svg><g><rect x="10" y="10" width="100" height="150" fill="red" data-comment="rect in the simple case" /></g></svg>
 svg
-  )))
+)))
 
   ;; more complex case
   (check-equal?
@@ -61,5 +61,5 @@ svg
     #<<svg
 <svg xmlns="http://www.w3.org/2000/svg"><g></g><g id="group1"><rect x="10" y="10" width="100" height="150" fill="green" /><g><g id="subgroup1"><g><rect x="100" y="400" width="200" height="300" /></g></g></g></g></svg>
 svg
-  )))
+)))
 )

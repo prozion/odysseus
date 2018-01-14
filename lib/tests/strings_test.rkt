@@ -9,7 +9,7 @@
   (check-equal? (dupstr "foo " 3) "foo foo foo ")
 
   ;(check-equal? (format-n "hello ~a" "world") "hello world")
-  ;(check-equal? (format-n "hello ~l(, )" '("world" "verden")) "hello world, verden")
+  ;(check-equal? (format-n "hello ~l(,)" '("world" "verden")) "hello world, verden")
 
   (check-equal? (strnumber->number "3") 3)
   (check-= (strnumber->number "3,0") 3.0 1e-6)
@@ -22,4 +22,11 @@
 
   (check-equal? (when/str (> 3 2) (format "~a ~a " "hello" 3) "world") "hello 3 world")
   (check-equal? (when/str (< 3 2) (format "~a ~a " "hello" 3) "world") "")
+
+  (check-equal? (title-case? "A") #t)
+  (check-equal? (title-case? "Abyss") #t)
+  (check-equal? (title-case? "Зевс") #t)
+  (check-equal? (title-case? "abyss") #f)
+  (check-equal? (title-case? "m") #f)
+  (check-equal? (title-case? "щиты") #f)
 )

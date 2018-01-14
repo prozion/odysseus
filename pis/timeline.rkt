@@ -7,7 +7,7 @@
 (define BDATE "28.08.1979")
 (define REFDATE "01.06.1985")
 
-;; (relative-hour-duration "01.06.1985" "11.05.2017" ) -> 4.89 [1 hour in 1985 is equal to 4.89 in 2017]
+;; (relative-hour-duration "01.06.1985" "11.05.2017") -> 4.89 [1 hour in 1985 is equal to 4.89 in 2017]
 (define (relative-hour-duration t1 t2 (t0 BDATE))
   (/ (date-diff t2 t0) (date-diff t1 t0) 1.0))
 

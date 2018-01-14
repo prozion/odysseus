@@ -6,10 +6,11 @@
   (list
     "lib"
     "sbgn")
-  "odysseus-sbgn"
+  "pd2af"
+  #:extract-to "c:/denis/denis_core/projects/"
   #:exception-set (list
     "sbgn/chemistry"
-    "sbgn/pd"
-    "sbgn/af"
+    "sbgn/er"
+    "sbgn/tests/er"
     "lib/tests"
 ))

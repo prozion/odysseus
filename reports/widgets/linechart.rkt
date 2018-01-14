@@ -54,7 +54,7 @@
       ;(xs (range 0 width dx))
       (scaled-data (map (λ (x) (- height (*r k x))) data))
       (control-points (get-control-points xs scaled-data))
-      )
+   )
     (g
       (path
         d (if smooth
@@ -121,7 +121,7 @@
             #:title (title "")
             #:x-axis (x-axis 1)
             #:y-axis (y-axis #f)
-        )
+     )
   (let*
       ((data (if
                 datafile
@@ -149,7 +149,7 @@
       (scaled-xs (map
                     (λ (x) (* kx (- x x0)))
                     xs))
-      )
+   )
     (g
       (when title
         (text

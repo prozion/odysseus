@@ -23,7 +23,7 @@
           'blue #"36"
           'white #"37"
           'default #"39"
-        )))
+     )))
     (bytes-append
       #"\x1B"
       #"["

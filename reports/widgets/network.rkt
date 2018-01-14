@@ -167,7 +167,7 @@
 (define (network
           #:data data
           #:labels (labels #f)
-        )
+     )
   (let* ( (graph (init-graph data))
           (graph (optimize-layout graph)))
     (g (@ 'transform (svg/translate 10 30))

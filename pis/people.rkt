@@ -6,7 +6,7 @@
 
 (provide (all-defined-out))
 
-; (@ 'surname "" 'name "" 'tags "")
+; (@  'surname "" 'name "")
 
 (define (identify-person . body)
   #t
@@ -59,6 +59,11 @@
 (define gay? (contains-tag? "g"))
 ; p - probable candidate to link each other in PA-network
 (define pan? (contains-tag? "p"))
+; hubber - person that links many people and could (would) have introduced them, network builder
+(define hubber? (contains-tag? "h"))
+
+(define lack-of-info? (contains-tag? "?"))
+(define medical-related? (contains-tag? "M"))
 
 (define has-phone? (contains-key? 'phone))
 (define has-email? (contains-key? 'email))

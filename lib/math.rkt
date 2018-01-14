@@ -41,7 +41,7 @@
   (define (dec->hex-r v)
     (cond
       ((= v 0) "")
-      (else (str (dec->hex-r (quotient v 16)) (next-hex (% v 16)) ))))
+      (else (str (dec->hex-r (quotient v 16)) (next-hex (% v 16))))))
   (cond
     ((= v 0) "0")
     (else (dec->hex-r v))))

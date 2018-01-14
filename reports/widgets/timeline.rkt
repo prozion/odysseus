@@ -40,7 +40,7 @@
           ;;
           #:dot (dot #f)
           #:overlap-tracks (overlap-tracks #f)
-        )
+     )
   (let* (
           (mind (date->days mind))
           (maxd (date->days maxd))
@@ -58,7 +58,7 @@
                               ((< ds mind) 0)
                               ((> ds maxd) screen-w)
                               (else (* (- ds mind) x-ratio))))))
-        )
+     )
     (str
       (when title
         (g (@ 'transform (svg/translate y-axis-w 0))
@@ -112,7 +112,7 @@
                                       'x2 x1
                                       'y2 (+ y track-h)
                                       'style (format "stroke: ~a; opacity: 0.2" event-color)))))))
-              )
+           )
               ; label-y
               (when y-axis
                 (text
@@ -121,7 +121,7 @@
                       'text-anchor "end"
                       'style (format "font-family: ~a; font-weight: bold; font-size: ~a" font-family y-font-size))
                   track))
-      ))))
+   ))))
       ; x
       (when x-ticks
         (g (@ 'transform (svg/translate y-axis-w (+ title-h screen-h)))
@@ -135,7 +135,7 @@
                   (x (if (list? xdate) (first xdate) xdate))
                   (label (str (if (list? xdate) (second xdate) xdate)))
                   (x (date->x x))
-                  )
+               )
               (str
                 s
                 ;(line 'x1 x 'y1 x-axis-h 'x2 x 'y2 (- H title-h) 'style (format "stroke: ~a; opacity: 0.1" tick-color))
@@ -148,5 +148,5 @@
                           ;'transform (svg/rotate x-rotate x2 y2)
                           'style (format "font-family: ~a; font-size: ~a; font-weight: ~a" font-family x-font-size (if major-tick "bold" "normal")))
                     label))
-              )))))
-    )))
+           )))))
+ )))

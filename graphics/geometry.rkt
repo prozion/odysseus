@@ -70,7 +70,7 @@
                               ;            (> (distance c2x c2y x2 y2) 50)
                               ;            (> (distance c1x c1y x2 y2) 50))
                               ;      (printf "x1=~a, y1=~a, x2=~a, y2=~a, x3=~a, y3=~a, dx1=~a, dx2=~a, k=~a, a1=~a, c1x=~a, c1y=~a, c2x=~a, c2y=~a~n" x1 y1 x2 y2 x3 y3 dx1 dx2 k a1 c1x c1y c2x c2y)))
-                            )
+                         )
                             (values c1x c1y c2x c2y))
                         (let* ((dy1 (* (- y2 y1) fct))
                               (dy2 (* (- y3 y2) fct))
@@ -79,7 +79,7 @@
                               (c2y (+ y2 dy2))
                               (c2x x2))
                             (values c1x c1y c2x c2y)))))
-                  (merge (list c1x c1y x2 y2 c2x c2y) (smooth-next-triplet-c (cdr points) fct) ))))
+                  (merge (list c1x c1y x2 y2 c2x c2y) (smooth-next-triplet-c (cdr points) fct)))))
     (else null)))
 
 (define (points->smoothed-points points #:fct (fct 3))

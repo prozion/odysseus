@@ -15,12 +15,12 @@
 ;            styles (@ 'bar (@ 'fill "red blue"
 ;                              'opacity '(0.5 0.8 0.1)
 ;                              ;'class "bc3 bc2" 'class-hover "bc3_hover bc2_hover")
-;                            )
+;                         )
 ;                      'x-axis (@ 'font-size 12)
 ;                      'y-axis (@ 'font-size 12))
 ;            normalize-mode 'trunc-at-zero
 ;            title "Storskog the best!")
-;  )
+;)
 ;)
 
 (.svg

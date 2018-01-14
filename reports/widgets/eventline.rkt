@@ -53,7 +53,7 @@
                           (λ (a b) (< (->number a -0.1) (->number b -0.1))))))
           (max-event (last events))
           (events-number (length events))
-          ;(_ (write-file "authors.txt" (implode (uniques (flatten (hash-keys data))) "\n" )))
+          ;(_ (write-file "authors.txt" (implode (uniques (flatten (hash-keys data))) "\n")))
           (data (for/fold
                   ((res data))
                   (((k v) data))
@@ -70,7 +70,7 @@
           (track-h (* 1.0 (/ (- H (* gap items-number) legend-x-h title-h) items-number)))
           (track-w (- W legend-y-w))
           (zebra-background (if (> 2 (length zebra-background)) (list (first zebra-background) (first zebra-background)) zebra-background))
-        )
+     )
     (str
       (when title
               (g (@ 'transform (svg/translate legend-y-w 0))
@@ -119,7 +119,7 @@
                         'width (- W xend)
                         'height track-h
                         'style (format "fill: ~a" passive-fill)))
-              )))
+           )))
               ; label-y
               (text
                 (@  'x (- legend-y-w 3)
@@ -132,7 +132,7 @@
                   (format "<tspan style=\"~a\">~a</tspan>"
                               "fill: #aaa; font-weight: normal"
                               (length track-list))))
-                ))))
+             ))))
       ; legend-x
       (g (@ 'transform (svg/translate legend-y-w title-h))
         (for/fold/idx
@@ -163,5 +163,5 @@
                             'transform (svg/rotate legend-x-rotate x2 y2)
                             'style (format "font-family: ~a; font-size: ~a" font-family legend-x-font-size))
                       (str k)))))
-            ))))
-    )))
+         ))))
+ )))
