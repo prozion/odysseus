@@ -347,6 +347,18 @@
     ((> (indexof seq oldel) 0) (replace-all (replace seq oldel newel) oldel newel))
     (else seq)))
 
+(define (list-substitute lst target insert)
+  (cond
+    ((not (list? lst)) lst)
+    (else
+      (for/fold
+        ((acc (list)))
+        ((l lst))
+        (cond
+          ((equal? l target) (pushr acc insert))
+          ((list? l) (pushr acc (list-substitute l target insert)))
+          (else (pushr acc l)))))))
+
 (define (uniques seq)
   (define (uniques-iter seq acc)
     (cond
@@ -470,7 +482,24 @@
       ((i is))
       (pushr res (apply f (map (λ (x) (nth-cycled x i)) seqs))))))
 
+(define (cleanmap seqs)
+  (filter-not false? seqs))
+
 (define (soft-merge #:op (op +) . args)
   (cond
     ((ormap string? args) (apply string-append (map str args)))
     (else (apply op args))))
+
+(define (remove-by-part lst part)
+  (local ((define (remove-by-part-1 lst part)
+            (cond
+              ((not (list? lst)) lst)
+              ((index-of lst part) (exclude lst part))
+              (else (map (λ (el) (remove-by-part el part)) lst)))))
+    (cond
+      ((vector? part)
+        (for/fold
+          ((res lst))
+          ((p part))
+          (remove-by-part-1 res p)))
+      (else (remove-by-part-1 lst part)))))

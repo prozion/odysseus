@@ -61,3 +61,6 @@
 (define (title-case? astr)
   (let ((astr (if (symbol? astr) (symbol->string astr) astr)))
     (re-matches? "^[A-ZА-Я].*" astr)))
+
+(define (mstring->string astr)
+  (string-replace astr "\n" " "))

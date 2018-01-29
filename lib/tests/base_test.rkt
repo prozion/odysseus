@@ -14,6 +14,7 @@
 ; optimize - post near Magic Forest
 ; bytes - outpost near Stella country
 ; stats - outpost near Villina country
+; json - Great River fleet
 
 ; graphics/tests: spies
 ; color_test - spies and police in the Emerald city and around

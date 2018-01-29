@@ -223,6 +223,10 @@
   (check-equal? (replace-all "Tell me, O muse, of that ingenious hero" " " "_") "Tell_me,_O_muse,_of_that_ingenious_hero")
   (check-equal? (replace-all "Tell me, O muse, of that ingenious hero" "w" "_") "Tell me, O muse, of that ingenious hero")
 
+  (check-equal? (list-substitute '(1 3 2 (3 4) 5 3) 3 30) '(1 30 2 (30 4) 5 30))
+  (check-equal? (list-substitute '(1 3 2 (3 4) 5 3) 3 "hello") '(1 "hello" 2 ("hello" 4) 5 "hello"))
+  (check-equal? (list-substitute '(1 2 (a 4 c (a ((a))) 5 a)) 'a 'b) '(1 2 (b 4 c (b ((b))) 5 b)))
+
   (check-equal? (not-uniques '(1 2 3 1 10 7 3 4 4)) '(1 3 4))
   (check-equal? (not-uniques "abcdefa") '("a"))
   (check-equal? (not-uniques '(1 2 13 12 10 7 3 4 14)) '())
@@ -280,6 +284,8 @@
 
   (check-equal? (map-cycled (λ (a b c) (+ b c)) '(1 2 3 4 5 6) '(10 20) '(5 15 25)) '(15 35 35 25 25 45))
 
+  (check-equal? (cleanmap '(1 2 3 #f 4 #f "a" '() 3)) '(1 2 3 4 "a" '() 3))
+
   (check-equal? (soft-merge "c") "c")
   (check-equal? (soft-merge 567) 567)
   (check-equal? (soft-merge 1 2) 3)
@@ -293,4 +299,11 @@
   ;(check-equal? (soft-merge '(1 2) 5) '(1 2 5))
   ;(check-equal? (soft-merge "d" (hash 'a 10 'b 20)) "d")
   ;(check-equal? (soft-merge (hash 'a 10 'b 20) "d") (hash 'a 10 'b 20 "d" null))
+
+  (check-equal? (remove-by-part '(1 2 3 4 5) 3) '(1 2 4 5))
+  (check-equal? (remove-by-part '(1 2 3 4 5) 6) '(1 2 3 4 5))
+  (check-equal? (remove-by-part '(1 2 3 4 5) '#(6 8 1 3)) '(2 4 5))
+  (check-equal? (remove-by-part '((a) b (c (d)) (e)) '(c (d))) '((a) b (e)))
+  (check-equal? (remove-by-part '((a) b (c (d)) (e)) '#((c (d)) (e))) '((a) b))
+  (check-equal? (remove-by-part '((a) b (c (d)) (e)) '(d)) '((a) b (c) (e)))
 )

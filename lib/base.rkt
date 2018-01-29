@@ -122,7 +122,7 @@
               plain-name
               body ...))))))
 
-; has already been implemented in racket/syntax
+; has already been implemented in racket/syntax (format-symbol)
 ;(define-syntax (format-symbol stx)
 ;  (syntax-case stx ()
 ;    ((_ frmt syms ...) #'(string->symbol (format frmt syms ...)))
