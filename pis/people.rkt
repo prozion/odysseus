@@ -1,6 +1,6 @@
 #lang racket
 
-(require "../lib/all.rkt" (for-syntax "../lib/seqs.rkt"))
+(require "../lib/load/all.rkt" (for-syntax "../lib/seqs.rkt"))
 (require "../graphics/console.rkt")
 (require compatibility/defmacro)
 
@@ -92,6 +92,12 @@
               (key-equal? 'name part2 #t)
               (key-equal? 'surname part1 #t)))))))
 
+(define (person-signature p)
+  (format "~a ~a ~a"
+    (hash-ref p 'name "")
+    (hash-ref p 'surname "")
+    (hash-ref p 'nick "")))
+
 ; acquaintances number
 (define (acqs x)
   (length
@@ -149,10 +155,12 @@
           (format " ~a~n" name))
         (format " ~a ~a~n" name surname)))
     (esc-sec (string-text-color 'grey))
-    (apply string-append
-      (map
-        (λ (x) (format " ~a~n" (field->str person (string->symbol x) 'all "-")))
-        fields))
+    (if (empty? fields)
+      ""
+      (apply string-append
+        (map
+          (λ (x) (format " ~a~n" (field->str person (string->symbol x) 'all "-")))
+          fields)))
     (esc-sec (string-text-color 'default)))))
 
 (define (people->string subpeople fields)

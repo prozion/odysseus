@@ -40,8 +40,17 @@
 
   (check-equal? (split "") '())
   (check-equal? (split "Oslo") '("O" "s" "l" "o"))
+  (check-equal? (split "a") '("a"))
   (check-equal? (split "Dar-as-Salam" "-") '("Dar" "as" "Salam"))
+  ; (check-equal? (split "Dar, as, Salam" ", ") '("Dar" "as" "Salam")) ; use string-split in these cases
   (check-equal? (split '(1 2 0 3 4 0 5 0 6) 0) '((1 2) (3 4) (5) (6)))
+
+  (check-equal? (split-by-lambda '(1 2 3 4 5 6 7) (λ (x) (equal? x 4))) '((1 2 3) (5 6 7)))
+  (check-equal? (split-by-lambda* '(1 2 3 4 5 6 7) (λ (x) (equal? x 4))) '((1 2 3) (4) (5 6 7)))
+  (check-equal? (split-by-lambda '(1 2 3 11 4 5 13 6 7) (λ (x) (> x 10))) '((1 2 3) (4 5) (6 7)))
+  (check-equal? (split-by-lambda* '(1 2 3 11 4 5 13 6 7) (λ (x) (> x 10))) '((1 2 3) (11) (4 5) (13) (6 7)))
+  (check-equal? (split-by-lambda '(1 2 3 11 12 13 4 5 13 6 18 7) (λ (x) (> x 10))) '((1 2 3) (4 5) (6) (7)))
+  (check-equal? (split-by-lambda* '(1 2 3 11 12 13 4 5 13 6 18 7) (λ (x) (> x 10))) '((1 2 3) (11 12 13) (4 5) (13) (6) (18) (7)))
 
   (check-equal? (nth "" 10) "")
   (check-equal? (nth "Oslo god morgen" 0) null)
@@ -66,6 +75,7 @@
   (check-equal? (indexof '(11 -22 30 80 -5) -5) 5)
   (check-equal? (indexof '(11 -22 30 80 -5) 333) 0)
 
+  (check-false (indexof? 'a 'd))
   (check-true (indexof? '(a b c d e f) 'd))
   (check-true (indexof? '(1 (10 1) 2) '(10 1)))
   (check-false (indexof? '(1 2 3 4 5) 6))
@@ -180,10 +190,16 @@
   (check-equal? (remove '(1 2 3 4 5 6 7) 4 #:len 3) '(1 2 3 7))
 
   (check-equal? (exclude '(1 2 3 4 5 6 7) 3) '(1 2 4 5 6 7))
+  (check-equal? (exclude '(3) 3) '())
+  (check-equal? (exclude '(1 2 3 4 5 6 7) 10) '(1 2 3 4 5 6 7))
   (check-equal? (exclude '(1 2 "c" 4 5 "c" 7) "c") '(1 2 4 5 "c" 7))
+  (check-equal? (exclude '(1 2 (5 8) 4 5 7) '(5 8)) '(1 2 4 5 7))
   (check-equal? (exclude "Tell me, O muse, of that ingenious hero" "o") "Tell me, O muse, f that ingenious hero")
 
   (check-equal? (exclude-all '(1 2 "c" 4 5 "c" 7) "c") '(1 2 4 5 7))
+  (check-equal? (exclude-all '(1 1 1) 1) '())
+  (check-equal? (exclude-all '(1 2 "c" 4 5 "c" 7) "d") '(1 2 "c" 4 5 "c" 7))
+  (check-equal? (exclude-all '(1 2 (5 8) 4 5 (5 8) 7) '(5 8)) '(1 2 4 5 7))
   (check-equal? (exclude-all "Tell me, O muse, of that ingenious hero" "o") "Tell me, O muse, f that ingenius her")
   (check-equal? (exclude-all "Tell me,\r\n O muse,\r of that ingenious hero\r" "\r") "Tell me,\n O muse, of that ingenious hero")
 
@@ -257,6 +273,7 @@
   (check-equal? (partition '(1 2 3 4 5 6 7 8 9) 4) '((1 2 3 4) (5 6 7 8)))
   (check-equal? (partition '(1 2 3 4 5) 1) '((1) (2) (3) (4) (5)))
   (check-equal? (partition '(1 2 3 4 5) 0) '(1 2 3 4 5))
+  (check-equal? (partition `(key (,(hash 'a 10) ,(hash 'b 20))) 2) `((key (,(hash 'a 10) ,(hash 'b 20)))))
 
   (check-equal? (partition-all '(1 2 3 4 5 6 7 8 9) 3) '((1 2 3) (4 5 6) (7 8 9)))
   (check-equal? (partition-all '(1 2 3 4 5 6 7 8 9) 4) '((1 2 3 4) (5 6 7 8) (9)))
@@ -300,10 +317,25 @@
   ;(check-equal? (soft-merge "d" (hash 'a 10 'b 20)) "d")
   ;(check-equal? (soft-merge (hash 'a 10 'b 20) "d") (hash 'a 10 'b 20 "d" null))
 
+  (check-equal? (replace-by-part '(1 2 3 4 5) 3 10) '(1 2 10 4 5))
+  (check-equal? (replace-by-part '(1 2 3 4 5) 6 10) '(1 2 3 4 5))
+  (check-equal? (replace-by-part '(1 2 (3 (8 9 10) 4) 5) 8 100) '(1 2 (3 (100 9 10) 4) 5))
+
   (check-equal? (remove-by-part '(1 2 3 4 5) 3) '(1 2 4 5))
+  (check-equal? (remove-by-part '(1 2 3 4 3 5) 3) '(1 2 4 5))
+  (check-equal? (remove-by-part '(1 2 3 (1 3 5) 4 3 5) 3) '(1 2 (1 5) 4 5))
   (check-equal? (remove-by-part '(1 2 3 4 5) 6) '(1 2 3 4 5))
   (check-equal? (remove-by-part '(1 2 3 4 5) '#(6 8 1 3)) '(2 4 5))
   (check-equal? (remove-by-part '((a) b (c (d)) (e)) '(c (d))) '((a) b (e)))
   (check-equal? (remove-by-part '((a) b (c (d)) (e)) '#((c (d)) (e))) '((a) b))
   (check-equal? (remove-by-part '((a) b (c (d)) (e)) '(d)) '((a) b (c) (e)))
+  (check-equal? (remove-by-part '((a) b (c (d)) (b)) 'b) '((a) (c (d)) ()))
+
+  (check-equal? (format-list '(a b ~a d) '(c)) '(a b (c) d))
+  (check-equal? (format-list '(a b ~a) 'c) '(a b c))
+  (check-equal? (format-list '(a b ~a d) 'c) '(a b c d))
+  (check-equal? (format-list '(a b ~a d e) 'c) '(a b c d e))
+  (check-equal? (format-list '(a b ~a d (e (f ~a))) '(c) 'u) '(a b (c) d (e (f u))))
+  (check-equal? (format-list '(a b ~a d) (for/list ((i (in-range 1 3))) i)) '(a b (1 2) d))
+  (check-equal? (format-list '(a b ~a d) (for/fold ((res (list))) ((i (in-range 1 3))) `(,@res ,i))) '(a b (1 2) d))
 )

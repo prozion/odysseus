@@ -3,7 +3,7 @@
 (require racket/cmdline)
 
 (require (file "c:/denis/denis_core/denis_personal/my_people/all.rkt"))
-(require "../lib/all.rkt")
+(require "../lib/load/all.rkt")
 (require "../pis/people.rkt")
 (require "../pis/people_verify.rkt")
 (require "../graphics/console.rkt")
@@ -16,11 +16,11 @@
 
 (define (todaybd people (day #f))
   (let* ((curdate (if day day (current-date)))
-        (cur-day-month (day-month curdate))
+        (cur-day-month (d.m curdate))
         (filtered-people (filter
                   (λ (p) (let ((bd (hash-ref p 'bdate #f)))
                             (if bd
-                                (equal? cur-day-month (day-month bd))
+                                (equal? cur-day-month (d.m bd))
                                 #f)))
                   people)))
     (ppl-output '("bdate" "phone" "sn") filtered-people)))

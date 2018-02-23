@@ -15,6 +15,7 @@
 ; bytes - outpost near Stella country
 ; stats - outpost near Villina country
 ; json - Great River fleet
+; tree - Siege crue
 
 ; graphics/tests: spies
 ; color_test - spies and police in the Emerald city and around

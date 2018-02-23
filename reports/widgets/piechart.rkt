@@ -3,7 +3,7 @@
 (require compatibility/defmacro)
 (require "../../graphics/svg.rkt")
 (require "../../graphics/color.rkt")
-(require "../../lib/all.rkt")
+(require "../../lib/load/all.rkt")
 
 (provide piechart)
 

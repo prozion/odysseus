@@ -1,12 +1,12 @@
 #lang racket
 
-(require "release.rkt")
+(require "../release.rkt")
 
 (extract-files
   (list
     "lib"
     "sbgn")
-  "odysseus-sbgn"
+  "sbgn-simulation"
   #:exception-set (list
     "sbgn/chemistry"
     "sbgn/pd"

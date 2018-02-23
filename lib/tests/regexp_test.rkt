@@ -35,7 +35,4 @@
   (check-equal? (re-substitute "some (text)" "\\(.*?\\)" "[]") "some []")
   (check-equal? (re-substitute "some (text)" (list "o" "e") (list "a" "i")) "sami (tixt)")
   (check-equal? (re-substitute "some (text)" (list "s.*(?=\\s)" "e") (list "any" "i")) "any (tixt)")
-
-  (check-equal? (re-match '((a 10) (b 20)) `((a ,x) (b %p)) ((%p 20)) x) 10)
-  (check-equal? (re-match '((a 10) (b 100)) `((a ,x) (b %p)) ((%p foovar)) x) 100)
 )

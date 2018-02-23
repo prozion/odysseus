@@ -25,6 +25,12 @@
 (define-macro (dup-alist lst n)
     `(map (λ (x) (quote ,lst)) (range 1 ,n)))
 
+(define (alookup alst key)
+  (let ((pair (assoc key alst)))
+    (if pair
+      (cadr pair)
+      #f)))
+
 ; (alist-expand '((1 2) (3 4)) '(10 20) 1) -> '((1 2 10) (1 2 20) (3 4))
 (define (alist-expand base-list expander-list pos)
   (let ((pos-el (nth base-list pos)))
@@ -35,8 +41,10 @@
           expander-list)
         pos)))
 
-(define (alist-flatten alst)
-  (foldl merge '() alst))
+(define (alist-flatten alst (acc (list)))
+  (cond
+    ((empty? alst) acc)
+    (else (alist-flatten (cdr alst) (append acc (car alst))))))
 
 (define (alist->mstring alst (frmt (dupstr "~a " (length (car alst)))))
   (implode
@@ -66,7 +74,7 @@
     (λ (a b) (f (car a) (cdr a) (car b) (cdr b)))))
 
 (define (hash->sorted-clist h)
-  (clist-sort (hash->list h) (λ (cara cdra carb cdrb) (> cdra cdrb))))        
+  (clist-sort (hash->list h) (λ (cara cdra carb cdrb) (> cdra cdrb))))
 
 (define (pairwise lst1 lst2)
   (for/fold

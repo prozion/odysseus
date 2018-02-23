@@ -2,7 +2,7 @@
 
 (require compatibility/defmacro)
 (require "../../graphics/svg.rkt")
-(require "../../lib/all.rkt")
+(require "../../lib/load/all.rkt")
 (require "barchart-2.rkt")
 
 (provide (all-defined-out))

@@ -4,7 +4,7 @@
 
   (require rackunit)
   (require "../layout.rkt")
-  (require "../../lib/all.rkt")
+  (require "../../lib/load/all.rkt")
 
   (check-= (get-proportion '(0 . 10) 50 100) 5 1e-10)
   (check-= (get-proportion '(10 . 20) 50 100) 15 1e-10)

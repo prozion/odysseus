@@ -29,4 +29,7 @@
   (check-equal? (title-case? "abyss") #f)
   (check-equal? (title-case? "m") #f)
   (check-equal? (title-case? "щиты") #f)
+
+  (check-equal? (count-tabs "hello") 0)
+  (check-equal? (count-tabs "\t\t\thello") 3)
 )

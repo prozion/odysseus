@@ -41,3 +41,9 @@
                               ((i (reverse (list parameters ...))))
                               (string-append "~a " s))))
         #'(printf frmt parameters ...)))))
+
+(define (print-list lst)
+	(for ((i lst))
+		(println i)))
+
+(define ---- print-list)

@@ -1,7 +1,7 @@
 #lang racket
 
 (require racket/file)
-(require "../lib/all.rkt")
+(require "../lib/load/all.rkt")
 
 (provide (all-defined-out))
 

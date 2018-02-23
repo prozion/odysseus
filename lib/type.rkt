@@ -8,6 +8,9 @@
 (define (scalar? x)
   (or (number? x) (string? x) (symbol? x) (null? x)))
 
+(define (sequence? x)
+  (or (list? x) (hash? x) (vector? x)))
+
 (define (simple-cons? x)
   (and (pair? x) (not (list? x))))
 
@@ -19,6 +22,11 @@
     (list? x)
     (not (empty? x))
     (andmap list? x)))
+
+(define (plain-list? x)
+  (and
+    (list? x)
+    (not (ormap list? x))))
 
 (define (list-of-cons? x)
   (and
@@ -37,6 +45,16 @@
     (list? x)
     (not (empty? x))
     (andmap pair? x)))
+
+(define (plain-hash? x)
+  (and
+    (hash? x)
+    (not (ormap
+            (λ (el) (cond
+                      ((hash? el) #t)
+                      ((list? el) (ormap hash? el))
+                      (else #f)))
+            (hash-values x)))))
 
 (define (type x)
   (cond
@@ -77,13 +95,19 @@
               (+ delta (string->number filtered)))))))
     (else x)))
 
+(define (->string x)
+  (cond
+    ((number? x) (number->string x))
+    ((symbol? x) (symbol->string x))
+    (else x)))
+
 (define (->int x)
   (int (->number x)))
 
-(define (->symbol x)
+(define (->symbol x (glue-char "_"))
   (cond
     ((number? x) (string->symbol (number->string x)))
-    ((string? x) (string->symbol x))
+    ((string? x) (string->symbol (string-replace x " " glue-char)))
     (else x)))
 
 (define (atom? x)
@@ -99,3 +123,6 @@
 
 (define (clist? seq)
   (andmap simple-cons? seq))
+
+(define (one-element? seq)
+  (and (list? seq) (= (length seq) 1)))

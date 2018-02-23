@@ -1,6 +1,6 @@
 #lang racket
 
-(require "../../lib/all.rkt")
+(require "../../lib/load/all.rkt")
 
 (provide shapefile->points)
 

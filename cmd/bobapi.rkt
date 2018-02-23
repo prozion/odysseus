@@ -2,7 +2,7 @@
 
 (require racket/cmdline)
 
-(require "../lib/all.rkt")
+(require "../lib/load/all.rkt")
 (require "../graphics/console.rkt")
 (require "../reports/html.rkt")
 (require "../reports/csv.rkt")

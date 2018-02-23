@@ -34,6 +34,11 @@
   (check-equal? (date-diff "15.03.2017" "07.04.2017") 23)
   (check-equal? (date-diff "28.08.1979" "07.04.2017") 13737)
 
+  (check-equal? (month-diff "03.2017" "04.2017") 1)
+  (check-equal? (month-diff "03.2016" "04.2017") 13)
+  (check-equal? (month-diff "08.2016" "04.2017") 8)
+  (check-equal? (month-diff "08.1979" "04.2017") 452)
+
   (check-false (d> "28.08.1979" "07.04.2017"))
   (check-true (d< "28.08.1979" "07.04.2017"))
 
@@ -43,9 +48,20 @@
   (check-false (d= "07.04.2017" "28.08.1979"))
   (check-true (d= "7.04.2017" "07.04.2017"))
 
-  (check-equal? (day-month "07.04.2017") "07.04")
-  (check-equal? (day-month "06.06.198x") "06.06")
-  (check-equal? (day-month "06.10") "06.10")
+  (check-equal? (d.m "07.04.2017") "07.04")
+  (check-equal? (d.m "06.06.198x") "06.06")
+  (check-equal? (d.m "06.10") "06.10")
 
   ;(check-equal? (datetime-diff "15.03.2017 1:56:48" "07.04.2017 4:12:50") ...)
+
+  (check-equal? (day "03.11.1965") "03")
+  (check-equal? (month "03.11.1965") "11")
+  (check-equal? (year "03.11.1965") "1965")
+
+  (check-true (first-month? 12 1))
+  (check-true (first-month? 1 0))
+  (check-true (first-month? 5 8))
+  (check-true (first-month? 17 8))
+  (check-false (first-month? 13 1))
+  (check-false (first-month? 5 3))
 )

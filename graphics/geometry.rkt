@@ -1,7 +1,7 @@
 #lang racket
 
 (require "svg.rkt")
-(require "../lib/all.rkt")
+(require "../lib/load/all.rkt")
 
 (provide points->smoothed-points points->smooth-path points->path)
 

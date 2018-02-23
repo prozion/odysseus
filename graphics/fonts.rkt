@@ -1,7 +1,6 @@
 #lang racket
 
-(require "../lib/base.rkt")
-(require "../lib/hash.rkt")
+(require "../lib/load/all.rkt")
 
 (provide text-length text-height h-centrify v-centrify)
 
@@ -27,7 +26,7 @@
               "Georgia" (@ "normal" 0.48)
               "Helvetica" (@ "normal" 0.52)
               "Palatino" (@ "normal" 0.42)
-              "Tahoma" (@ "normal" 0.55)
+              "Tahoma" (@ "normal" 0.55 "bold" 0.7)
               "Times New Roman" (@ "normal" 0.422 "bold" 0.45)
               "Trebuchet" (@ "normal" 0.52)
               "Open Sans" (@ "normal" 0.5)
@@ -49,9 +48,13 @@
 (define (text-height t #:font-size (font-size FONT_SIZE))
   font-size)
 
-(define (h-centrify w t #:font-family (font-family FONT_FAMILY))
+(define (h-centrify w t #:font-family (font-family FONT_FAMILY) #:font-size (font-size #f))
   (let* ( (t (if (hash? t) (hash-ref t 'text "") t))
-          (font-size (if (hash? t) (hash-ref t 'font-size FONT_SIZE) FONT_SIZE))
+          (font-size (if font-size
+                        font-size
+                        (if (hash? t)
+                          (hash-ref t 'font-size FONT_SIZE)
+                          FONT_SIZE)))
           [tl (text-length t #:font-size font-size #:font-family font-family)])
     (/r (- w tl) 2)))
 

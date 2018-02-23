@@ -11,9 +11,20 @@
 
   (check-equal? (seconds '((a 2) (b 10))) '(2 10))
 
+  (check-equal? (alookup '((a 10) (b 20)) 'a) 10)
+  (check-equal? (alookup '((a 10) (b 20) (a 30)) 'a) 10)
+  (check-equal? (alookup '((a 10) (b 20)) 'c) #f)
+  (check-equal? (alookup '(((a d) 10) (b 20)) '(a d)) 10)
+
   (check-speed
               (alist-expand (dup-alist (1 2 3) 100) (range 1 1000) 50)
               10)
+
+  (check-equal? (alist-flatten '((a 10) (b 20))) '(a 10 b 20))
+  (check-equal? (alist-flatten '((a 10) (b 20) (c (30 40)))) '(a 10 b 20 c (30 40)))
+  (check-equal? (alist-flatten '((a 10))) '(a 10))
+  (check-equal? (alist-flatten '()) empty)
+  (check-equal? (alist-flatten '(())) empty)
 
   (check-equal? (clist-ref '((1 . 2) (3 . 4)) 3) 4)
   (check-equal? (clist-ref '((1 . 2) (3 . 4)) 7 10) 10)

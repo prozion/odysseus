@@ -5,7 +5,7 @@
 (require "../../graphics/fonts.rkt")
 (require "../../graphics/console.rkt")
 (require "../../graphics/layout.rkt")
-(require "../../lib/all.rkt" (for-syntax "../../lib/syntax.rkt" "../../lib/hash.rkt" "../../lib/controls.rkt"))
+(require "../../lib/load/all.rkt" (for-syntax "../../lib/syntax.rkt" "../../lib/hash.rkt" "../../lib/controls.rkt"))
 
 (require "../../lib/debug.rkt")
 

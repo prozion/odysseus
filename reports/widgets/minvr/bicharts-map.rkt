@@ -2,7 +2,7 @@
 
 (require "_common.rkt")
 (require "../piechart.rkt")
-(require "../../../lib/all.rkt")
+(require "../../../lib/load/all.rkt")
 (require "../../../scrap/google.rkt")
 (require "../../../graphics/color.rkt")
 (require "../../../graphics/svg.rkt")

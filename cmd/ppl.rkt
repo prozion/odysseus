@@ -3,7 +3,7 @@
 (require racket/cmdline)
 
 (require (file "c:/denis/denis_core/denis_personal/my_people/all.rkt"))
-(require "../lib/all.rkt")
+(require "../lib/load/all.rkt")
 (require "../pis/people.rkt")
 (require "../pis/people_verify.rkt")
 (require "../graphics/console.rkt")
@@ -12,9 +12,10 @@
 (define ns (module->namespace (string->path "c:/denis/denis_core/denis_personal/my_people/all.rkt")))
 
 (define query "")
-(define person "")
 (define verifyf null)
 (define fields "sn")
+(define person #f)
+(define tags #f)
 (define only-fields #f)
 (define info null)
 (define csvfile "")
@@ -24,12 +25,6 @@
     (andmap
       (λ (f) (indexof? (hash-keys p) (string->symbol f)))
       fields)))
-
-(define (filter-query people query fields only-fields?)
-  (filter query
-    (if only-fields?
-      (filter (has-all-fields fields) people)
-      people)))
 
 (define (ppl-output fields people-sublist (csvfile ""))
   (if (nil? csvfile)
@@ -47,14 +42,8 @@
 (command-line
   #:program "ppl"
   #:multi
-    [("-q" "--query") q
-                    "query to filter"
-										(set! query q)]
-    [("-p" "--person") p
-                    "search by person's name and surname"
-										(set! person p)]
-    [("-n" "--name") n
-                    "same as -p"
+    [("-p" "--person") n
+                    "regexp for person name/surname"
 										(set! person n)]
     [("-v" "--verify") v
                     "verify uniqueness for values in specified field"
@@ -65,6 +54,9 @@
     [("-f" "--fields") f
                     "fields to show"
 										(set! fields f)]
+    [("-t" "--tags") t
+                    "fields to show"
+										(set! tags t)]
     [("-F" "--only-with-fields") F
                     "show only those records that have specified fields"
 										(begin
@@ -90,22 +82,14 @@
                   ((equal? info "face2face") (acqs people))
                   (else "?"))))
             (set-text-color 'default))
-      ((not (nil? person))
-        (ppl-output
-          (split fields ",")
-          (filter-query
-            people
-            (by-name-surname person)
-            (split fields ",")
-            only-fields)
-          csvfile))
       (else
-        (ppl-output
-          (split fields ",")
-          (filter-query
-            people
-            (eval (read (open-input-string query)) ns)
-            (split fields ",")
-            only-fields)
-          csvfile)))
+        (let* ((people people)
+              (fields (if fields (split fields ",") empty)))
+          (when only-fields
+            (set! people (filter (has-all-fields fields) people)))
+          (when person
+            (set! people (filter (λ (p) (re-matches? person (person-signature p))) people)))
+          (when tags
+            (set! people (filter (λ (p) (indexof? (explode tags) (hash-ref p 'tags #f))) people)))
+          (ppl-output fields people csvfile))))
 )

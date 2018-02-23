@@ -11,7 +11,7 @@
   "widgets/network2.rkt")
 (require "../graphics/svg.rkt")
 (require compatibility/defmacro)
-(require "../lib/all.rkt")
+(require "../lib/load/all.rkt")
 
 (provide (all-from-out
             "widgets/barchart.rkt"

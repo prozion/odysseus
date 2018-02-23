@@ -1,6 +1,6 @@
 #lang racket
 
-(require "../../lib/all.rkt")
+(require "../../lib/load/all.rkt")
 (require "../../scrap/csv.rkt")
 (require "../../scrap/google.rkt")
 (require "../../scrap/esri/shp.rkt")

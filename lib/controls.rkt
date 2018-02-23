@@ -2,7 +2,7 @@
 
 (require compatibility/defmacro)
 (require racket/stxparam)
-(require (for-syntax racket/syntax))
+(require racket/syntax (for-syntax racket/syntax))
 (require "base.rkt")
 
 (provide (except-out (all-defined-out) while-fun))
@@ -31,6 +31,17 @@
         ((= count 1) (list ,f))
         (else (cons ,f (gen-r (- count 1))))))
     (gen-r n)))
+
+(define set-id
+  (let ((ids (list))
+        (prefix ""))
+    (λ (#:prefix (pref #f) #:reset (reset #f))
+      (when reset
+        (set! ids (list)))
+      (when pref
+        (set! prefix pref))
+      (set! ids (cons (format-symbol "~a~a" prefix (length ids)) ids))
+      (first ids))))
 
 ; (the y-axis-pos 'left y-axis-left) -> (if (equal? y-axis-pos 'left) y-axis-left 0)
 (define-syntax (the stx)
@@ -72,8 +83,8 @@
                 (apply zor (cdr body))
                 (car body)))))
 
-(define-macro ($ name . args)
-  `(define ,name (list ,@args)))
+; (define-macro ($$ name . args)
+;   `(define ,name (list ,@args)))
 
 ; <name> will consume both inline arguments and arguments as list
 ; def -> (name arguments)
@@ -105,3 +116,8 @@
   (while-fun
       (lambda () condition)
       (lambda () body ...)))
+
+(define (repeat-f f arg-acc arg-lst)
+  (cond
+    ((empty? arg-lst) arg-acc)
+    (else (repeat-f f (f arg-acc (car arg-lst)) (cdr arg-lst)))))

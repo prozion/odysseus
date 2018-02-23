@@ -4,7 +4,7 @@
 (require racket/file)
 
 ;(require (file "c:/denis/denis_core/odysseus/lib/base.rkt"))
-(require "../lib/all.rkt")
+(require "../lib/load/all.rkt")
 (require "../graphics/console.rkt")
 
 (provide count-only-real-code-lines)

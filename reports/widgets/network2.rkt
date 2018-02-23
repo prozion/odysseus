@@ -4,7 +4,7 @@
 (require "../../graphics/svg.rkt")
 (require "../../graphics/fonts.rkt")
 (require "../../graphics/layout.rkt")
-(require "../../lib/all.rkt")
+(require "../../lib/load/all.rkt")
 (require "../../scrap/csv.rkt")
 (require "../layout_globals.rkt")
 (require "network.rkt")

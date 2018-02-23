@@ -82,6 +82,27 @@
             (lshift seq (sub1 seppos))
             (split (ltrim seq seppos) sep)))))))
 
+(define (split-by-lambda-general seq f #:inclusive? (inclusive? #f))
+  (let-values
+    (((a b c d)
+      (for/fold
+        ((res (list)) (head (list)) (borders (list)) (rest seq))
+        ((el seq))
+        (cond
+          ((f el) (values (if (empty? borders) (pushr res head) res) (list) (pushr borders el) (cdr rest)))
+          ((equal? (cdr rest) null)
+            (values (pushr (if (and inclusive? (not (empty? borders))) (pushr res borders) res) (pushr head el)) null null null))
+          (else
+            (let ((res (if (and inclusive? (not (empty? borders))) (pushr res borders) res)))
+              (values res (pushr head el) (list) (cdr rest))))))))
+    a))
+
+(define (split-by-lambda seq f)
+  (split-by-lambda-general seq f))
+
+(define (split-by-lambda* seq f)
+  (split-by-lambda-general seq f #:inclusive? #t))
+
 (define (nth seq index)
   (let ((ll (len seq)))
     (cond
@@ -111,14 +132,15 @@
   ;    ((null? seq) 0)
   ;    ((equal? el (car seq)) acc)
   ;    (else (indexof-iter (cdr seq) el (+ 1 acc)))))
-  (if (string? seq)
-    ;(indexof-iter (explode seq) el 1)
-    (indexof (explode seq) el)
-    ;(indexof-iter seq el 1)))
-    (let ((res (member el seq)))
-      (if res
-        (+ 1 (- (length seq) (length (member el seq))))
-        0))))
+  (cond
+    ((string? seq)
+      (indexof (explode seq) el))
+    ((list? seq)
+      (let ((res (member el seq)))
+        (if res
+          (+ 1 (- (length seq) (length (member el seq))))
+          0)))
+    (else 0)))
 
 (define (indexof? seq el)
   (if (= 0 (indexof seq el)) #f #t))
@@ -490,12 +512,20 @@
     ((ormap string? args) (apply string-append (map str args)))
     (else (apply op args))))
 
+(define (replace-by-part lst part target)
+  (cond
+    ((not (list? lst)) lst)
+    (else (map
+            (λ (el) (replace-by-part el part target))
+            (list-substitute lst part target)))))
+
 (define (remove-by-part lst part)
   (local ((define (remove-by-part-1 lst part)
             (cond
               ((not (list? lst)) lst)
-              ((index-of lst part) (exclude lst part))
-              (else (map (λ (el) (remove-by-part el part)) lst)))))
+              (else (map
+                      (λ (el) (remove-by-part-1 el part))
+                      (exclude-all lst part))))))
     (cond
       ((vector? part)
         (for/fold
@@ -503,3 +533,30 @@
           ((p part))
           (remove-by-part-1 res p)))
       (else (remove-by-part-1 lst part)))))
+
+(define (format-list pattern . inserts)
+  (local ((define (format-list-iter head tail inserts)
+            (cond
+              ((empty? tail) (values head inserts))
+              ((list? (car tail))
+                (let-values (((el inserts) (format-list-iter (list) (car tail) inserts)))
+                  (format-list-iter
+                    (pushr head el)
+                    (cdr tail)
+                    inserts)))
+              ((equal? (car tail) '~a)
+                (format-list-iter
+                  (pushr head (car inserts))
+                  (cdr tail)
+                  (cdr inserts)))
+              (else
+                (format-list-iter
+                  (pushr head (car tail))
+                  (cdr tail)
+                  inserts)))))
+    (let-values (((res extra-inserts)
+                    (format-list-iter
+                      (list)
+                      pattern
+                      inserts)))
+      res)))

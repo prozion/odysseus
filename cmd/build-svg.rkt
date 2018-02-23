@@ -4,7 +4,7 @@
 (require racket/file (for-syntax racket/file)) ;
 (require compatibility/defmacro)
 
-(require "../lib/all.rkt");  (for-syntax "../lib/syntax.rkt" "../lib/seqs.rkt"))
+(require "../lib/load/all.rkt");  (for-syntax "../lib/syntax.rkt" "../lib/seqs.rkt"))
 (require "../reports/reports.rkt")
 (require "../graphics/svg.rkt")
 
@@ -18,7 +18,7 @@
 (define (build #:in ody-file #:out (output-file null))
   (parameterize ([current-namespace (namespace-anchor->namespace a)])
     (namespace-require (string->path (string-append (getenv "odysseus") "/reports/reports.rkt")))
-    (namespace-require (string->path (string-append (getenv "odysseus") "/lib/all.rkt")))
+    (namespace-require (string->path (string-append (getenv "odysseus") "/lib/load/all.rkt")))
     (let* ([v (load ody-file)]
           [output-filename (if (null? output-file)
                               (path-replace-extension (file-name-from-path ody-file) (@. v.output-file-ext))

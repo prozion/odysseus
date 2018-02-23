@@ -5,6 +5,7 @@
 (require "seqs.rkt")
 (require "strings.rkt")
 (require "regexp.rkt")
+(require "debug.rkt")
 
 (provide (all-defined-out))
 
@@ -90,6 +91,16 @@
   (abs
     (- (date->days d2) (date->days d1))))
 
+(define (month-diff m1 m2)
+  (let* ((m1 (split m1 "."))
+        (m2 (split m2 "."))
+        (m1-month (->number (first m1)))
+        (m1-year (->number (second m1)))
+        (m2-month (->number (first m2)))
+        (m2-year (->number (second m2)))
+        )
+    (+ (- m2-month m1-month) (* 12 (- m2-year m1-year)))))
+
 (define (comparison-f comp-op conversion)
   (λ (a b)
     (let* ((a (if (list? a) (car a) a))
@@ -155,7 +166,7 @@
         (year (date-year curdate)))
     (format "~a.~a.~a" day month year)))
 
-(define (day-month adate)
+(define (d.m adate)
   (let* ((parts (get-matches
                   "([0-9x]{2}).([0-9x]{2})(.([0-9x]{4}[~?]?))?"
                   adate))
@@ -163,3 +174,30 @@
     (if parts
       (str (second parts) "." (third parts))
       "")))
+
+(define (m.y adate)
+  (format "~a.~a" (month adate) (year adate)))
+
+(define (parse-date adate)
+  (match adate
+    ((pregexp #px"^([0-9x]{2})\\.([0-9x]{2})\\.([0-9x]{4})$" (list _ day month year))
+        (hash 'day day 'month month 'year year))
+    ((pregexp #px"^([0-9x]{2})\\.([0-9x]{2})$" (list _ day month))
+        (hash 'day day 'month month 'year #f))
+    ((pregexp #px"^([0-9x]{2})\\.([0-9x]{4})$" (list _ month year))
+        (hash 'day #f 'month month 'year year))
+    (else
+        (hash))))
+
+(define (day adate)
+  (hash-ref (parse-date adate) 'day #f))
+
+(define (month adate)
+  (hash-ref (parse-date adate) 'month #f))
+
+(define (year adate)
+  (hash-ref (parse-date adate) 'year #f))
+
+; for finding year ticks on the timeline:
+(define (first-month? month shift)
+  (= 1 (remainder (+ month shift) 12)))

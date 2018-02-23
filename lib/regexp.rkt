@@ -38,19 +38,3 @@
         (re-substitute (re-substitute astr (car re) (car repstr)) (cdr re) (cdr repstr))))
     (else
       (string-replace astr (->re re) repstr))))
-
-(define-macro (re-match val-expr pattern parameters body)
-  (let ((pattern-expanded (list-substitute pattern (caar parameters) (cadar parameters))))
-    `(begin
-      ; (println ,pattern-expanded)
-      (match ,val-expr
-        (,pattern-expanded ,body)
-        (else #f)))))
-
-; (define-syntax (re-match stx)
-;   (syntax-case stx ()
-;     ((_ val-expr pattern parameters body ...)
-;         (with-syntax ((pattern-expanded (datum->syntax stx (list-substitute (syntax->datum #'pattern) (caar (syntax->datum #'parameters)) (cadar (syntax->datum #'parameters))))))
-;           #'(match val-expr
-;               (pattern-expanded body ...)
-;               (else #f))))))

@@ -33,6 +33,16 @@
 
   (check-false (list2? '((1 2 3 4) (3 4 5) 10 (8 9))))
 
+  (check-true (plain-list? '(1 2 3 4 5)))
+  (check-true (plain-list? '()))
+  (check-true (plain-list? (list (hash 'a 10) (hash 'b 20 'c 30))))
+  (check-true (plain-list? (list (hash (quote aa) 2) (hash (quote bb) 4 (quote cc) 8))))
+  (check-false (plain-list? '(())))
+  (check-false (plain-list? '(1 2 3 () 4 5)))
+  (check-false (plain-list? '(1 2 3 (4 5) 4 5)))
+  (check-false (plain-list? '(1 2 3 4 (5))))
+  (check-false (plain-list? '(((1)) 2 3 4 5)))
+
   (check-pred list-of-simple-cons? (list (cons 1 2) (cons 4 5)))
   (check-equal? (list-of-simple-cons? (list (cons 1 2) (cons 4 5) 10)) #f)
   (check-equal? (list-of-simple-cons? '((1 2) (4 5))) #f)
@@ -69,6 +79,10 @@
   (check-equal? (->number "0") 0)
   (check-equal? (->number "00") 0)
 
+  (check-equal? (->string "00") "00")
+  (check-equal? (->string 100) "100")
+  (check-equal? (->string 'a) "a")
+
   (check-equal? (->int "3.5") 3)
   (check-equal? (->int "3,5") 3)
   (check-equal? (->int "3") 3)
@@ -90,5 +104,11 @@
 
   (check-true (clist? '((1 . 2) (3 . 4))))
   (check-false (clist? '((1  2) (3  4))))
-  (check-false (clist? '((1 . 2) (3  4))))  
+  (check-false (clist? '((1 . 2) (3  4))))
+
+  (check-true (one-element? '(1)))
+  (check-false (one-element? '(1 2)))
+  (check-false (one-element? '()))
+  (check-false (one-element? 'a))
+  (check-false (one-element? 10))
 )

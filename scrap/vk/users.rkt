@@ -2,7 +2,7 @@
 
 (require net/url)
 (require json)
-(require "../../lib/all.rkt")
+(require "../../lib/load/all.rkt")
 (require "vk.rkt")
 ;(require (file "c:/denis/denis_core/settings/APIs.rkt"))
 
