@@ -63,6 +63,9 @@
   (check-pred true? null)
   (check-equal? (true? #f) #f)
 
+  (check-true (nonempty? '(2)))
+  (check-false (nonempty? '()))
+
   (check-pred nil? null)
   (check-pred nil? empty)
   (check-pred nil? '())

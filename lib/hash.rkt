@@ -386,3 +386,24 @@
 ;
 ; (define-macro (hash-object name class)
 ;   `(hash-union (hash 'name ,name) ,class))
+
+(define (unify-hashes lst by-key)
+  (let loop ((res empty) (lst-rest lst))
+    (cond
+      ((empty? lst-rest) res)
+      (else
+        (let* ((cur-hash (car lst-rest))
+              (key-value (hash-ref cur-hash by-key #f))
+              (with-same-key-value (if key-value
+                                      (filter (λ (x) (equal? (hash-ref x by-key #f) key-value)) res)
+                                      #f))
+              (exist-with-same-key-value? (not (nil? with-same-key-value)))
+              (with-same-key-value (if exist-with-same-key-value? (car with-same-key-value) #f))
+              (joined-hash (if with-same-key-value
+                              (apply hash-union (list with-same-key-value cur-hash))
+                              cur-hash))
+              (res (if exist-with-same-key-value?
+                    (list-substitute res with-same-key-value joined-hash)
+                    (pushr res joined-hash)))
+              )
+        (loop res (cdr lst-rest)))))))

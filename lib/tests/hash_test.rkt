@@ -583,4 +583,9 @@
       'e (list (hash 'aa 2) (hash 'bb 4 'cc 8))
       'f '(g h)))
 
+  (check-equal? (unify-hashes
+                  (list (hash 'a 10 'b 20) (hash 'c 30 'd 40) (hash 'a 20 'e 40) (hash 'a 10 'c 30 'b 50 'f 80) (hash 'k 100 'm 200))
+                  'a)
+                (list (hash 'a 10 'b 20 'c 30 'f 80) (hash 'c 30 'd 40) (hash 'a 20 'e 40) (hash 'k 100 'm 200)))
+
   )

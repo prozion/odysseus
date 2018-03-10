@@ -30,6 +30,12 @@
           astr
           (car match-position))))))
 
+(define (get-first-group-match re astr)
+  (let* ((res (get-matches re astr)))
+    (match res
+      (`((,_ ,g1)) g1)
+      (else #f))))
+
 (define (re-substitute astr re repstr)
   (cond
     ((and (list? re) (list? repstr))

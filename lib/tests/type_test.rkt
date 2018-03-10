@@ -19,6 +19,13 @@
   (check-equal? (simple-cons? (list 1)) #f)
   (check-equal? (simple-cons? (list)) #f)
 
+  (check-false (one-element-list? '()))
+  (check-false (one-element-list? '(1 2)))
+  (check-false (one-element-list? '(1 2 (3))))
+  (check-true (one-element-list? '((3))))
+  (check-true (one-element-list? '(1)))
+  (check-false (one-element-list? 3))
+
   (check-pred cons-ext? (cons 1 2))
   (check-equal? (cons-ext? (list 1 2)) #t)
   (check-equal? (cons-ext? (list 1)) #t)

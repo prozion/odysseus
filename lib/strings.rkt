@@ -65,8 +65,8 @@
 (define (mstring->string astr)
   (string-replace astr "\n" " "))
 
-(define (count-tabs line)
+(define (count-tabs line (sym "\t"))
 	(let loop ((count 0) (line (explode line)))
 		(cond
-			((equal? (car line) "\t") (loop (+ 1 count) (cdr line)))
+			((equal? (car line) sym) (loop (+ 1 count) (cdr line)))
 			(else count))))

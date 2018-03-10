@@ -19,6 +19,15 @@
       ((f t) (pushr res t))
       (else res))))
 
+(define (tree-clean f tr)
+  (for/fold
+    ((res (list)))
+    ((t tr))
+    (cond
+      ((not-empty-list? t) (pushr res (tree-clean f t)))
+      ((not (f t)) (pushr res t))
+      (else res))))
+
 (define (hash-tree-flatten-with-paths htree (path (list)))
   (cond
     ((not (hash? htree))

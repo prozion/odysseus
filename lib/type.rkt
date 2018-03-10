@@ -11,6 +11,12 @@
 (define (sequence? x)
   (or (list? x) (hash? x) (vector? x)))
 
+(define (not-empty-list? x)
+  (and (list? x) (not (empty? x))))
+
+(define (one-element-list? x)
+  (and (not-empty-list? x) (empty? (cdr x))))
+
 (define (simple-cons? x)
   (and (pair? x) (not (list? x))))
 

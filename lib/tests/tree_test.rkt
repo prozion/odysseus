@@ -20,6 +20,12 @@
     '(((()()(())))))
 
   (check-equal?
+    (tree-clean
+      empty?
+      '(a (@ (id 10) ()) () (b (@ (id 20) (class "foo"))) () (c (@ (id 30)) (d (@ (id 40)) (e) ()))))
+    '(a (@ (id 10)) (b (@ (id 20) (class "foo"))) (c (@ (id 30)) (d (@ (id 40)) (e)))))
+
+  (check-equal?
     (hash-tree-flatten-with-paths (hash 1 (hash 'a (list (hash 'aa 10) (hash 'ab 20)) 'b (hash 'bb 30))))
     (list
       (hash 'aa 10 '_path (list 1 'a))
@@ -42,8 +48,9 @@
       (hash 'a 10 '_path (list 1))
       (hash 'b 20 '_path (list 2))
       (hash 'c 30 '_path (list 2))))
-)
 
+
+)
 ; #hash(
 ;   (education . (list
 ;                   #hash((category . "learning") (interval . "09.1996-06.1997") (name . "Учёба на Физтехе"))

@@ -42,6 +42,8 @@
 (define (rand n)
   (add1 (random n)))
 
+(define (nonempty? e) (not (empty? e)))
+
 (define nil?
   (λ (v) (or
             (null? v)

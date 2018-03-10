@@ -26,10 +26,18 @@
   (check-equal? (get-matches (regexp "a.*b") "barrowbee") '(("arrowb")))
   (check-equal? (get-matches (pregexp "a.*b") "barrowbee") '(("arrowb")))
   (check-equal? (get-matches "a(.*)b" "barrowbee") '(("arrowb" "rrow")))
+  (check-equal? (get-matches "m(.*)o" "barrowbee") empty)
   (check-equal?
     (get-matches "node/(\\S+)/(\\S+)" "node/a1468/index.php node/other/do~")
     '(("node/a1468/index.php" "a1468" "index.php")
       ("node/other/do~" "other" "do~")))
+  (check-equal? (get-matches "City of (Moscow|Athens) is a capital of (Russia|Greece)" "City of Moscow is a capital of Russia")
+      '(("City of Moscow is a capital of Russia" "Moscow" "Russia")))
+  (check-equal? (get-matches "City of (Moscow|Athens) is a capital of (Russia|Greece)" "Tallas")
+      empty)
+
+  (check-equal? (get-first-group-match "a(.*)b" "barrowbee") "rrow")
+  (check-equal? (get-first-group-match "a(.*)b" "zoomanoo") #f)
 
   (check-equal? (re-substitute "some (text)" "\\(" "[") "some [text)")
   (check-equal? (re-substitute "some (text)" "\\(.*?\\)" "[]") "some []")
