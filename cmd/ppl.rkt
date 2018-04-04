@@ -13,8 +13,9 @@
 
 (define query "")
 (define verifyf null)
-(define fields "sn")
+(define fields #f)
 (define person #f)
+(define city #f)
 (define tags #f)
 (define only-fields #f)
 (define info null)
@@ -45,6 +46,9 @@
     [("-p" "--person") n
                     "regexp for person name/surname"
 										(set! person n)]
+    [("-c" "--city") c
+                    "regexp for city"
+										(set! city c)]
     [("-v" "--verify") v
                     "verify uniqueness for values in specified field"
 										(set! verifyf v)]
@@ -55,7 +59,7 @@
                     "fields to show"
 										(set! fields f)]
     [("-t" "--tags") t
-                    "fields to show"
+                    "filter persons by tag"
 										(set! tags t)]
     [("-F" "--only-with-fields") F
                     "show only those records that have specified fields"
@@ -84,12 +88,14 @@
             (set-text-color 'default))
       (else
         (let* ((people people)
-              (fields (if fields (split fields ",") empty)))
+              (fields (if fields (split fields ",") #f)))
           (when only-fields
             (set! people (filter (has-all-fields fields) people)))
           (when person
             (set! people (filter (λ (p) (re-matches? person (person-signature p))) people)))
+          (when city
+            (set! people (filter (λ (p) (re-matches? city (or ($ city p) ""))) people)))
           (when tags
-            (set! people (filter (λ (p) (indexof? (explode tags) (hash-ref p 'tags #f))) people)))
+            (set! people (filter (λ (p) (and (hash-ref p 'tags #f) (not-empty? (intersect (explode (hash-ref p 'tags #f)) (explode tags))))) people)))
           (ppl-output fields people csvfile))))
 )

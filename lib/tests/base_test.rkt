@@ -16,6 +16,7 @@
 ; stats - outpost near Villina country
 ; json - Great River fleet
 ; tree - Siege crue
+; symbols - Engineering crue
 
 ; graphics/tests: spies
 ; color_test - spies and police in the Emerald city and around
@@ -98,6 +99,14 @@
                         '(1 2 3 11 12 14 17 23 118 121 123))
                 '(11 17 23))
 
+  (check-true (and* number? odd? 3))
+  (check-false (and* number? odd? 4))
+  (check-false (and* number? odd? "a"))
+
+  (check-true (or* number? odd? 3))
+  (check-true (or* number? odd? 4))
+  (check-false (or* number? symbol? "a"))
+
   (check-pred notnil? #t)
   (check-pred notnil? "txt")
   (check-pred notnil? 3)
@@ -143,6 +152,4 @@
   (check-equal? (symbol->list 'a) '(a))
   (check-equal? (symbol->list 'foo) '(f o o))
   (check-equal? (symbol->list (string->symbol "")) '())
-
-
 )

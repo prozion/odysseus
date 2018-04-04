@@ -1,6 +1,7 @@
 #lang racket
 
 (require compatibility/defmacro)
+(require (for-syntax racket))
 
 (provide (all-defined-out))
 
@@ -43,6 +44,7 @@
   (add1 (random n)))
 
 (define (nonempty? e) (not (empty? e)))
+(define not-empty? nonempty?)
 
 (define nil?
   (λ (v) (or
@@ -67,6 +69,18 @@
 
 (define and-> (f-> and))
 (define or-> (f-> or))
+
+(define-macro (op* o . args)
+  (let* ((argument (last args))
+        (ops (reverse (cdr (reverse args)))) ; without last element
+        (ops (for/list ((op ops)) (list op argument))))
+    `(,o ,@ops)))
+
+(define-macro (and* . args)
+  `(op* and ,@args))
+
+(define-macro (or* . args)
+  `(op* or ,@args))
 
 (define (not-> f)
   (λ (argument)
@@ -136,3 +150,6 @@
     (filter
       non-empty-string?
       (string-split (symbol->string sym) ""))))
+
+(define (listify a)
+  (if (list? a) a (list a)))

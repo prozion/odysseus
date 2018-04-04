@@ -141,10 +141,20 @@
     (format "~a" val)
     ""))
 
+(define (get-informative-fields person)
+  (let ((fields-to-check (split "sn email skype phone" " ")))
+    (filter (λ (field) (hash-ref person (->symbol field) #f)) fields-to-check)))
+
 (define (person->string person fields)
-  (let ((name (field->str person 'name 'first ""))
+  (let* ((name (field->str person 'name 'first ""))
         (surname (field->str person 'surname 'first ""))
-        (nick (field->str person 'nick 'first "n/a")))
+        (nick (field->str person 'nick 'first "n/a"))
+        (default-fields (get-informative-fields person))
+        (fields (if fields
+                    fields
+                    (if (not-empty? default-fields)
+                        (list (car default-fields))
+                        #f))))
   (string-append
     (esc-sec (string-text-color 'yellow))
     (if (and (nil? name) (nil? surname))
@@ -155,7 +165,7 @@
           (format " ~a~n" name))
         (format " ~a ~a~n" name surname)))
     (esc-sec (string-text-color 'grey))
-    (if (empty? fields)
+    (if (not fields)
       ""
       (apply string-append
         (map

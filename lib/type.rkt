@@ -14,8 +14,11 @@
 (define (not-empty-list? x)
   (and (list? x) (not (empty? x))))
 
-(define (one-element-list? x)
-  (and (not-empty-list? x) (empty? (cdr x))))
+(define (one-element? seq)
+  (and (list? seq) (= (length seq) 1)))
+
+(define (more-than-one-element? seq)
+  (and (list? seq) (> (length seq) 1)))
 
 (define (simple-cons? x)
   (and (pair? x) (not (list? x))))
@@ -79,6 +82,7 @@
     ((vector? x) 'vector)
     ((hash? x) 'hash)
     ((path? x) 'path)
+    ((void? x) 'void)
     (else #f)))
 
 ; delta is for special case met in sorting newspapers issues:
@@ -129,6 +133,3 @@
 
 (define (clist? seq)
   (andmap simple-cons? seq))
-
-(define (one-element? seq)
-  (and (list? seq) (= (length seq) 1)))

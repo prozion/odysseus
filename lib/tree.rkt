@@ -19,14 +19,20 @@
       ((f t) (pushr res t))
       (else res))))
 
-(define (tree-clean f tr)
+(define (tree-clean next-level? exclude? tr)
   (for/fold
     ((res (list)))
     ((t tr))
     (cond
-      ((not-empty-list? t) (pushr res (tree-clean f t)))
-      ((not (f t)) (pushr res t))
-      (else res))))
+      ((next-level? t) (pushr res (tree-clean next-level? exclude? t)))
+      ((exclude? t) res) ; in this cases f must handle also empty lists
+      (else (pushr res t)))))
+
+(define (tree-exclude tr el)
+  (tree-clean
+    list?
+    (λ (x) (equal? x el))
+    tr))
 
 (define (hash-tree-flatten-with-paths htree (path (list)))
   (cond
@@ -48,3 +54,63 @@
         (append
           res
           (hash-tree-flatten-with-paths (hash-ref htree key) (pushr path key)))))))
+
+(define (format-list pattern . inserts)
+  (local ((define (format-list-iter head tail inserts)
+            (cond
+              ((empty? tail) (values head inserts))
+              ((list? (car tail))
+                (let-values (((el inserts) (format-list-iter (list) (car tail) inserts)))
+                  (format-list-iter
+                    (pushr head el)
+                    (cdr tail)
+                    inserts)))
+              ((equal? (car tail) '~a)
+                (format-list-iter
+                  (if (equal? (car inserts) '$f)
+                    head
+                    (pushr head (car inserts)))
+                  (cdr tail)
+                  (cdr inserts)))
+              ((equal? (car tail) '~@a)
+                (format-list-iter
+                  (if (equal? (car inserts) '$f)
+                    head
+                    (if (list? (car inserts))
+                        (apply (curry pushr head) (car inserts))
+                        (pushr head (car inserts))))
+                  (cdr tail)
+                  (cdr inserts)))
+              ((equal? (car tail) '~s)
+                (format-list-iter
+                  (if (equal? (car inserts) '$f)
+                    head
+                    (pushr head (->string (car inserts))))
+                  (cdr tail)
+                  (cdr inserts)))
+              ((equal? (car tail) '~@s)
+                (format-list-iter
+                  (if (equal? (car inserts) '$f)
+                    head
+                    (if (list? (car inserts))
+                        (apply (curry pushr head) (map ->string (car inserts)))
+                        (pushr head (->string (car inserts)))))
+                  (cdr tail)
+                  (cdr inserts)))
+              (else
+                (format-list-iter
+                  (pushr head (car tail))
+                  (cdr tail)
+                  inserts)))))
+    (let-values (((res extra-inserts)
+                    (format-list-iter
+                      (list)
+                      pattern
+                      inserts)))
+      res)))
+
+(define (transform-list-recur lst f)
+  (cond
+    ((scalar? lst) (f lst))
+    ((plain-list? lst) (map f (f lst)))
+    (else (map (λ (x) (transform-list-recur x f)) (f lst)))))

@@ -32,4 +32,8 @@
 
   (check-equal? (count-tabs "hello") 0)
   (check-equal? (count-tabs "\t\t\thello") 3)
+
+  (check-equal? (word-sum "hello") 52)
+  (check-equal? (word-sum "бhello") 54)
+  (check-equal? (word-sum "абвгд") 15)
 )

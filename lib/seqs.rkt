@@ -197,8 +197,15 @@
 
 (define triml ltrim)
 
-(define (lpush seq el)
-  (cons el seq))
+(define (lpush seq . els)
+  (cond
+    ((empty? els) seq)
+    (else
+      (apply
+        (curry
+          lpush
+          (cons (car els) seq))
+        (cdr els)))))
 
 (define pushl lpush)
 
@@ -228,8 +235,15 @@
 
 (define trimr rtrim)
 
-(define (rpush seq el)
-  (reverse (cons el (reverse seq))))
+(define (rpush seq . els)
+  (cond
+    ((empty? els) seq)
+    (else
+      (apply
+        (curry
+          rpush
+          (reverse (cons (car els) (reverse seq))))
+        (cdr els)))))
 
 (define pushr rpush)
 
@@ -317,7 +331,6 @@
           (lshift seq (sub1 pos1))
           (rshift seq (- ll pos2)))))))
 
-
 (define (exclude seq el)
   (if (string? seq)
     (implode (exclude (explode seq) el))
@@ -328,6 +341,22 @@
     (cond
       ((> index 0) (exclude-all (exclude seq el) el))
       (else seq))))
+
+(define (exclude* seq . el)
+  (cond
+    ((empty? el) seq)
+    (else
+      (apply
+        (curry exclude* (exclude seq (car el)))
+        (cdr el)))))
+
+(define (exclude-all* seq . el)
+  (cond
+    ((empty? el) seq)
+    (else
+      (apply
+        (curry exclude-all* (exclude-all seq (car el)))
+        (cdr el)))))
 
 (define (insert seq index el)
   (let ((ll (len seq)))
@@ -534,29 +563,15 @@
           (remove-by-part-1 res p)))
       (else (remove-by-part-1 lst part)))))
 
-(define (format-list pattern . inserts)
-  (local ((define (format-list-iter head tail inserts)
-            (cond
-              ((empty? tail) (values head inserts))
-              ((list? (car tail))
-                (let-values (((el inserts) (format-list-iter (list) (car tail) inserts)))
-                  (format-list-iter
-                    (pushr head el)
-                    (cdr tail)
-                    inserts)))
-              ((equal? (car tail) '~a)
-                (format-list-iter
-                  (pushr head (car inserts))
-                  (cdr tail)
-                  (cdr inserts)))
-              (else
-                (format-list-iter
-                  (pushr head (car tail))
-                  (cdr tail)
-                  inserts)))))
-    (let-values (((res extra-inserts)
-                    (format-list-iter
-                      (list)
-                      pattern
-                      inserts)))
-      res)))
+(define (append-unique seq . seqs)
+  (cond
+    ((empty? seqs) seq)
+    (else
+      (apply
+        (curry
+          append-unique
+          (for/fold
+            ((res seq))
+            ((s (car seqs)))
+            (pushr-unique res s)))
+        (cdr seqs)))))

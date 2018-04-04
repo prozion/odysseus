@@ -70,3 +70,11 @@
 		(cond
 			((equal? (car line) sym) (loop (+ 1 count) (cdr line)))
 			(else count))))
+
+(define (word-sum word)
+  (let ((en-letters (explode "abcdefghijklmnopqrstuvwxyz"))
+        (ru-letters (explode "абвгдеёжзиклмнопрстуфхцчшщъыьэюя")))
+    (for/fold
+      ((res 0))
+      ((w (explode word)))
+      (+ res (indexof en-letters w) (indexof ru-letters w)))))

@@ -115,6 +115,8 @@
   (check-equal? (lpush '() 100) '(100))
   (check-equal? (lpush '(1 2 3) 100) '(100 1 2 3))
   (check-equal? (lpush '((1 2 3)) '(100 200)) '((100 200) (1 2 3)))
+  (check-equal? (lpush '(1 2) 3 4 5) '(5 4 3 1 2))
+  (check-equal? (pushl '(1 2) 3 4 5) '(5 4 3 1 2))
 
   (check-equal? (lpush-unique '(1 2 3) 100) '(100 1 2 3))
   (check-equal? (lpush-unique '(1 2 3) 3) '(1 2 3))
@@ -141,6 +143,8 @@
   (check-equal? (rpush '(1 2 3) 100) '(1 2 3 100))
   (check-equal? (rpush '(1 2 3) 3) '(1 2 3 3))
   (check-equal? (pushr '(1 2 3) 3) '(1 2 3 3))
+  (check-equal? (pushr '(1) 2 3 4) '(1 2 3 4))
+  (check-equal? (pushr '(1) 2 '(3 4)) '(1 2 (3 4)))
 
   (check-equal? (rpush-unique '(1 2 3) 100) '(1 2 3 100))
   (check-equal? (rpush-unique '(1 2 3) 3) '(1 2 3))
@@ -190,6 +194,8 @@
   (check-equal? (remove '(1 2 3 4 5 6 7) 4 #:len 3) '(1 2 3 7))
 
   (check-equal? (exclude '(1 2 3 4 5 6 7) 3) '(1 2 4 5 6 7))
+  (check-equal? (exclude* '(1 2 3 4 5 6 7) 3 2 1) '(4 5 6 7))
+  (check-equal? (exclude* '(1 2 3 4 5 6 7 3) 3 2 1) '(4 5 6 7 3))
   (check-equal? (exclude '(3) 3) '())
   (check-equal? (exclude '(1 2 3 4 5 6 7) 10) '(1 2 3 4 5 6 7))
   (check-equal? (exclude '(1 2 "c" 4 5 "c" 7) "c") '(1 2 4 5 "c" 7))
@@ -200,6 +206,7 @@
   (check-equal? (exclude-all '(1 1 1) 1) '())
   (check-equal? (exclude-all '(1 2 "c" 4 5 "c" 7) "d") '(1 2 "c" 4 5 "c" 7))
   (check-equal? (exclude-all '(1 2 (5 8) 4 5 (5 8) 7) '(5 8)) '(1 2 4 5 7))
+  (check-equal? (exclude-all* '[1 2 (5 8) 4 5 (5 8) 4 7] '(5 8) 2 4) '(1 5 7))
   (check-equal? (exclude-all "Tell me, O muse, of that ingenious hero" "o") "Tell me, O muse, f that ingenius her")
   (check-equal? (exclude-all "Tell me,\r\n O muse,\r of that ingenious hero\r" "\r") "Tell me,\n O muse, of that ingenious hero")
 
@@ -248,6 +255,7 @@
   (check-equal? (not-uniques '(1 2 13 12 10 7 3 4 14)) '())
 
   (check-equal? (uniques '(1 2 3 1 10 7 3 4 4)) '(1 2 3 10 7 4))
+  (check-equal? (uniques '(1 2 (3 4) 1 10 7 3 4 4 (3 4))) '(1 2 (3 4) 10 7 3 4))
 
   (check-equal? (minus '() '()) '())
   (check-equal? (minus '(1 2 3) '()) '(1 2 3))
@@ -331,11 +339,7 @@
   (check-equal? (remove-by-part '((a) b (c (d)) (e)) '(d)) '((a) b (c) (e)))
   (check-equal? (remove-by-part '((a) b (c (d)) (b)) 'b) '((a) (c (d)) ()))
 
-  (check-equal? (format-list '(a b ~a d) '(c)) '(a b (c) d))
-  (check-equal? (format-list '(a b ~a) 'c) '(a b c))
-  (check-equal? (format-list '(a b ~a d) 'c) '(a b c d))
-  (check-equal? (format-list '(a b ~a d e) 'c) '(a b c d e))
-  (check-equal? (format-list '(a b ~a d (e (f ~a))) '(c) 'u) '(a b (c) d (e (f u))))
-  (check-equal? (format-list '(a b ~a d) (for/list ((i (in-range 1 3))) i)) '(a b (1 2) d))
-  (check-equal? (format-list '(a b ~a d) (for/fold ((res (list))) ((i (in-range 1 3))) `(,@res ,i))) '(a b (1 2) d))
+  (check-equal? (append-unique '(1 2 3) '(4 5 1 6)) '(1 2 3 4 5 6))
+  (check-equal? (append-unique '(1 2 1 3) '(4 5 1 6 2 2 2)) '(1 2 1 3 4 5 6))
+  (check-equal? (append-unique '(1 2 1 3) '(4 5 1 6 2) '(2 2) '(7 3 8 8 (9) 10)) '(1 2 1 3 4 5 6 7 8 (9) 10))
 )

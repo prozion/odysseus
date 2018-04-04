@@ -14,17 +14,31 @@
   (check-equal? (scalar? (hash)) #f)
   (check-equal? (scalar? (hash 'a 1 'b 2)) #f)
 
+  (check-true (sequence? '()))
+  (check-true (sequence? '(1 2)))
+  (check-true (sequence? (hash 'a 10)))
+  (check-true (sequence? #(1 2 3)))
+  (check-false (sequence? 5))
+  (check-false (sequence? 'a))
+
+  (check-true (not-empty-list? '(1)))
+  (check-false (not-empty-list? '()))
+
+  (check-true (one-element? '(1)))
+  (check-true (one-element? '((1))))
+  (check-false (one-element? '(1 2)))
+  (check-false (one-element? '()))
+  (check-false (one-element? 'a))
+  (check-false (one-element? 10))
+
+  (check-false (more-than-one-element? '(3)))
+  (check-true (more-than-one-element? '(3 4)))
+  (check-false (more-than-one-element? #f))
+
   (check-pred simple-cons? (cons 1 2))
   (check-equal? (simple-cons? (list 1 2)) #f)
   (check-equal? (simple-cons? (list 1)) #f)
   (check-equal? (simple-cons? (list)) #f)
-
-  (check-false (one-element-list? '()))
-  (check-false (one-element-list? '(1 2)))
-  (check-false (one-element-list? '(1 2 (3))))
-  (check-true (one-element-list? '((3))))
-  (check-true (one-element-list? '(1)))
-  (check-false (one-element-list? 3))
 
   (check-pred cons-ext? (cons 1 2))
   (check-equal? (cons-ext? (list 1 2)) #t)
@@ -112,10 +126,4 @@
   (check-true (clist? '((1 . 2) (3 . 4))))
   (check-false (clist? '((1  2) (3  4))))
   (check-false (clist? '((1 . 2) (3  4))))
-
-  (check-true (one-element? '(1)))
-  (check-false (one-element? '(1 2)))
-  (check-false (one-element? '()))
-  (check-false (one-element? 'a))
-  (check-false (one-element? 10))
 )
