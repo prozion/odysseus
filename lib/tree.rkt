@@ -114,3 +114,16 @@
     ((scalar? lst) (f lst))
     ((plain-list? lst) (map f (f lst)))
     (else (map (λ (x) (transform-list-recur x f)) (f lst)))))
+
+(define (same-elements? as bs)
+  (cond
+    ((and (scalar? as) (scalar? bs)) (equal? as bs))
+    ((and (list? as) (list? bs))
+      (and
+        (for/and
+          ((a as))
+          (ormap (λ (b) (same-elements? a b)) bs)))
+        (for/and
+          ((b bs))
+          (ormap (λ (a) (same-elements? b a)) as)))
+    (else (equal? as bs))))

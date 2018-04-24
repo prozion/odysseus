@@ -18,16 +18,16 @@
             (format ", \"params\": \"~a\"" params-str)
             "")))
 
-(define (neo4j/authenticate (ip vps/ip))
+(define (neo4j/authenticate (ip neo4j/ip))
   (let ((gdb-url (format "http://~a:7474/user/neo4j" ip)))
     (get-url
-      test/url
+      gdb-url
       (list
         (format "Authorization: Basic ~a"
-                          (string->base64 (format "~a:~a" vps/neo4j/user vps/neo4j/pwd)))
+                          (string->base64 (format "~a:~a" neo4j/user neo4j/pwd)))
         "Accept: application/json; charset=UTF-8"))))
 
-(define (cypher-request cyreq (ip vps/ip))
+(define (cypher-request cyreq (ip neo4j/ip))
   (let ((gdb-url (format "http://~a:7474/db/data/cypher" ip)))
     (post-url
       gdb-url
@@ -36,7 +36,7 @@
         "Accept: application/json; charset=UTF-8"
         "Content-Type: application/json"
         (format "Authorization: Basic ~a"
-                          (string->base64 (format "~a:~a" vps/neo4j/user vps/neo4j/pwd))))
+                          (string->base64 (format "~a:~a" neo4j/user neo4j/pwd))))
       (cypher->json cyreq))))
 
 (define (neo4j/cypher cyreq)
@@ -49,31 +49,33 @@
 ;(define (gdb/create-database db-name)
 ;  (neo4j/cypher (format "CREATE (n:~a)" db-name)))
 
-(define (gdb/create-node n)
-  (let ((label (@. n.:label))
-        (properties (hash-delete n ':label)))
-    (neo4j/cypher
-      (format
-        "CREATE (~a ~a)"
-        (if label (str ":" label) "")
-        (hash-print-json properties)))))
+; (gdb/create-node (hash :label "City" name "Moscow" country "Russia"))
+(define-catch (gdb/create-node n #:label-attr (label-attr '_label) #:ignore-attrs (ignore-attrs empty))
+  (let* ((label (hash-ref n label-attr))
+        (n-only-properties (hash-filter (λ (k v) (not (indexof? ignore-attrs k))) n))
+        (n-only-properties (hash-map (λ (k v) (values k (->string v))) n-only-properties))
+        (command (format
+                  "CREATE (~a ~a)"
+                  (if label (str ":" label) "")
+                  (hash-print-json n-only-properties))))
+      command))
+    ; (neo4j/cypher command)))
 
 ; n1: (hash ':label "person:queens_giant" 'id 5 'name "Richard Roe"))
 ; n2: (hash ':label "person:queens_giant" 'id 7 'name "John Doe"))
 ; rel: (hash ':label "test_rel" 'rate 10)
-(define (gdb/create-rel n1 n2 rel)
-  (let ((label1 (@. n1.:label))
-        (label2 (@. n2.:label))
-        (labelr (@. rel.:label)))
-  (neo4j/cypher
-    (format
-      "MATCH (n1~a), (n2~a) WHERE ~a AND ~a CREATE (n1)-[r~a ~a]->(n2)"
-      (if label1 label1 "")
-      (if label2 label2 "")
-      (hash-print (hash-delete n1 ':label) #:delimeter " AND " #:prefix "n1.")
-      (hash-print (hash-delete n2 ':label) #:delimeter " AND " #:prefix "n2.")
-      (if labelr (str ":" labelr) "")
-      (hash-print-json (hash-delete rel ':label))))))
+(define-catch (gdb/create-rel id1 id2 relation-type #:label1 (label1 #f) #:label2 (label2 #f))
+  (let ((command
+            (format
+              "MATCH (n1~a), (n2~a) WHERE ~a AND ~a CREATE (n1)-[r~a]->(n2)"
+              (if label1 label1 "")
+              (if label2 label2 "")
+              (format "n1.id=\"~a\"" id1)
+              (format "n2.id=\"~a\"" id2)
+              (if relation-type (str ":" relation-type) ""))))
+    command))
+    ; (neo4j/cypher command)))
+
 
 (define (gdb/delete-nodes #:label (label #f) #:limit (limit #f))
   (neo4j/cypher

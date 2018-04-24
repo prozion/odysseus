@@ -1,8 +1,8 @@
 #lang racket
 
-(require "../lib/load/all.rkt")
+(require "../../lib/load/all.rkt")
 (require racket/stxparam)
-(require "../lib/crypto.rkt")
+(require "../../lib/crypto.rkt")
 
 (provide (all-defined-out))
 

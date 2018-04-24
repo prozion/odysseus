@@ -1,6 +1,7 @@
 #lang racket
 
 (require "seqs.rkt")
+(require "type.rkt")
 (require "regexp.rkt")
 (require compatibility/defmacro)
 
@@ -53,7 +54,7 @@
             (cond
               ((equal? cur-f "d") (format-number-iter (cdr format-str) (cdr number-str) (str cur-d res-str)))
               (else (format-number-iter (cdr format-str) number-str (str cur-f res-str))))))))
-  (format-number-iter (reverse (split format-str)) (reverse (split (number->string number))) ""))
+  (format-number-iter (reverse (split format-str)) (reverse (split (->string number))) ""))
 
 (define-macro (when/str condition . expression)
   `(if ,condition (string-append ,@expression) ""))
@@ -78,3 +79,8 @@
       ((res 0))
       ((w (explode word)))
       (+ res (indexof en-letters w) (indexof ru-letters w)))))
+
+(define (no-words? astr)
+  (or
+    (not astr)
+    (re-matches? "^\\s*$" astr)))

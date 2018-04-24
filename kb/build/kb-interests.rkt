@@ -1,10 +1,12 @@
 #lang racket
 
-(require "../lib/load/all.rkt")
-(require "turtle.rkt")
-(require "tab-tree.rkt")
+(require "../../lib/load/all.rkt")
+(require "../owl/turtle.rkt")
+(require "../tab-tree.rkt")
 
 (provide (all-defined-out))
+
+;;; Build ontology for hobbies and professions
 
 (define hobbies-tree (parse-tab-tree "c:/denis/denis_core/denis_ontologies/interests/hobbies.tree"))
 

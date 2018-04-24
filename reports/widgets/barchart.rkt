@@ -12,19 +12,19 @@
 ; #:colors '("black" "grey" "#aa6")
 ; #:gap 1
 ; #:title "Storskog the best!")
-(define (barchart
-            #:data (data #f)
-            #:max-extent (max-extent #f)
+(define-catch (barchart
+                  #:data (data #f)
+                  #:max-extent (max-extent #f)
 
-            #:gap (gap 0)
-            #:colors (colors '("black"))
-            #:xs-orientation (xs-orientation 0)
-            #:title (title "")
+                  #:gap (gap 0)
+                  #:colors (colors '("black"))
+                  #:xs-orientation (xs-orientation 0)
+                  #:title (title "")
 
-            #:height (height 0)
-            #:width (width 1000)
-            #:y0 (y0 0)
-            #:y-ticks (y-ticks #f))
+                  #:height (height 0)
+                  #:width (width 1000)
+                  #:y0 (y0 0)
+                  #:y-ticks (y-ticks #f))
   (let* (
         (x 50)
         (y (+ 10 y0))

@@ -46,6 +46,9 @@
 (define (nonempty? e) (not (empty? e)))
 (define not-empty? nonempty?)
 
+(define (not-equal? a b)
+  (not (equal? a b)))
+
 (define nil?
   (λ (v) (or
             (null? v)
@@ -153,3 +156,16 @@
 
 (define (listify a)
   (if (list? a) a (list a)))
+
+(define (range+ start end)
+  (cond
+    ((< end start) empty)
+    ((= end start) (list end))
+    (else
+      (append (range start end) (list end)))))
+
+(define (dup value size)
+  (map (λ (x) value) (range size)))
+
+(define (but-last seq)
+  (reverse (cdr (reverse seq))))

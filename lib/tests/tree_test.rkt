@@ -99,6 +99,16 @@
                             'a
                             x)))
                 '(a 2 (3 (a 4 (a 5 6 (a 7) 8 (a 9 a) 11) 12 (a (13))) 14) 15 (a 16)))
+
+  (check-true (same-elements? 2 2))
+  (check-false (same-elements? 2 3))
+  (check-false (same-elements? '(1 2) '(2 3)))
+  (check-true (same-elements? '(1 1 2) '(2 1)))
+  (check-true (same-elements? '((2 1) (3 4)) '((1 2) (4 3))))
+  (check-true (same-elements? '((2 (3 1 10)) (3 4)) '(((10 1 3) 2) (4 3))))
+  (check-true (same-elements?
+                '((((#f S1 (simple chemical)) (#f enzyme)) (#f P1 (simple chemical))) "positive influence")
+                '((((#f enzyme) (#f S1 (simple chemical))) (#f P1 (simple chemical))) "positive influence")))
 )
 ; #hash(
 ;   (education . (list

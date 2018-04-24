@@ -52,6 +52,8 @@
   (check-true (alist? (hash->alist (hash 'a 1 'b 2))))
   (check-equal? (hash->alist (hash 'a 1 'b 2)) '((a 1) (b 2)))
 
+  ; (check-equal? (hash->cons (hash 'a 1 'b 2)) (list (a . 1) (b . 2))) Racket function hash->list does the same
+
   (check-hash-equal?
     (list->hash '((1 1 2 3 4) (2 5 6 7 8)) (list 'key 'a 'b 'c 'd) #:columns-exclude '(b d))
     (hash 1 (hash 'a 1 'c 3) 2 (hash 'a 5 'c 7)))
@@ -587,5 +589,9 @@
                   (list (hash 'a 10 'b 20) (hash 'c 30 'd 40) (hash 'a 20 'e 40) (hash 'a 10 'c 30 'b 50 'f 80) (hash 'k 100 'm 200))
                   'a)
                 (list (hash 'a 10 'b 20 'c 30 'f 80) (hash 'c 30 'd 40) (hash 'a 20 'e 40) (hash 'k 100 'm 200)))
+
+  (check-hash-equal?
+                (hash-keys-substitute (hash 'a 10 'b 20) '(a b) '(c d))
+                (hash 'c 10 'd 20))
 
   )

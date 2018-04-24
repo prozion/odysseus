@@ -31,12 +31,25 @@
   (true? (hash-ref h key #f)))
 
 (define (hash-empty? h)
-  (= 0 (length (hash-keys h))))
+  (empty? (hash-keys h)))
 
 (define (hasher-by-names . body)
   (λ
     args
     (for/hash ((k body) (v args)) (values k v))))
+
+(define (hash-pretty-string h)
+  (let* ((ks (hash-keys h))
+        (res-str
+          (for/fold
+            ((res ""))
+            ((k ks))
+            (str
+              res
+              (format "~a : ~a~n" k (hash-ref h k))))))
+  res-str))
+
+
 
 ;; REDUCE
 (define (hash-length h)
@@ -346,7 +359,7 @@
       ((s ""))
       (((k v) (in-hash h)) (i hl))
       (let ((vp (cond
-                  ((string? v) (str "'" v "'"))
+                  ((string? v) (str "\"" v "\""))
                   (else v))))
       (if (< i (dec hl))
         (str s prefix k equal-sign vp delimeter)
@@ -407,3 +420,14 @@
                     (pushr res joined-hash)))
               )
         (loop res (cdr lst-rest)))))))
+
+(define (hash-keys-substitute h original-keys subst-keys)
+  (cond
+    ((empty? subst-keys) h)
+    ((empty? original-keys) h)
+    (else
+      (let* ((original-key (car original-keys))
+            (subst-key (car subst-keys))
+            (original-value (hash-ref h original-key))
+            (h (hash-union (hash subst-key original-value) (hash-delete h original-key))))
+        (hash-keys-substitute h (cdr original-keys) (cdr subst-keys))))))

@@ -9,4 +9,5 @@
   #:exception-set (list
     "lib/projects"
     "lib/tests"
+    "lib/algs"
 ))

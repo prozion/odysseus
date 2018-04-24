@@ -62,3 +62,9 @@
                     seq)))
         (string-split seq sep)))
     (else (split seq sep))))
+
+(define (opt/difference seq1 seq2)
+  (set-symmetric-difference seq2 (reverse seq1)))
+
+(define (opt/append-unique . seqs)
+  (opt/uniques (apply append seqs)))

@@ -19,6 +19,8 @@
   (check-equal? (format-number "ddd ddd" 38504) "38 504")
   (check-equal? (format-number "ddd" 38504) "38504")
   (check-equal? (format-number "d. d. d" 38504) "385. 0. 4")
+  (check-equal? (format-number "dd" 3) "3")
+  (check-equal? (format-number "dd" 3 #:filler "0") "03")
 
   (check-equal? (when/str (> 3 2) (format "~a ~a " "hello" 3) "world") "hello 3 world")
   (check-equal? (when/str (< 3 2) (format "~a ~a " "hello" 3) "world") "")
@@ -36,4 +38,12 @@
   (check-equal? (word-sum "hello") 52)
   (check-equal? (word-sum "бhello") 54)
   (check-equal? (word-sum "абвгд") 15)
+
+  (check-true (no-words? ""))
+  (check-true (no-words? " "))
+  (check-true (no-words? #f))
+  (check-false (no-words? "s"))
+  (check-false (no-words? "  s"))
+  (check-false (no-words? "  a"))
+  (check-false (no-words? "  s "))
 )

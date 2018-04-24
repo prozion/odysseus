@@ -18,6 +18,9 @@
 (define (re-matches? re astr)
   (true? (regexp-match (->re re) astr)))
 
+(define (re-full-matches? re astr)
+  (true? (re-matches? (str "^" re "$") astr)))
+
 (define (get-matches re astr)
   (let ((re (->re re)))
     (for/fold

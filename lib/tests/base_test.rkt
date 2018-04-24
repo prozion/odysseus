@@ -17,6 +17,9 @@
 ; json - Great River fleet
 ; tree - Siege crue
 ; symbols - Engineering crue
+; checks - Orchestra crue
+; hashtree - Information and propaganda crue
+; http - Kamikadze crue
 
 ; graphics/tests: spies
 ; color_test - spies and police in the Emerald city and around
@@ -152,4 +155,12 @@
   (check-equal? (symbol->list 'a) '(a))
   (check-equal? (symbol->list 'foo) '(f o o))
   (check-equal? (symbol->list (string->symbol "")) '())
+
+  (check-equal? (range+ 1 10) '(1 2 3 4 5 6 7 8 9 10))
+  (check-equal? (range+ 3 3) '(3))
+  (check-equal? (range+ 3 2) '())
+
+  (check-equal? (dup 5 10) '(5 5 5 5 5 5 5 5 5 5))
+
+  (check-equal? (but-last '(1 2 3)) '(1 2))
 )

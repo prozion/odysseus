@@ -15,9 +15,13 @@
             (post-time (- (current-inexact-milliseconds) start-time)))
         (if ,descr
           (begin
-            (printf "~a~a~n" ,descr post-time)
+            (printf "~a ~a ms~n" ,descr post-time)
             res)
           post-time))))
+
+(define-syntax (print-benchmark stx)
+  (syntax-case stx ()
+    ((_ args ...) #'(void (benchmark args ...)))))
 
 (define-macro (show-status status-var text)
   `(when (,status-var)

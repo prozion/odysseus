@@ -4,6 +4,9 @@
 
 (provide (all-defined-out))
 
+;;; These functions onvert tree format to a list of hashes,
+;;; where each parameter in tree format becomes a key in the hash structure
+
 (define-catch (line->hash line)
   (let* ((res-name (get-matches (format "^(~a)*([^:\\s]+)(\\s|$)" "\t") line))
         (_name (if (empty? res-name) #f (nth (nth res-name 1) 3)))

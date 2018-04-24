@@ -6,6 +6,7 @@
 (require "seqs.rkt")
 (require "debug.rkt")
 (require "regexp.rkt")
+(require racket/serialize)
 
 (provide (all-defined-out))
 
@@ -19,10 +20,10 @@
           (else el)))
       args))))
 
-(define (write-data-to-file filename v)
-  (write-to-file v filename #:exists 'replace))
-
-(define var->file write-data-to-file)
+; (define (write-data-to-file filename v)
+;   (write-to-file v filename #:exists 'replace))
+;
+; (define var->file write-data-to-file)
 
 (define (write-file filename v)
   (display-to-file v filename #:exists 'replace))
@@ -59,3 +60,11 @@
     (parameterize ([current-namespace (namespace-anchor->namespace namespace-anchor)])
       (load filepath))
     #f))
+
+; serializes data and save it into the file
+(define (write-data-to-file data filepath)
+  (write-to-file (serialize data) filepath #:exists 'replace))
+
+; read serialized data and converts it to a normal value
+(define (read-serialized-data-from-file filepath)
+  (deserialize (file->value filepath)))

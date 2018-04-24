@@ -1,0 +1,4 @@
+authorization
+	Implicit_flow
+	Authorization_code_flow
+	Client_credentials_flow 

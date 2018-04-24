@@ -35,7 +35,7 @@
 ; layout -- positions + sizes of blocks in the widget
 ; $layout = (widget: (x y w h), title: (h pos[top|bottom]), y-axis: (w pos[left|right]), x-axis: (h pos[top|bottom]), bars: (gap))
 ; $styles = (bars: (class), title: (font-family font-weight font-size), y-axis-text (font-family font-weight font-size), x-axis-text (font-family font-weight font-size)
-(define (barchart-f
+(define-catch (barchart-f
             #:scales @scales
             #:layout @layout
             #:labels @labels
@@ -198,7 +198,8 @@
                     (for/fold/idx
                       (s "")
                       (tick ticks)
-                        (let* ((tick-y (- y-axis-h (* scale-factor tick)))
+                        (let* (
+                              (tick-y (- y-axis-h (* scale-factor tick)))
                               (tick-w (if (> Y-AXIS_W 60) 15 (* 0.25 Y-AXIS_W)))
                               (tick-offset y-axis-tick-offset)
                               (tick-label-offset (+ (* 2 tick-offset) tick-w))

@@ -41,6 +41,12 @@
 (define (str . body)
   (implode body))
 
+(define (list-pretty-string seq)
+  (for/fold
+    ((res ""))
+    ((s seq))
+    (str res s "\n")))
+
 (define (implode lst (sep ""))
   (let ([seq (map
                 (λ (x) (if (nil? x) "" (tostring x)))
@@ -126,24 +132,23 @@
       (else
         (nth seq (remainder index (length seq)))))))
 
-(define (indexof seq el)
-  ;(define (indexof-iter seq el acc)
-  ;  (cond
-  ;    ((null? seq) 0)
-  ;    ((equal? el (car seq)) acc)
-  ;    (else (indexof-iter (cdr seq) el (+ 1 acc)))))
+(define (indexof seq el (compare-f equal?))
   (cond
     ((string? seq)
-      (indexof (explode seq) el))
+      (indexof (explode seq) el compare-f))
     ((list? seq)
-      (let ((res (member el seq)))
-        (if res
-          (+ 1 (- (length seq) (length (member el seq))))
-          0)))
+      (let ((indexes
+              (for/fold
+                      ((res empty))
+                      ((e seq) (i (in-naturals)))
+                      (if (compare-f e el)
+                        (pushr res (+ 1 i))
+                        res))))
+        (if (empty? indexes) 0 (car indexes))))
     (else 0)))
 
-(define (indexof? seq el)
-  (if (= 0 (indexof seq el)) #f #t))
+(define (indexof? seq el (compare-f equal?))
+  (if (= 0 (indexof seq el compare-f)) #f #t))
 
 (define (indexof-all seq el)
   (define (indexof-all-iter seq el acclist el-passed)
@@ -176,6 +181,7 @@
       ;(cons (car seq) (lshift (cdr seq) (- count 1))))))
       (take seq count))))
 
+(define shiftl lshift)
 
 (define (lpop seq)
   (if (string? seq)
@@ -221,10 +227,12 @@
 (define (rshift seq (count 1))
   (reverse (lshift (reverse seq) count)))
 
+(define shiftr rshift)
+
 (define (rpop seq)
-    (if (string? seq)
-      (rpop (explode seq))
-      (car (reverse seq))))
+  (if (string? seq)
+    (rpop (explode seq))
+    (car (reverse seq))))
 
 (define last rpop)
 
@@ -331,10 +339,10 @@
           (lshift seq (sub1 pos1))
           (rshift seq (- ll pos2)))))))
 
-(define (exclude seq el)
+(define (exclude seq el #:compare (compare equal?))
   (if (string? seq)
-    (implode (exclude (explode seq) el))
-    (remove seq (indexof seq el))))
+    (implode (exclude (explode seq) el #:compare compare))
+    (remove seq (indexof seq el compare))))
 
 (define (exclude-all seq el)
   (let ((index (indexof seq el)))
@@ -410,14 +418,20 @@
           ((list? l) (pushr acc (list-substitute l target insert)))
           (else (pushr acc l)))))))
 
+; (define (uniques seq)
+;   (define (uniques-iter seq acc)
+;     (cond
+;       ((nil? seq) acc)
+;       (else (uniques-iter
+;               (ltrim seq)
+;               (rpush-unique acc (first seq))))))
+;   (uniques-iter seq null))
+
 (define (uniques seq)
-  (define (uniques-iter seq acc)
-    (cond
-      ((nil? seq) acc)
-      (else (uniques-iter
-              (ltrim seq)
-              (rpush-unique acc (first seq))))))
-  (uniques-iter seq null))
+  (cond
+    ((list? seq) (remove-duplicates seq))
+    ((string? seq) (uniques (explode seq)))
+    (else seq)))
 
 (define (not-uniques seq)
   (define (not-uniques-iter seq acc)
@@ -430,29 +444,63 @@
                 (rpush acc (first seq)))))))
   (not-uniques-iter seq null))
 
-(define (minus seq1 seq2)
-  ;(clean
-  ;  (λ (x)  (indexof? seq2 x))
-  ;  seq1))
-  (reverse (set-subtract seq1 seq2)))
+(define (minus seq1 seq2 #:equal-f (equal-f #f))
+  (if equal-f
+    (filter-not
+       (λ (x)
+              (for/or
+                ((s seq2))
+                (cond
+                  ((and (list? x) (list? s)) (equal-f x s))
+                  (else (equal? x s)))))
+       seq1)
+    (reverse (set-subtract seq1 seq2))))
 
 ;(define (minus/hash seq1 seq2)
 
 (define (difference seq1 seq2)
-  ;(merge
-  ;  (clean
-  ;    (λ (x) (indexof? seq2 x))
-  ;    seq1)
-  ;  (clean
-  ;    (λ (x) (indexof? seq1 x))
-  ;    seq2)))
-  (set-symmetric-difference seq2 (reverse seq1)))
+  (append
+     (filter-not
+       (λ (x) (indexof? seq2 x))
+       seq1)
+     (filter-not
+       (λ (x) (indexof? seq1 x))
+       seq2)))
 
-(define (intersect seq1 seq2)
-  ;(filter
-  ;  (λ (x) (indexof? seq2 x))
-  ;  seq1))
-  (reverse (set-intersect seq1 seq2)))
+(define (unique-difference seq1 seq2)
+  (remove-duplicates (difference seq1 seq2)))
+
+(define (intersect . seqs)
+  (cond
+    ((null? (cdr seqs)) (car seqs))
+    (else
+      (reverse (set-intersect (car seqs) (apply intersect (cdr seqs)))))))
+
+(define (equal-elements? seq1 seq2)
+  (empty? (unique-difference seq1 seq2)))
+
+(define (equal-set? seq1 seq2 (deep #f))
+  (cond
+    ((empty? seq1) (empty? seq2))
+    ((empty? seq2) (empty? seq1))
+    ((indexof? seq2 (car seq1))
+      (equal-set? (cdr seq1) (exclude seq2 (car seq1))))
+    (else #f)))
+
+(define (deep-equal-set? seq1 seq2)
+  (let ((search-func
+          (λ (s) (or
+            (equal? s (car seq1))
+            (and (list? s) (list? (car seq1)) (deep-equal-set? s (car seq1)))))))
+    (cond
+      ((empty? seq1) (empty? seq2))
+      ((empty? seq2) (empty? seq1))
+      ;; consider elements equal also in the case, when they are lists and contain the same elements, no matter in what order (elements are equal-setted too) and do it in the recursive manner
+      ((for/or ((s seq2)) (search-func s))
+          (deep-equal-set? (cdr seq1) (filter-not search-func seq2)))
+      ((indexof? seq2 (car seq1))
+          (deep-equal-set? (cdr seq1) (exclude seq2 (car seq1))))
+      (else #f))))
 
 ;; complex structures access
 (define (nlist-ref lst indexes)
@@ -502,19 +550,6 @@
         ((null? break-points) (list seq))
         (else (break-seq-it (list) seq break-points)))))
 
-;(define (flatten lnlst)
-;  (cond
-;    (((not-> list?) lnlst) lnlst)
-;    ((null? lnlst) lnlst)
-;    (else
-;      (foldl
-;        (λ (a b) (merge b
-;                        (if (list? a)
-;                          (flatten a)
-;                          (list a))))
-;        '()
-;        lnlst))))
-
 (define (depth seq)
   (cond
     ((list? seq) (if (null? seq) 1 (inc (apply max (map depth seq)))))
@@ -549,19 +584,19 @@
             (list-substitute lst part target)))))
 
 (define (remove-by-part lst part)
-  (local ((define (remove-by-part-1 lst part)
+  (define (remove-by-part-1 lst part)
             (cond
               ((not (list? lst)) lst)
               (else (map
                       (λ (el) (remove-by-part-1 el part))
-                      (exclude-all lst part))))))
+                      (exclude-all lst part)))))
     (cond
       ((vector? part)
         (for/fold
           ((res lst))
           ((p part))
           (remove-by-part-1 res p)))
-      (else (remove-by-part-1 lst part)))))
+      (else (remove-by-part-1 lst part))))
 
 (define (append-unique seq . seqs)
   (cond

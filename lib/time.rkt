@@ -2,7 +2,9 @@
 
 (require "base.rkt")
 (require "type.rkt")
+(require "hash.rkt")
 (require "seqs.rkt")
+(require "math.rkt")
 (require "strings.rkt")
 (require "regexp.rkt")
 (require "debug.rkt")
@@ -12,7 +14,7 @@
 ;;;; basic data for functions
 
 (define days '(31 28 31 30 31 30 31 31 30 31 30 31))
-(define leap-days '(31 28 31 30 31 30 31 31 30 31 30 31))
+(define leap-days '(31 29 31 30 31 30 31 31 30 31 30 31))
 
 (define (acc-days d)
   (for/fold
@@ -24,6 +26,9 @@
 (define leap-days-acc (acc-days leap-days))
 
 ;;;; functions to work with time
+
+(define (date day month year)
+  (hash 'day day 'month month 'year year))
 
 (define (time->seconds astr)
   (let* ( (time-units (split astr ":"))
@@ -65,7 +70,30 @@
       (!= 0 (remainder year 100)))
     (= 0 (remainder year 400))))
 
-(define (date->days d)
+(define (date? adate)
+  (and
+    (string? adate)
+    (or
+      (re-matches? "^[0-9x]{2}\\.[0-9x]{2}\\.[0-9x]{4}$" adate)
+      (re-matches? "^[0-9x]{2}\\.[0-9x]{2}$" adate)
+      (re-matches? "^(0[1-9x]|1[0-2x])\\.[0-9x]{4}$" adate))))    
+
+(define-catch (valid-date? d)
+  (let* ((d (if (string? d) (parse-date d) d))
+        (day (->number ($ day d)))
+        (month (->number ($ month d)))
+        (year (->number ($ year d))))
+    (cond
+      ; general limits on days and months
+      ((or (> day 31) (> month 12)) #f)
+      ; check 31 and 30 days in month
+      ((and (= day 31) (indexof? '(2 4 6 9 11) month)) #f)
+      ; check for 29 February in a non-leap year
+      ((and (not (leap-year? year)) (= 29 day) (= 2 month)) #f)
+      ; if no checks triggered, consider d a valid date
+      (else #t))))
+
+(define-catch (date->days d)
   (let*
       ((date-lst (split d "."))
       ;(day (->number (first (split (first date-lst) "-")))) ; take first day in the days interval
@@ -75,21 +103,47 @@
       (years (range 1 year))
       (leap-years (filter leap-year? years))
       (non-leap-years (clean leap-year? years)))
-    (+
-      (* 366 (length leap-years))
-      (* 365 (length non-leap-years))
-      ;; count days in months before:
-      (nth
-        (if (leap-year? year)
-          leap-days-acc
-          days-acc)
-        month)
-      ;; plus days in the current month:
-      day)))
+    (cond
+      ((not (valid-date? (date day month year))) #f)
+      (else
+        (+
+          (* 366 (length leap-years))
+          (* 365 (length non-leap-years))
+          ;; count days in months before:
+          (nth
+            (if (leap-year? year)
+              leap-days-acc
+              days-acc)
+            month)
+          ;; plus days in the current month:
+          day)))))
 
-(define (date-diff d1 d2)
-  (abs
-    (- (date->days d2) (date->days d1))))
+(define-catch (days->dm days (leap #f))
+  (define (full-month acc-arr val (count 0))
+    (cond
+      ((empty? acc-arr) count)
+      ((>= (car acc-arr) val) (inc count))
+      (else (full-month (cdr acc-arr) val (inc count)))))
+  (let* ((m-len '(31 28 31 30 31 30 31 31 30 31 30 31))
+        (m-len-leap '(31 29 31 30 31 30 31 31 30 31 30 31))
+        (d-by-m (accumulate m-len))
+        (d-by-m-leap (accumulate m-len-leap))
+        (d-by-m (if leap d-by-m-leap d-by-m))
+        (m (full-month d-by-m days))
+        (d (- days (if (> m 1)
+                        (nth d-by-m (dec m))
+                        0)))
+        (d (if (= d 0) 1 d)))
+      (vk->date
+        (implode (list d m) "."))))
+
+(define-catch (date-diff d1 d2)
+  (let ((days1 (date->days d1))
+        (days2 (date->days d2)))
+      (and days1 days2 (- days1 days2))))
+
+(define (date-diff-abs d1 d2)
+  (abs (date-diff d1 d2)))
 
 (define (month-diff m1 m2)
   (let* ((m1 (split m1 "."))
@@ -108,8 +162,15 @@
       (comp-op (conversion a) (conversion b)))))
 
 (define d> (comparison-f > date->days))
+(define d>= (comparison-f >= date->days))
 (define d< (comparison-f < date->days))
+(define d<= (comparison-f <= date->days))
 (define d= (comparison-f = date->days))
+
+(define-catch (date-between? date-interval-cons adate)
+  (and
+    (d>= adate (car date-interval-cons))
+    (d<= adate (cdr date-interval-cons))))
 
   ;(~r #:min-width 2 #:pad-string "0" 1)
 
@@ -189,6 +250,21 @@
     (else
         (hash))))
 
+(define-catch (vk->date adate)
+  (cond
+    ((or (not adate) (equal? adate "")) #f)
+    (else
+      (let* ((parts (split adate "."))
+            (dd (car parts))
+            (dd (format-number "dd" dd #:filler "0"))
+            (parts (cdr parts))
+            (mm (if (not-empty? parts) (car parts) #f))
+            (mm (if mm (format-number "dd" mm #:filler "0") #f))
+            (parts (if (not-empty? parts) (cdr parts) parts))
+            (yyyy (if (not-empty? parts) (car parts) #f))
+            (yyyy (if yyyy (format-number "dddd" yyyy) #f)))
+        (format "~a~a~a" (if dd dd "") (if mm (str "." mm) "") (if yyyy (str "." yyyy) ""))))))
+
 (define (day adate)
   (hash-ref (parse-date adate) 'day #f))
 
@@ -201,3 +277,37 @@
 ; for finding year ticks on the timeline:
 (define (first-month? month shift)
   (= 1 (remainder (+ month shift) 12)))
+
+(define (get-zodiac-sign adate)
+  (when (not (date? adate)) (error (format "wrong date format: ~a" adate)))
+  (let* (
+        (Capricorn1 (cons "01.01.1979" "19.01.1979")) ; Козерог
+        (Aquarius (cons "20.01.1979" "18.02.1979")) ; Водолей
+        (Pisces (cons "19.02.1979" "20.03.1979")) ; Рыбы
+        (Aries (cons "21.03.1979" "19.04.1979")) ; Овен
+        (Taurus (cons "20.04.1979" "20.05.1979")) ; Телец
+        (Gemini (cons "21.05.1979" "20.06.1979")) ; Близнецы
+        (Cancer (cons "21.06.1979" "22.07.1979")) ; Рак
+        (Leo (cons "23.07.1979" "22.08.1979")) ; Лев
+        (Virgo (cons "23.08.1979" "22.09.1979")) ; Дева
+        (Libra (cons "23.09.1979" "22.10.1979")) ; Весы
+        (Scorpio (cons "23.10.1979" "21.11.1979")) ; Скорпион
+        (Sagittarius (cons "22.11.1979" "21.12.1979")) ; Стрелец
+        (Capricorn2 (cons "22.12.1979" "31.12.1979")) ; Козерог
+        (adate-str adate)
+        (adate (parse-date adate))
+        (adate (str (d.m adate-str) ".1979"))
+        )
+    (cond
+      ((or (date-between? Capricorn1 adate) (date-between? Capricorn2 adate)) 'Capricorn)
+      ((date-between? Aquarius adate) 'Aquarius)
+      ((date-between? Pisces adate) 'Pisces)
+      ((date-between? Aries adate) 'Aries)
+      ((date-between? Taurus adate) 'Taurus)
+      ((date-between? Gemini adate) 'Gemini)
+      ((date-between? Cancer adate) 'Cancer)
+      ((date-between? Leo adate) 'Leo)
+      ((date-between? Virgo adate) 'Virgo)
+      ((date-between? Libra adate) 'Libra)
+      ((date-between? Scorpio adate) 'Scorpio)
+      ((date-between? Sagittarius adate) 'Sagittarius))))
