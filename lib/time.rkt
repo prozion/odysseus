@@ -71,12 +71,19 @@
     (= 0 (remainder year 400))))
 
 (define (date? adate)
-  (and
-    (string? adate)
-    (or
-      (re-matches? "^[0-9x]{2}\\.[0-9x]{2}\\.[0-9x]{4}$" adate)
-      (re-matches? "^[0-9x]{2}\\.[0-9x]{2}$" adate)
-      (re-matches? "^(0[1-9x]|1[0-2x])\\.[0-9x]{4}$" adate))))    
+  (let ((adate (->string adate)))
+    (and
+      adate
+      (or
+        (re-matches? "^[0-9x]{2}\\.[0-9x]{2}\\.[0-9x]{4}$" adate)
+        (re-matches? "^[0-9x]{2}\\.[0-9x]{2}$" adate)
+        (re-matches? "^(0[1-9x]|1[0-2x])\\.[0-9x]{4}$" adate)))))
+
+(define (precise-date? adate)
+  (let ((adate (->string adate)))
+    (and
+      adate
+      (re-matches? "^[0-9]{2}\\.[0-9]{2}\\.[0-9]{4}\\??$" adate))))
 
 (define-catch (valid-date? d)
   (let* ((d (if (string? d) (parse-date d) d))

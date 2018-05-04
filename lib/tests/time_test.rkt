@@ -120,6 +120,14 @@
   (check-false (date? 3))
   (check-false (date? #f))
 
+  (check-true (precise-date? "28.08.1979"))
+  (check-true (precise-date? "28.08.1979?"))
+  (check-true (precise-date? '28.08.1979))
+  (check-false (precise-date? "2x.08.1979"))
+  (check-false (precise-date? "10.xx.1979"))
+  (check-false (precise-date? "xx.10.1979"))
+
+
   (check-hash-equal? (parse-date "28.08.1979") (hash 'day "28" 'month "08" 'year "1979"))
   (check-hash-equal? (parse-date "28.08.xxxx") (hash 'day "28" 'month "08" 'year "xxxx"))
 

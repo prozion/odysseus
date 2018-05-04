@@ -3,13 +3,20 @@
 (require "../../lib/load/all.rkt")
 (require "../../../settings/APIs.rkt")
 
-(provide
-    neo4j/authenticate neo4j/cypher
-    ;gdb/create-database
-    gdb/delete-nodes
-    gdb/create-node gdb/create-rel
-    gdb/create-index gdb/drop-index
-    gdb/import-csv)
+(provide (all-defined-out))
+
+(define (neo4jy k)
+  (string-replace (->string k) "-" "_"))
+
+(define (neo4jy-attr k)
+  (->symbol (neo4jy k)))
+
+(define (neo4jy-keys element)
+  (hash-map (λ (k v)
+              (values
+                (neo4jy-attr k)
+                v))
+            element))
 
 (define (cypher->json cypher-str (params-str #f))
   (format "{\"query\": \"~a\" ~a}"
@@ -52,6 +59,7 @@
 ; (gdb/create-node (hash :label "City" name "Moscow" country "Russia"))
 (define-catch (gdb/create-node n #:label-attr (label-attr '_label) #:ignore-attrs (ignore-attrs empty))
   (let* ((label (hash-ref n label-attr))
+        (label (if label (neo4jy label) label))
         (n-only-properties (hash-filter (λ (k v) (not (indexof? ignore-attrs k))) n))
         (n-only-properties (hash-map (λ (k v) (values k (->string v))) n-only-properties))
         (command (format

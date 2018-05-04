@@ -126,4 +126,12 @@
   (check-true (clist? '((1 . 2) (3 . 4))))
   (check-false (clist? '((1  2) (3  4))))
   (check-false (clist? '((1 . 2) (3  4))))
+
+  (check-true (untype-equal? 3 3))
+  (check-true (untype-equal? 3 (- 4 1)))
+  (check-true (untype-equal? 3 "3"))
+  (check-true (untype-equal? 'a "a"))
+  (check-false (untype-equal? 'a 'b))
+  (check-false (untype-equal? 'a 'ab))
+  (check-false (untype-equal? "hello" "world"))
 )

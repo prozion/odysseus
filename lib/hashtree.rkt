@@ -1,11 +1,13 @@
 #lang racket
 
+(require (for-syntax (prefix-in seqs: "seqs.rkt") racket/list))
+(require "seqs.rkt")
 (require "base.rkt")
 (require "type.rkt")
-(require "seqs.rkt")
 (require "hash.rkt")
 (require "debug.rkt")
 (require "regexp.rkt")
+(require "optimize.rkt")
 (require compatibility/defmacro)
 
 (provide (all-defined-out))
@@ -55,7 +57,7 @@
     ((hash-empty? hash-tree) acc-result)
     (else
       (planarize
-        (apply hash-union (hash-values hash-tree))
+        (apply opt/hash-union (hash-values hash-tree))
         (append-unique
           acc-result
           (hash-keys hash-tree))))))
@@ -104,14 +106,22 @@
           #f
           (hash-tree-get-value-by-id-path (hash-ref hash-tree (car key)) (cdr id-path) id-attr))))))
 
-; get element by his id path
-(define-catch (hash-tree-get-element-by-id-path hash-tree id-path (id-attr 'id))
-  (let* ((id (last id-path))
-        (id-path (but-last id-path))
-        (element (hash-tree-get-value-by-id-path hash-tree id-path id-attr))
-        (element (hash-filter (λ (k v) (equal? (get-key k) id)) element))
-        (element (car (hash-keys element))))
-    element))
+; get a whole element in the key position
+(define-catch (hash-tree-get-element-by-id-path hash-tree id-path)
+  ; (--- id-path hash-tree)
+  (cond
+    ((one-element? id-path)
+      (let* (
+              (matched-key-element (filter
+                                      (λ (x) (untype-equal? ($ id x) (car id-path)))
+                                      (hash-keys hash-tree)))
+              (matched-key-element (if (not-empty? matched-key-element) (car matched-key-element) #f)))
+        matched-key-element))
+    (else
+      (let* ((next-id (first id-path))
+            (next-hash-tree (hash-filter (λ (k v) (untype-equal? ($ id k) next-id)) hash-tree))
+            (next-hash-tree (if (hash-empty? next-hash-tree) (error "wrong accessor path") (car (hash-values next-hash-tree)))))
+        (hash-tree-get-element-by-id-path next-hash-tree (cdr id-path))))))
 
 ; sets new value to the end key element defined by the path
 (define-catch (hash-tree-set-value hash-tree path value)
@@ -188,7 +198,7 @@
         new-hash-tree))))
 
 ; filter and hash-tree subset selection functions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(define-catch (get-leaves hash-tree #:exclude (exclude #f))
+(define-catch (get-leaves hash-tree #:exclude (exclude '(name)))
   (cond
     ((not (hash? hash-tree)) empty)
     ((hash-empty? hash-tree) empty)
@@ -231,5 +241,37 @@
             res))))))
 
 ; handy macros ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(define-macro (@-> path hash-tree id-attr)
-  `(hash-tree-get-value-by-id-path ,hash-tree (split (symbol->string ',path) ".") ,id-attr))
+
+; get key hash or value
+(define-syntax ($$ stx)
+  (syntax-case stx ()
+    ((_ path hash-tree id ...)
+        ; id ... is here to avoid two patterns and duplication of with-syntax code
+        (let* (
+              (id-lst (syntax->datum #'(id ...)))
+              (conditional-id (if (empty? id-lst) #f (car id-lst))))
+          (with-syntax ((conditional-id-stx (datum->syntax stx conditional-id))
+                        (path-lst (datum->syntax stx (seqs:split (symbol->string (syntax->datum #'path)) "."))))
+            (if conditional-id
+                #'(hash-tree-get-element-by-id-path hash-tree 'path-lst conditional-id-stx)
+                #'(hash-tree-get-element-by-id-path hash-tree 'path-lst)))))))
+
+(define-syntax ($$$ stx)
+  (syntax-case stx ()
+    ((_ path hash-tree id ...)
+        ; id ... is here to avoid two patterns and duplication of with-syntax code
+        (let* (
+              (id-lst (syntax->datum #'(id ...)))
+              (conditional-id (if (empty? id-lst) #f (car id-lst))))
+          (with-syntax ((conditional-id-stx (datum->syntax stx conditional-id))
+                        (path-lst (datum->syntax stx (seqs:split (symbol->string (syntax->datum #'path)) "."))))
+            (if conditional-id
+                #'(hash-tree-get-value-by-id-path hash-tree 'path-lst conditional-id-stx)
+                #'(hash-tree-get-value-by-id-path hash-tree 'path-lst)))))))
+
+; take first level elements under the path
+(define-macro ($$$-1 path hash-tree)
+  `(hash-keys ($$$ ,path ,hash-tree)))
+
+(define-macro ($$$-2 path hash-tree)
+  `(flatten (map hash-keys (hash-values ($$$ ,path ,hash-tree)))))

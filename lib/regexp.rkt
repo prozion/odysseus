@@ -21,17 +21,20 @@
 (define (re-full-matches? re astr)
   (true? (re-matches? (str "^" re "$") astr)))
 
-(define (get-matches re astr)
+(define-catch (get-matches re astr)
   (let ((re (->re re)))
     (for/fold
       ((res (list)))
       ((match-position (regexp-match-positions* re astr)))
-      (pushr
-        res
-        (regexp-match
-          re
-          astr
-          (car match-position))))))
+      ; BUG: gives an error, when parsing timeline.tree
+      (begin
+        ; (println (format "~a ~a ~a ~a" re astr match-position (regexp-match-positions* re astr)))
+        (pushr
+          res
+          (regexp-match
+            re
+            astr
+            (car match-position)))))) )
 
 (define (get-first-group-match re astr)
   (let* ((res (get-matches re astr)))

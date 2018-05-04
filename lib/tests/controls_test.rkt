@@ -27,9 +27,6 @@
   (check-equal? (ifthe (λ (x) (> x 5)) 9 sqr sqrt) 81)
   (check-equal? (ifthe (λ (x) (< x 5)) 9 sqr sqrt) 3)
 
-  ; ($$ foo 1 2 3 4 5)
-  ; (check-equal? foo '(1 2 3 4 5))
-
   (check-equal? (repeat-f append '(1 2 3) '((4) (5 (6)) (7))) '(1 2 3 4 5 (6) 7))
   (check-equal? (repeat-f + 0 '(1 2 3)) 6)
   (check-equal? (repeat-f + 0 '()) 0)

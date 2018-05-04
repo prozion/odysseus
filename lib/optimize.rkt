@@ -1,5 +1,6 @@
 #lang racket
 
+(require (rename-in  racket/hash  (hash-union hash-union-racket)))
 (require compatibility/defmacro)
 (require "base.rkt")
 (require "seqs.rkt")
@@ -68,3 +69,6 @@
 
 (define (opt/append-unique . seqs)
   (opt/uniques (apply append seqs)))
+
+(define (opt/hash-union . seqs)
+  (apply hash-union-racket seqs))

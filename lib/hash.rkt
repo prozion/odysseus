@@ -431,3 +431,10 @@
             (original-value (hash-ref h original-key))
             (h (hash-union (hash subst-key original-value) (hash-delete h original-key))))
         (hash-keys-substitute h (cdr original-keys) (cdr subst-keys))))))
+
+(define (untyped-hash-ref h k)
+  (hash-ref
+    (hash-map
+      (λ (k v) (values (->string k) v))
+      h)
+    (->string k)))

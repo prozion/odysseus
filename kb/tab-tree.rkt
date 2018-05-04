@@ -9,6 +9,8 @@
 ;;;;; We build a nested hash structure (hashtree), where every element is a hash key.
 ;;;;; For manipulation with hashtrees we use functions from hashtree.rkt
 
+(define mtree (make-parameter #f))
+
 (define-catch (get-item-name item)
   (let ((name (hash-ref item 'name #f))
         (id (hash-ref item key-name #f)))
@@ -19,6 +21,9 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(define-catch (vanilla-category? line)
+  (re-matches? "^\t*[A-Za-zА-ЯЁа-яё\\-+/_]+\\s*\\.$" line))
+
 ;;; Reads one line from a tab-tree file into a hash.
 ;;; Line has a following format:
 ;;; <name> <parameter-name>:<parameter-value> ... <string-parameter-name>:"<string-parameter-value>" ...
@@ -26,16 +31,21 @@
 ;;; The resulting hash is (hash <key-name> <name> <parameter-name> <parameter-value> ... <string-parameter-name> "<string-parameter-value>" ...)
 ;;; This hash is identified by <key-name> special attribute. Underscore in the beginning of key name is reserved symbol in this system of data representation.
 ;;; All keys that starts with _ has a special meaning.
-(define-catch (get-item line #:symbol (symbol "\t"))
+(define-catch (get-item line)
+  ; (--- line)
   (let* (
         ; read <name>
-        (res-name (get-matches (format "^(~a)*(\\S+)" symbol) line))
+        (res-name (if (mtree)
+                    ; if parsing in mtree mode:
+                    (get-matches "^\t*([A-Za-zА-ЯЁа-яё0-9\\-_+/]+)" line)
+                    ; if parsing in tree mode, include dot:
+                    (get-matches "^\t*([A-Za-zА-ЯЁа-яё0-9.\\-_+/]+)" line)))
         ; read all parameters, that have a string value
         (res-string-parameters
-              (get-matches (format "(\\S+):\"(.+?)\"") line))
+              (get-matches "(\\S+?):\"(.+?)\"" line))
         ; read all parameters, that have value as reference, date, number, special value etc. except string
         (res-parameters
-              (get-matches (format "(\\S+):(\\S+)") line))
+              (get-matches "(\\S+?):(\\S+?)" line))
         ; accumulate parameters to a hash
 				(parameters (for/hash ((p res-parameters)) (values (->symbol (list-ref p 1)) (->symbol (list-ref p 2)))))
         ; accumulate string parameters to a hash
@@ -44,7 +54,7 @@
         (res (hash-union string-parameters parameters))
         ; add id to item
         (res (if res-name
-            (hash-insert res (cons key-name (nth (nth res-name 1) 3)))
+            (hash-insert res (cons key-name (nth (nth res-name 1) 2)))
             res))
         ; add name to item, if it not already defined:
         (name (get-item-name res))
@@ -66,7 +76,7 @@
             (item (get-item line)) ; parse current line to item
             ; convert to string all general (not special) parameters:
             (item (hash-map
-                    (λ (k v) (if (special-parameter? k)
+                    (λ (k v) (if (and k (special-parameter? k))
                                 (values k v)
                                 (values k (->string v))))
                     item))
@@ -95,14 +105,71 @@
 
 ; Initialize population of a tree with data from tabtree file
 (define-catch (parse-tab-tree tree-file)
-  (let* (
-        ;; take all lines from the file:
-        (tree-lines (read-file-by-lines tree-file))
-        ;; remove comment lines:
-        (tree-lines (clean
-                      (λ (line) (or
-                                  (re-matches? "^\t*;" line)
-                                  (re-matches? "^\\s*$" line)))
-                      tree-lines)))
-      ;; start populating the tree
-      (fill-tree-iter tree-lines (hash) empty)))
+  (parameterize ((mtree #f))
+    (let* (
+          ;; take all lines from the file:
+          (tree-lines (read-file-by-lines tree-file))
+          ;; remove comment lines:
+          (tree-lines (clean
+                        (λ (line) (or
+                                    (re-matches? "^\t*;" line)
+                                    (re-matches? "^\\s*$" line)))
+                        tree-lines)))
+        ;; start populating the tree
+        (fill-tree-iter tree-lines (hash) empty))))
+
+(define-catch (parse-tab-mtree tree-file)
+  (parameterize ((mtree #t))
+    (let* (
+          ;; take all lines from the file:
+          (tree-lines (read-file-by-lines tree-file))
+          ;; remove comment lines:
+          (tree-lines (clean
+                        (λ (line) (or
+                                    (re-matches? "^\t*;" line)
+                                    (re-matches? "^\\s*$" line)))
+                        tree-lines))
+          ;; group lines
+          (tree-lines (let loop ((res (list)) (endline? #f) (rest-lines tree-lines))
+                        (cond
+                          ((empty? rest-lines) res)
+                          (else
+                              (let ((res (if endline?
+                                            (pushr res (list (car rest-lines)))
+                                            (let* (
+                                                  ; get the last group and insert there a new line
+                                                  (last-group (if (not-empty? res) (last res) (list)))
+                                                  (last-group (pushr last-group (car rest-lines)))
+                                                  (res (trimr res 1))
+                                                  (res (pushr res last-group)))
+                                              res))))
+                                ; (--- (car rest-lines) (vanilla-category? (car rest-lines)))
+                                (loop
+                                  res
+                                  (if (or
+                                        ; just a category without parameters
+                                        (vanilla-category? (car rest-lines))
+                                        ; end expression
+                                        (re-matches? ".*<\\.>\\s*$" (car rest-lines)))
+                                      #t #f)
+                                  (cdr rest-lines)))))))
+          (tree-lines (map
+                        (λ (group)
+                          (let* (
+                                  ; clear <.>
+                                  (last-line (last group))
+                                  (last-line (string-replace last-line #rx"<\\.>\\s*" ""))
+                                  (group (pushr (trimr group 1) last-line))
+                                  ; remove extra tabs in extra lines
+                                  (parameter-lines (cdr group))
+                                  (parameter-lines (if (not-empty? parameter-lines)
+                                                      (map
+                                                        (λ (line) (string-replace ; handle sbgn-lisp lines
+                                                                      (string-replace line #rx"[\t\n]+" "") ; remove leading tabs
+                                                                      "`" "\""))
+                                                        parameter-lines)
+                                                      parameter-lines))
+                                  (line (str (first group) " " (implode parameter-lines " "))))
+                            line))
+                        tree-lines)))
+      (fill-tree-iter tree-lines (hash) empty))))

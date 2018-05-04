@@ -18,7 +18,7 @@
         (let* ((path (rtrim p 2))
               (base-leaf (last (but-last p)))
               (referred-leaf-id (last p))
-              (referred-leaf (hash-tree-get-element-by-id-path refs-hash-tree p))
+              (referred-leaf (hash-tree-get-value-by-id-path refs-hash-tree p))
               (refs ($ ref referred-leaf))
               (refs (split refs ",")))
           (pushr

@@ -49,7 +49,11 @@
   (let* ( [path (if dir
                     (build-path (current-directory) dir)
                     (current-directory))]
-          [path (if (directory-exists? path) path (build-path dir))]
+          [path (if (directory-exists? path)
+                        path
+                        (begin
+                          (make-directory path)
+                          path))]
           [path (if (directory-exists? path) path (current-directory))])
   (write-file
     (build-path path file)

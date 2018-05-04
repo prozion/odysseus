@@ -37,8 +37,13 @@
   `(check-true
       (check-hash ,h1 ,h2)))
 
+(define-syntax (check-hash-difference stx)
+  (syntax-case stx ()
+    ((_ h1 h2) #'(check-hash-difference-1 h1 h2 "1" "2"))
+    ((_ h1 h2 h1-semantic h2-semantic) #'(check-hash-difference-1 h1 h2 h1-semantic h2-semantic))))
+
 ; this function is like 'check-hash', but in addition it prints differences between hashes:
-(define-check (check-hash-difference h1 h2)
+(define-check (check-hash-difference-1 h1 h2 h1-semantic h2-semantic)
   ; h1 -resulted hash, h2 - sample hash, against which we compare the resulted hash
   ; list-order? - Applied in the case, when hash keys are lists. If #t, then the order for elements in list is important, otherwise elements can follow in any order, they should be just of the same set.
   (if (check-hash h1 h2 #t)
@@ -59,10 +64,17 @@
       (fail-check
         (format "Fail: -Different hashes-~n~a~n~a"
             (if difference-in-keys?
-              (format "Different keys~n[1]: ~a~n~n[2]: ~a~n~n" (list-pretty-string h1-but-not-h2) (list-pretty-string h2-but-not-h1))
+              (format "Different keys~n[~a]: ~a~n~n[~a]: ~a~n~n"
+                      h1-semantic
+                      (list-pretty-string h1-but-not-h2)
+                      h2-semantic
+                      (list-pretty-string h2-but-not-h1))
               "")
             (if different-values?
-              (format "Different values~n[1,2]: ~a" (hash-pretty-string different-values))
+              (format "Different values~n[~a,~a]: ~a"
+                      h1-semantic
+                      h2-semantic
+                      (hash-pretty-string different-values))
               "")))
       (void))))
 

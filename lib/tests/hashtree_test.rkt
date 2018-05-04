@@ -25,6 +25,25 @@
                             (hash) )
                       ))
 
+(define hash-tree-2 (hash
+                      (hash 'id "root1")
+                        (hash
+                          (hash 'id "a" 'value "1")
+                            (hash)
+                          (hash 'id "b" 'value "2")
+                            (hash
+                              (hash 'id "b1" 'value "10")
+                              (hash)
+                              (hash 'id "b2" 'value "30")
+                              (hash))
+                          (hash 'id "c" 'value "3")
+                            (hash))
+                      (hash 'id "root2" 'status "inactive")
+                        (hash
+                          (hash 'id "d" 'value "-1")
+                            (hash) )
+                      ))
+
   (check-true (category? (hash 'id "category 1")))
   (check-true (category? (hash 'id "category 1" '_parent #f)))
   (check-false (category? (hash 'id "category 1" 'foo "bar")))
@@ -59,14 +78,16 @@
                         '(y z))
                       30)
 
-  (check-hash-equal? (hash-tree-get-element-by-id-path hash-tree-1 '("category 1" "b" "b1"))
-                      (hash 'id "b1" 'value "10"))
+  (check-hash-equal? (hash-tree-get-value-by-id-path hash-tree-1 '("category 1" "b" "b1"))
+                      (hash))
 
-  (check-hash-equal? (hash-tree-get-element-by-id-path hash-tree-1 '("category 1" "b"))
-                      (hash 'id "b" 'value "2"))
+  (check-hash-equal? (hash-tree-get-value-by-id-path hash-tree-1 '("category 1" "b"))
+                      (hash
+                        (hash 'id "b1" 'value "10")
+                        (hash)))
 
-  (check-hash-equal? (hash-tree-get-element-by-id-path hash-tree-1 '("category 1" "a"))
-                      (hash 'id "a" 'value "1"))
+  (check-hash-equal? (hash-tree-get-value-by-id-path hash-tree-1 '("category 1" "a"))
+                      (hash))
 
   (check-hash-equal? (hash-tree-set-value
                         (hash 'a (hash 'a1 10 'a2 20) 'b (hash 'b1 30 'b2 (hash 'b21 40 'b22 50)))
@@ -115,5 +136,18 @@
   (check-same-elements?
     (get-paths hash-tree-1)
     '(("category 1" "a") ("category 1" "b" "b1") ("category 1" "c") ("category 2" "d")))
+
+  (check-hash-equal? ($$ root1.b.b1 hash-tree-2) (hash 'id "b1" 'value "10"))
+
+  (check-hash-equal?
+    ($$$ root1.b hash-tree-2)
+    (hash
+      (hash 'id "b1" 'value "10")
+      (hash)
+      (hash 'id "b2" 'value "30")
+      (hash)))
+
+  (check-hash-equal? ($$$ root1.b.b1 hash-tree-2) (hash))
+  ; (check-equal? ($$$ root1.b.b1.value hash-tree-2) "10")
 
 )

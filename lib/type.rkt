@@ -133,3 +133,7 @@
 
 (define (clist? seq)
   (andmap simple-cons? seq))
+
+(define (untype-equal? a1 a2)
+  (equal? (->string a1) (->string a2)))
+  

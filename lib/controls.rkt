@@ -83,8 +83,6 @@
                 (apply zor (cdr body))
                 (car body)))))
 
-; (define-macro ($$ name . args)
-;   `(define ,name (list ,@args)))
 
 ; <name> will consume both inline arguments and arguments as list
 ; def -> (name arguments)
