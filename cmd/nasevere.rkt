@@ -4,8 +4,8 @@
 
 (require "../lib/load/all.rkt")
 (require "../graphics/console.rkt")
-(require "../reports/html.rkt")
-(require "../reports/csv.rkt")
+(require "../report/html.rkt")
+(require "../report/csv.rkt")
 (require "../pis/nasevere.rkt")
 
 (require "../../denis_personal/my_knowledge/nasevere/groups.rkt")
@@ -25,7 +25,7 @@
     (partition groups 4)))
 
 (command-line
-  #:program "generate reports from the knowledge database"
+  #:program "generate report from the knowledge database"
   #:multi
     [("-o" "--output") o
                     "csv file to output information"

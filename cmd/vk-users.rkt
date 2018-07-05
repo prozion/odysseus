@@ -6,7 +6,7 @@
 (require "../scrap/vk/vk.rkt")
 (require "../scrap/vk/users.rkt")
 (require "../graphics/console.rkt")
-(require "../reports/html.rkt")
+(require "../report/html.rkt")
 
 (provide (all-defined-out))
 

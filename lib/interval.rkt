@@ -24,7 +24,6 @@
 ; 'plain numbers' - numbers that are especially good as values on y-axis
 ; (>plain 10 8) -> #t
 ; (>plain 5 4) -> #t
-; TODO: optimize speed of the algorythm
 (define (>plain x y)
   (let ((pris '(10 5 2 3 1)))
     (define (first-pri) (car pris))

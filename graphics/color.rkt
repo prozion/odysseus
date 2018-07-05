@@ -3,6 +3,7 @@
 (require "../lib/seqs.rkt")
 (require "../lib/math.rkt")
 (require "../lib/base.rkt")
+(require "../lib/debug.rkt")
 (require "../lib/controls.rkt")
 (require racket/format)
 
@@ -65,18 +66,12 @@
         #:delta-s -60
      ))))
 
-; TODO: perception model
-;Есть формула яркости цвета:
-;Br = (r * 77 + g * 150 + b * 28) / 255
-;Применяется для перевода в GrayScale. Эти же коэффициенты определяют заметность изменения значения разных цветовых каналов.
-;Можно сделать просто - считаешь, что цвета заполняют параллелепипед со сторонами 77, 150 и 28, первый цвет берёшь хоть случайный, для каждого следующего ищешь в параллелепипеде точку, наиболее удалённую от всех уже занятых, таким образом первые цвета будут очень контрастными, чем дальше, тем контрастность будет падать.
-
 (define (rand-color)
   (let ((hex "0123456789abcdef"))
     (str "#" (implode (gen (nth hex (rand 16)) 6)))))
 
-; TODO: add contract with normalized values of r,g,b: (<= 0 x 1)
-(define (hue col)
+; TODO2: add contract with normalized values of r,g,b: (<= 0 x 1)
+(define-catch (hue col)
   (let* ( [r (nth col 1)] [g (nth col 2)] [b (nth col 3)]
           [r (// r 255)] [g (// g 255)] [b (// b 255)]
           [maxv (max r g b)] [minv (min r g b)]
@@ -223,6 +218,18 @@
         (hsv-color (rgb->hsv rgb-color))
         (ncolor (color+ (nth hsv-color 3) degree))
         (modified-hsv (setn hsv-color 3 ncolor))
+        (modified-rgb (hsv->rgb modified-hsv))
+        (res (rgb->str modified-rgb))
+   )
+    res))
+
+(define (color/desaturate color degree)
+  (let*
+      (
+        (rgb-color (str->rgb color))
+        (hsv-color (rgb->hsv rgb-color))
+        (ncolor (color+ (nth hsv-color 2) degree))
+        (modified-hsv (setn hsv-color 2 ncolor))
         (modified-rgb (hsv->rgb modified-hsv))
         (res (rgb->str modified-rgb))
    )

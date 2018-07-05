@@ -11,9 +11,9 @@
   (check-true (re? (regexp "d[a-z]*\\d+$")))
   (check-true (re? (pregexp "d[a-z]*\\d+$")))
 
-  (check-true (re? (->re (regexp "abc"))))
-  (check-true (re? (->re "abc")))
-  (check-true (re? (->re 123)))
+  (check-true (re? (->pre (regexp "abc"))))
+  (check-true (re? (->pre "abc")))
+  (check-true (re? (->pre 123)))
   (check-false (re? 123))
 
   (check-true (re-matches? "row" "barrowbee"))
@@ -35,9 +35,10 @@
   (check-equal? (get-matches (regexp "a.*b") "barrowbee") '(("arrowb")))
   (check-equal? (get-matches (pregexp "a.*b") "barrowbee") '(("arrowb")))
   (check-equal? (get-matches "a(.*)b" "barrowbee") '(("arrowb" "rrow")))
+  (check-equal? (get-matches #rx"{(.*)}" "b{arrow}bee") '(("{arrow}" "arrow")))
   (check-equal? (get-matches "m(.*)o" "barrowbee") empty)
   (check-equal?
-    (get-matches "node/(\\S+)/(\\S+)" "node/a1468/index.php node/other/do~")
+    (get-matches #px"node/(\\S+)/(\\S+)" "node/a1468/index.php node/other/do~")
     '(("node/a1468/index.php" "a1468" "index.php")
       ("node/other/do~" "other" "do~")))
   (check-equal? (get-matches "City of (Moscow|Athens) is a capital of (Russia|Greece)" "City of Moscow is a capital of Russia")

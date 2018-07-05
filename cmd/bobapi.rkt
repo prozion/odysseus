@@ -4,8 +4,8 @@
 
 (require "../lib/load/all.rkt")
 (require "../graphics/console.rkt")
-(require "../reports/html.rkt")
-(require "../reports/csv.rkt")
+(require "../report/html.rkt")
+(require "../report/csv.rkt")
 (require "../scrap/bobapi.rkt")
 
 (require "../../settings/APIs.rkt")
@@ -26,7 +26,7 @@
     (partition groups 4)))
 
 (command-line
-  #:program "generate reports from the knowledge database"
+  #:program "generate report from the knowledge database"
   #:multi
     [("-T" "--temperature") t
                     "body temperature data"

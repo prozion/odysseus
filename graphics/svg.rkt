@@ -128,7 +128,10 @@
 (make-single-tag line)
 (make-single-tag path)
 (make-tag g)
+(make-tag a)
 (make-tag text)
+(make-tag tspan)
+(make-tag title)
 
 (make-single-tag image)
 ;(define (image file #:x (x 0) #:y (y 0) #:width (width 100) #:height (height 100))

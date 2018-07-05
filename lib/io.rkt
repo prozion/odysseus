@@ -46,15 +46,19 @@
 
 (define (write-file-to-dir #:file file #:dir dir v)
   ; first try thinking that dir is relative, then absolute path, if both are not directories then write to current-directory
-  (let* ( [path (if dir
-                    (build-path (current-directory) dir)
-                    (current-directory))]
-          [path (if (directory-exists? path)
-                        path
-                        (begin
-                          (make-directory path)
-                          path))]
-          [path (if (directory-exists? path) path (current-directory))])
+  (let* (
+          [dir-parts (split dir "/")]
+          ; find and create non-existing directories
+          (_ (let loop ((existed empty) (nonexisted dir-parts))
+                                  (cond ((empty? nonexisted) 'end)
+                                        (else
+                                          (let ((next-directory (build-path (current-directory) (implode (pushr existed (car nonexisted)) "/"))))
+                                            (if (directory-exists? next-directory)
+                                                (loop (pushr existed (car nonexisted)) (cdr nonexisted))
+                                                (begin
+                                                  (make-directory next-directory)
+                                                  (loop (pushr existed (car nonexisted)) (cdr nonexisted)))))))))
+          [path (build-path (current-directory) dir)])
   (write-file
     (build-path path file)
     v)))

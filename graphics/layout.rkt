@@ -103,19 +103,6 @@
                 (ormap
                   (λ (b) (bbox-overlap? b bcur))
                   bboxes)
-                ; TODO: calculate with limits on crossing:
-                ;(if segments
-                ;  (or
-                ;    (ormap
-                ;      (λ (l) (bbox-overlap-segment? bcur l))
-                ;      segments)
-                ;    (ormap
-                ;      (λ (b) (bbox-overlap-segment? b lcur))
-                ;      bboxes)
-                ;    (ormap
-                ;      (λ (l) (segments-cross? lcur l))
-                ;      segments))
-                ;  #f)
            ))
             (hash 'dx dx 'dy dy 'bbox bcur))
           (else

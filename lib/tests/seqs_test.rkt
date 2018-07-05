@@ -26,6 +26,7 @@
   (check-equal? (implode '(" " "b" "a" "k" "e" "\n" "r" "y")) " bake\nry")
   (check-equal? (implode '(1 2 3 4)) "1234")
   (check-equal? (implode '(1 2 3 4) "+") "1+2+3+4")
+  (check-equal? (implode '(1) "+") "1")
   (check-equal? (implode (list null null null) ",") ",,")
 
   (check-equal? (intermix 0 '(1 2 3 4)) '(1 0 2 0 3 0 4))
@@ -87,6 +88,7 @@
   (check-equal? (indexof-all '(11 8 -22  8 30 80 -5 8) 8) '(2 4 8))
 
   (check-equal? (count-element '(11 8 -22  8 30 80 -5 8) 8) 3)
+  (check-equal? (count-element '(1 1 1) 1) 3)
 
   (check-true (regexp-indexof? '("doo" "fowl" "island") "doo"))
   (check-true (regexp-indexof? '("doo" "fowl" "island") "i.*d"))

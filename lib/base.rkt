@@ -119,18 +119,19 @@
 (define (inie a b x)
   (and (<= a x) (< x b)))
 
-; TODO: implement with macro
-;(define (get-value n lambda-values . args)
-;  (call-with-values
-;    (apply lambda-values args)
-;    (λ vs (list-ref vs (inc n)))))
-
 (define-syntax (catch stx)
   (syntax-case stx ()
     ((_ place code ...)
       #'(with-handlers
           ((exn:fail? (λ (err) (printf "error in ~a: ~a~n" place (exn-message err)) (exit))))
           code ...))))
+
+(define-syntax (try stx)
+  (syntax-case stx (catch)
+    ((_ code (catch result))
+      #'(with-handlers
+          ((exn:fail? (λ (err) result)))
+          code))))
 
 (define-syntax (define-catch stx)
   (syntax-case stx ()
@@ -140,6 +141,7 @@
             (catch
               plain-name
               body ...))))))
+
 
 ; has already been implemented in racket/syntax (format-symbol)
 ;(define-syntax (format-symbol stx)
@@ -169,3 +171,14 @@
 
 (define (but-last seq)
   (reverse (cdr (reverse seq))))
+
+(define (hash-pretty-string h)
+  (let* ((ks (hash-keys h))
+        (res-str
+          (for/fold
+            ((res ""))
+            ((k ks))
+            (~a
+              res
+              (format "~a : ~a~n" k (hash-ref h k))))))
+  res-str))

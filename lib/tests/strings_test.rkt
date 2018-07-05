@@ -20,7 +20,8 @@
   (check-equal? (format-number "ddd" 38504) "38504")
   (check-equal? (format-number "d. d. d" 38504) "385. 0. 4")
   (check-equal? (format-number "dd" 3) "3")
-  (check-equal? (format-number "dd" 3 #:filler "0") "03")
+  ; (check-equal? (format-number "dd" 3 #:filler "0") "03")
+  (check-equal? (format-number "ddd" 3 #:filler "0") "003")
 
   (check-equal? (when/str (> 3 2) (format "~a ~a " "hello" 3) "world") "hello 3 world")
   (check-equal? (when/str (< 3 2) (format "~a ~a " "hello" 3) "world") "")
@@ -46,4 +47,8 @@
   (check-false (no-words? "  s"))
   (check-false (no-words? "  a"))
   (check-false (no-words? "  s "))
+
+  (check-equal? (sort-by-string '("a" b "cd" "c" "aa" 1 2)) '(1 2 "a" "aa" b "c" "cd"))
+  (check-equal? (sort-by-string '("a" b "cd" "c" "aa" 1 2) 'a-z) '(1 2 "a" "aa" b "c" "cd"))
+  (check-equal? (sort-by-string '("a" b "cd" "c" "aa" 1 2) 'z-a) (reverse '(1 2 "a" "aa" b "c" "cd")))
 )

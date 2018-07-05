@@ -8,6 +8,8 @@
   (check-= ((-> sin sqrt) 4) (sin 2) 1e-6)
 
   (check-= (->> sin sqrt 4) (sin 2) 1e-6)
+  (check-equal? (->> (λ (x) (filter odd? x)) (λ (x) (map (curry * 3) x)) (λ (x) (append '(-1 -2 -3) x)) '(1 2 3 4 5))
+                '(-3 -9 3 9 15))
 
   (check-equal? (gen 1 5) '(1 1 1 1 1))
 

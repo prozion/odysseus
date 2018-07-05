@@ -18,7 +18,7 @@
       (hash-values h2)
       <)))
 
-(define (check-hash h1 h2 (list-any-order? #f))
+(define (check-hash h1 h2 #:list-any-order? (list-any-order? #f))
   (let* ((k1s (hash-keys h1))
         (k2s (hash-keys h2))
         (v1s (hash-values h1))

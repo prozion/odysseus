@@ -8,7 +8,7 @@
 (require "../scrap/vk/users.rkt")
 (require "../scrap/vk/groups.rkt")
 (require "../graphics/console.rkt")
-(require "../reports/html.rkt")
+(require "../report/html.rkt")
 
 (define ns (module->namespace (string->path "c:/denis/denis_core/odysseus/scrap/vk/groups.rkt")))
 

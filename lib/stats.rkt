@@ -26,7 +26,7 @@
         (freqs (sort freqs (λ (a b) (> (second a) (second b))))))
     (caar freqs)))
 
-; TODO: understand how to incorporate it to s/mode so the following is possible: (s/mode args #:epsilon (epsilon 0))
+; how to incorporate it to s/mode so the following is possible: (s/mode args #:epsilon (epsilon 0))?
 (define (s/mode-epsilon arglst (epsilon 0))
   (let* ((freqs
           (map

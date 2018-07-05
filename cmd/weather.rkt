@@ -4,7 +4,7 @@
 
 (require "../lib/load/all.rkt")
 (require "../graphics/console.rkt")
-(require "../reports/html.rkt")
+(require "../report/html.rkt")
 
 (require "../scrap/weather/weather.rkt")
 (require "../scrap/weather/yr.no.rkt")

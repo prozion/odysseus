@@ -137,17 +137,28 @@
     (get-paths hash-tree-1)
     '(("category 1" "a") ("category 1" "b" "b1") ("category 1" "c") ("category 2" "d")))
 
-  (check-hash-equal? ($$ root1.b.b1 hash-tree-2) (hash 'id "b1" 'value "10"))
+  (check-hash-equal? ($4 root1.b hash-tree-2)
+                      (hash
+                        (hash 'id "b1" 'value "10")
+                        (hash)
+                        (hash 'id "b2" 'value "30")
+                        (hash)))
 
-  (check-hash-equal?
-    ($$$ root1.b hash-tree-2)
-    (hash
+  (check-same-elements?
+    ($3 root1 hash-tree-2)
+    (list
+      (hash 'id "a" 'value "1")
+      (hash 'id "b" 'value "2")
+      (hash 'id "c" 'value "3")))
+  (check-same-elements?
+    ($3 root1.b hash-tree-2)
+    (list
       (hash 'id "b1" 'value "10")
-      (hash)
-      (hash 'id "b2" 'value "30")
-      (hash)))
+      (hash 'id "b2" 'value "30")))
 
-  (check-hash-equal? ($$$ root1.b.b1 hash-tree-2) (hash))
-  ; (check-equal? ($$$ root1.b.b1.value hash-tree-2) "10")
+  (check-hash-equal? ($2 root1.b.b1 hash-tree-2) (hash 'id "b1" 'value "10"))
+
+  (check-equal? ($1 root1.b.b1.value hash-tree-2) "10")
+
 
 )

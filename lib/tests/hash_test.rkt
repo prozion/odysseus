@@ -12,6 +12,16 @@
   (define h (hash 'a (hash 'aa 10 'ab 20) 'b (hash 'ba (hash 'baa 300 'bab 30))))
 
 
+  (check-true (check-hash (hash) (hash)))
+  (check-true (check-hash (@ 'a 1 'b 2) (hash 'a 1 'b 2)))
+  (check-true (check-hash (hash 'b 2 'a (- 4 3)) (hash 'a 1 'b 2)))
+  (check-false (check-hash (hash 'a 10 'b 2) (hash 'a 1 'b 2)))
+  (check-false (check-hash (hash 'a 1 'b 2 'c 3) (hash 'a 1 'b 2)))
+  ; different element orders in the lists:
+  (check-false (check-hash (hash 'a '(1 2 3) 'b 2 'c '(1 3 5)) (hash 'a '(2 1 3) 'b 2 'c '(1 3 5))))
+  (check-true (check-hash (hash 'a '(1 2 3) 'b 2 'c '(1 3 5)) (hash 'a '(2 1 3) 'b 2 'c '(1 3 5)) #:list-any-order? #t))
+  (check-true (check-hash (hash 'a '(1 (2 5) 3) 'b 2 'c '(1 3 5)) (hash 'a '((5 2) 1 3) 'b 2 'c '(1 3 5)) #:list-any-order? #t))
+
   (check-hash-equal? (@ 'a 1 'b 2) (hash 'a 1 'b 2))
   (check-hash-equal? (@ "" null #f empty 'a 1 'b 2) (hash 'a 1 'b 2))
   (check-hash-equal? (@ (when #f 'a) 'b 10 'c 20) (hash 'b 10 'c 20))
@@ -31,6 +41,11 @@
 
   (check-true (hash-empty? (hash)))
   (check-false (hash-empty? (hash 'a 10)))
+
+  (check-equal? (hash-ref* (hash 'a 10 'b 20) 'b) 20)
+  (check-equal? (hash-ref* (hash 'a 10 'b 20) "b") 20)
+  (check-equal? (hash-ref* (hash 'a 10 "b" 20) 'b) 20)
+  (check-equal? (hash-ref* (hash 'a 10 "b" 20) 'c 100) 100)
 
   (check-hash-equal? (@clean 'a 1 'b 2 'c "") (hash 'a 1 'b 2))
 
@@ -596,5 +611,9 @@
 
   (check-equal? (untyped-hash-ref (hash 'a 10 'b 20) 'b) 20)
   (check-equal? (untyped-hash-ref (hash 'a 10 'b 20) "b") 20)
+
+  (check-equal? (format-hash "{a} - {b}" (hash 'a 10 'b 20)) "10 - 20")
+  (check-equal? (format-hash "foo" (hash 'a 10 'b 20)) "foo")
+  (check-equal? (format-hash "{a}/{c}/{a}" (hash 'a 10 'b 20 'c "baz")) "10/baz/10")  
 
   )

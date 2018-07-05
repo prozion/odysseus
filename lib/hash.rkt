@@ -1,7 +1,7 @@
 #lang racket
 
 (require compatibility/defmacro)
-(require "base.rkt" "seqs.rkt" "type.rkt" "debug.rkt" (for-syntax "seqs.rkt" "type.rkt"))
+(require "base.rkt" "seqs.rkt" "type.rkt" "regexp.rkt" "debug.rkt" (for-syntax "seqs.rkt" "type.rkt"))
 
 (provide (all-defined-out))
 
@@ -38,18 +38,14 @@
     args
     (for/hash ((k body) (v args)) (values k v))))
 
-(define (hash-pretty-string h)
-  (let* ((ks (hash-keys h))
-        (res-str
-          (for/fold
-            ((res ""))
-            ((k ks))
-            (str
-              res
-              (format "~a : ~a~n" k (hash-ref h k))))))
-  res-str))
-
-
+; the same of hash-ref but no matter of type, matches if string projection values of hash key and compared key are equal
+(define-catch (hash-ref* h key (default-value #f))
+  (hash-ref
+    (hash-map
+      (λ (k v) (values (->string k) v))
+      h)
+    (->string key)
+    default-value))
 
 ;; REDUCE
 (define (hash-length h)
@@ -438,3 +434,10 @@
       (λ (k v) (values (->string k) v))
       h)
     (->string k)))
+
+(define-catch (format-hash frmt h)
+  (let* ((matches (get-matches #rx"{(.+?)}" frmt)))
+    (for/fold
+      ((res frmt))
+      ((m matches))
+      (string-replace res (first m) (->string (hash-ref* h (second m)))))))

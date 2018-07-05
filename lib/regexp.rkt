@@ -9,14 +9,20 @@
 (define (re? x)
   (or (regexp? x) (pregexp? x)))
 
-(define (->re x)
+(define (->pre x)
   (cond
     ((re? x) x)
     ((string? x) (pregexp x))
     (else (pregexp (str x)))))
 
+(define (->re x)
+  (cond
+    ((re? x) x)
+    ((string? x) (regexp x))
+    (else (regexp (str x)))))
+
 (define (re-matches? re astr)
-  (true? (regexp-match (->re re) astr)))
+  (true? (regexp-match (->pre re) astr)))
 
 (define (re-full-matches? re astr)
   (true? (re-matches? (str "^" re "$") astr)))
@@ -49,4 +55,4 @@
         (re-substitute astr (car re) (car repstr))
         (re-substitute (re-substitute astr (car re) (car repstr)) (cdr re) (cdr repstr))))
     (else
-      (string-replace astr (->re re) repstr))))
+      (string-replace astr (->pre re) repstr))))

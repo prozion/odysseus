@@ -26,7 +26,7 @@
         [full-list (hash-path json-hash 'feed 'entry)])
     full-list))
 
-;; QUESTION: does row number really correspond to row's order in the sheet or hashing breaks the order?
+;; does row number really correspond to row's order in the sheet or hashing breaks the order?
 (define (google-spreadsheet/get-content json-list row column-name)
   (hash-path (nth json-list row)
     (string->symbol (str "gsx$" column-name))

@@ -163,7 +163,7 @@
   (indexof-all-iter seq el empty 0))
 
 (define (count-element seq el)
-  (length (indexof-all seq el)))
+  (length (filter (curry equal? el) seq)))
 
 (define (regexp-indexof? seq regxp)
   (ormap

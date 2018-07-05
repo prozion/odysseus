@@ -5,7 +5,7 @@
 (require compatibility/defmacro)
 
 (require "../lib/load/all.rkt");  (for-syntax "../lib/syntax.rkt" "../lib/seqs.rkt"))
-(require "../reports/reports.rkt")
+(require "../report/report.rkt")
 (require "../graphics/svg.rkt")
 
 (require "../lib/debug.rkt")
@@ -17,7 +17,7 @@
 
 (define (build #:in ody-file #:out (output-file null))
   (parameterize ([current-namespace (namespace-anchor->namespace a)])
-    (namespace-require (string->path (string-append (getenv "odysseus") "/reports/reports.rkt")))
+    (namespace-require (string->path (string-append (getenv "odysseus") "/report/report.rkt")))
     (namespace-require (string->path (string-append (getenv "odysseus") "/lib/load/all.rkt")))
     (let* ([v (load ody-file)]
           [output-filename (if (null? output-file)

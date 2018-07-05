@@ -4,12 +4,13 @@
 
 (require (file "c:/denis/denis_core/denis_personal/my_people/all.rkt"))
 (require "../lib/load/all.rkt")
-(require "../pis/people.rkt")
-(require "../pis/people_verify.rkt")
+(require "people.rkt")
 (require "../graphics/console.rkt")
-(require "../reports/csv.rkt")
+(require "../report/csv.rkt")
 
-(define ns (module->namespace (string->path "c:/denis/denis_core/denis_personal/my_people/all.rkt")))
+; (define ns (module->namespace (string->path "c:/denis/denis_core/denis_personal/my_people/all.rkt")))
+
+(provide (all-defined-out))
 
 (define query "")
 (define verifyf null)
@@ -20,22 +21,6 @@
 (define only-fields #f)
 (define info null)
 (define csvfile "")
-
-(define (has-all-fields fields)
-  (λ (p)
-    (andmap
-      (λ (f) (indexof? (hash-keys p) (string->symbol f)))
-      fields)))
-
-(define (ppl-output fields people-sublist (csvfile ""))
-  (if (nil? csvfile)
-    (display (people->string people-sublist fields))
-    (write-csv-file
-      (merge
-        (list 'surname 'name)
-        (map string->symbol fields))
-      people-sublist
-      csvfile)))
 
 ;>ppl -q "(city=? \"Мурманск\")"
 ;>ppl -q "(city=? \"Мурманск\")" -f "phone,email"

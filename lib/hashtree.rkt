@@ -1,6 +1,6 @@
 #lang racket
 
-(require (for-syntax (prefix-in seqs: "seqs.rkt") racket/list))
+(require (for-syntax (prefix-in seqs: "seqs.rkt") "type.rkt" racket/list))
 (require "seqs.rkt")
 (require "base.rkt")
 (require "type.rkt")
@@ -25,6 +25,9 @@
   (hash-ref h key-name))
 
 (define get-id get-key)
+
+(define-catch (equal-ids? id1 id2)
+  (equal? (->string id1) (->string id2)))
 
 (define-catch (get-item-key item)
   (hash-ref item key-name #f))
@@ -217,6 +220,7 @@
           (append res (get-leaves (hash-ref hash-tree ke) #:exclude exclude)))))))
 
 (define-catch (get-item-by-id-from-the-list plained-hash-tree id (id-attr 'id))
+  ; (--- "get-item-by-id-from-the-list:" ($ id plained-hash-tree) id)
   (let ((res
           (filter
             (λ (e) (equal? (hash-ref e id-attr) id))
@@ -243,35 +247,123 @@
 ; handy macros ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ; get key hash or value
-(define-syntax ($$ stx)
-  (syntax-case stx ()
-    ((_ path hash-tree id ...)
-        ; id ... is here to avoid two patterns and duplication of with-syntax code
-        (let* (
-              (id-lst (syntax->datum #'(id ...)))
-              (conditional-id (if (empty? id-lst) #f (car id-lst))))
-          (with-syntax ((conditional-id-stx (datum->syntax stx conditional-id))
-                        (path-lst (datum->syntax stx (seqs:split (symbol->string (syntax->datum #'path)) "."))))
-            (if conditional-id
-                #'(hash-tree-get-element-by-id-path hash-tree 'path-lst conditional-id-stx)
-                #'(hash-tree-get-element-by-id-path hash-tree 'path-lst)))))))
+; (define-syntax ($4 stx)
+;   (syntax-case stx ()
+;     ((_ path hash-tree id ...)
+;         ; id ... is here to avoid two patterns and duplication of with-syntax code
+;         (let* (
+;               (id-lst (syntax->datum #'(id ...)))
+;               (conditional-id (if (empty? id-lst) #f (car id-lst))))
+;           (with-syntax ((conditional-id-stx (datum->syntax stx conditional-id))
+;                         (path-lst (datum->syntax stx (seqs:split (symbol->string (syntax->datum #'path)) "."))))
+;             (if conditional-id
+;                 #'(hash-tree-get-element-by-id-path hash-tree 'path-lst conditional-id-stx)
+;                 #'(hash-tree-get-element-by-id-path hash-tree 'path-lst)))))))
+;
+; (define-syntax ($3 stx)
+;   (syntax-case stx ()
+;     ((_ path hash-tree id ...)
+;         ; id ... is here to avoid two patterns and duplication of with-syntax code
+;         (let* (
+;               (id-lst (syntax->datum #'(id ...)))
+;               (conditional-id (if (empty? id-lst) #f (car id-lst))))
+;           (with-syntax ((conditional-id-stx (datum->syntax stx conditional-id))
+;                         (path-lst (datum->syntax stx (seqs:split (symbol->string (syntax->datum #'path)) "."))))
+;             (if conditional-id
+;                 #'(hash-tree-get-value-by-id-path hash-tree 'path-lst conditional-id-stx)
+;                 #'(hash-tree-get-value-by-id-path hash-tree 'path-lst)))))))
+;
+; ; take first level elements under the path
+; (define-macro ($3-1 path hash-tree)
+;   `(hash-keys ($3 ,path ,hash-tree)))
+;
+; (define-macro ($3-2 path hash-tree)
+;   `(flatten (map hash-keys (hash-values ($3 ,path ,hash-tree)))))
 
-(define-syntax ($$$ stx)
-  (syntax-case stx ()
-    ((_ path hash-tree id ...)
-        ; id ... is here to avoid two patterns and duplication of with-syntax code
-        (let* (
-              (id-lst (syntax->datum #'(id ...)))
-              (conditional-id (if (empty? id-lst) #f (car id-lst))))
-          (with-syntax ((conditional-id-stx (datum->syntax stx conditional-id))
-                        (path-lst (datum->syntax stx (seqs:split (symbol->string (syntax->datum #'path)) "."))))
-            (if conditional-id
-                #'(hash-tree-get-value-by-id-path hash-tree 'path-lst conditional-id-stx)
-                #'(hash-tree-get-value-by-id-path hash-tree 'path-lst)))))))
+(define-catch (get-$1 path hashtree)
+  (let* ((hash-item (cond ((> (length path) 1)
+                            (get-$2 (but-last path) hashtree))
+                          ((= (length path) 1)
+                            (get-$2 path hashtree))
+                          (else
+                              #f))))
+    (if hash-item
+      (hash-ref* hash-item (last path) #f)
+      #f)))
 
-; take first level elements under the path
-(define-macro ($$$-1 path hash-tree)
-  `(hash-keys ($$$ ,path ,hash-tree)))
+(define-catch (get-$2 path hashtree)
+  (let ((res-lst
+          (filter
+            (λ (x) (equal-ids? ($ id x) (last path)))
+            (get-$3 (but-last path) hashtree))))
+    (if (empty? res-lst) #f (car res-lst))))
 
-(define-macro ($$$-2 path hash-tree)
-  `(flatten (map hash-keys (hash-values ($$$ ,path ,hash-tree)))))
+(define (get-$3 path hashtree)
+  (sort
+    (hash-keys (get-$4 path hashtree))
+    (λ (a b)
+      (let* ((a-order ($ _order a))
+            (b-order ($ _order b)))
+        (if (and a-order b-order)
+          (< a-order b-order)
+          #t)))))
+
+(define (get-$4 path hashtree)
+  (cond
+    ((empty? path) hashtree)
+    (else
+      (let* ((next-id (car path))
+            (key (filter (λ (x)
+                            (equal-ids? ($ id x) next-id)) (hash-keys hashtree)))
+            (next-hash-tree (if (not-empty? key)
+                                  (hash-ref* hashtree (car key))
+                                  (error (str "wrong path: " (implode path "."))))))
+        (get-$4 (cdr path) next-hash-tree)))))
+
+(define-catch (do-by-sections hashtree path-to-sections f-header-of-section f-section-content)
+  (for/fold
+    ((res1 ""))
+    ((section (get-$3 path-to-sections hashtree)))
+    (str
+      res1
+      (f-header-of-section section)
+      (for/fold
+        ((res2 ""))
+        ((item (get-$3 (pushr path-to-sections ($ id section)) hashtree)))
+        (str
+          res2
+          (f-section-content item section))))))
+
+(define-catch (do-flat-list hashtree path-to-sections f-section-content)
+  (let ((section ($2 path-to-sections hashtree))
+        (items (get-$3 path-to-sections hashtree)))
+    (for/fold
+      ((res ""))
+      ((item items))
+      (str
+        res
+        (f-section-content item section)))))
+
+(define-macro ($4 path hashtree)
+  (let ((path (seqs:split (->string path) ".")))
+    `(get-$4 (list ,@path) ,hashtree)))
+
+(define-macro ($3 path hashtree)
+  (let ((path (seqs:split (->string path) ".")))
+    `(get-$3 (list ,@path) ,hashtree)))
+
+(define-macro ($2 path hashtree)
+  (let ((path (seqs:split (->string path) ".")))
+    `(get-$2 (list ,@path) ,hashtree)))
+
+(define-macro ($1 path hashtree)
+  (let ((path (seqs:split (->string path) ".")))
+    `(get-$1 (list ,@path) ,hashtree)))
+
+(define-macro ($$->str path f-header-of-section f-section-content hashtree)
+  (let ((path (seqs:split (->string path) ".")))
+    `(do-by-sections ,hashtree (list ,@path) ,f-header-of-section ,f-section-content)))
+
+(define-macro ($$-flat->str path f-section-content hashtree)
+  (let ((path (seqs:split (->string path) ".")))
+    `(do-flat-list ,hashtree (list ,@path) ,f-section-content)))

@@ -14,6 +14,10 @@
 ;;;; basic data for functions
 
 (define days '(31 28 31 30 31 30 31 31 30 31 30 31))
+(define months (split "jan feb mar apr may jun jul aug sep oct nov dec" " "))
+(define months-ru (split "янв фев мар апр май июн июл aвг сен окт ноя дек" " "))
+(define months-ru-full (split "январь февраль март апрель май июнь июль aвгуст сентябрь октябрь ноябрь декабрь" " "))
+(define months-ru-full-genetive (split "января февраля марта апреля мая июня июля aвгуста сентября октября ноября декабря" " "))
 (define leap-days '(31 29 31 30 31 30 31 31 30 31 30 31))
 
 (define (acc-days d)
@@ -125,7 +129,12 @@
           ;; plus days in the current month:
           day)))))
 
-(define-catch (days->dm days (leap #f))
+(define-catch (days->date days #:leap (leap #f) #:year (year #f))
+  (define (full-year val (curyear 1))
+    (cond
+      ((and (leap-year? curyear) (<= val 366)) (list curyear val))
+      ((<= val 365) (list curyear val))
+      (else (full-year (- val (if (leap-year? curyear) 366 365)) (inc curyear)))))
   (define (full-month acc-arr val (count 0))
     (cond
       ((empty? acc-arr) count)
@@ -136,13 +145,18 @@
         (d-by-m (accumulate m-len))
         (d-by-m-leap (accumulate m-len-leap))
         (d-by-m (if leap d-by-m-leap d-by-m))
+        (_ (full-year days))
+        (y (first _))
+        (days (second _))
         (m (full-month d-by-m days))
         (d (- days (if (> m 1)
                         (nth d-by-m (dec m))
                         0)))
         (d (if (= d 0) 1 d)))
       (vk->date
-        (implode (list d m) "."))))
+        (if year
+          (implode (list d m y) ".")
+          (implode (list d m) ".")))))
 
 (define-catch (date-diff d1 d2)
   (let ((days1 (date->days d1))
@@ -173,6 +187,9 @@
 (define d< (comparison-f < date->days))
 (define d<= (comparison-f <= date->days))
 (define d= (comparison-f = date->days))
+
+(define (d+ adate days)
+  (days->date (+ (date->days adate) days) #:year #t))
 
 (define-catch (date-between? date-interval-cons adate)
   (and
@@ -220,12 +237,25 @@
         (sec (nth t2s 3)))
     (hash 'year year 'month month 'day day 'hour hour 'min minute 'sec sec)))
 
-(define (th->string th (templatestr ""))
-  (format "~a.~a ~a:~a" (hash-ref th 'day) (hash-ref th 'month) (hash-ref th 'hour) (hash-ref th 'min)))
+(define timestr->hdate parse-time)
 
-(define (time-reformat timestr)
-  (th->string
-    (parse-time timestr)))
+(define-catch (seconds->hdate seconds)
+  (let* ((date-struct (seconds->date seconds))
+        (sec (date-second date-struct))
+        (minute (date-minute date-struct))
+        (hour (date-hour date-struct))
+        (day (date-day date-struct))
+        (month (date-month date-struct))
+        (year (date-year date-struct)))
+    (hash 'year year 'month month 'day day 'hour hour 'min minute 'sec sec)))
+
+(define (hdate->string hdate)
+  (format "~a.~a.~a ~a:~a"
+    (format-number "dd" ($ day hdate) #:filler "0")
+    (format-number "dd" ($ month hdate) #:filler "0")
+    ($ year hdate)
+    (format-number "dd" ($ hour hdate) #:filler "0")
+    (format-number "dd" ($ min hdate) #:filler "0")))
 
 (define (current-date)
   (let* ((curdate (seconds->date (current-seconds)))
@@ -234,9 +264,16 @@
         (year (date-year curdate)))
     (format "~a.~a.~a" day month year)))
 
+(define (date->string)
+  (let* ((curdate (seconds->date (current-seconds)))
+        (day (format-number "dd" (date-day curdate) #:filler "0"))
+        (month (format-number "dd" (date-month curdate) #:filler "0"))
+        (year (date-year curdate)))
+    (format "~a.~a.~a" day month year)))
+
 (define (d.m adate)
   (let* ((parts (get-matches
-                  "([0-9x]{2}).([0-9x]{2})(.([0-9x]{4}[~?]?))?"
+                  #px"([0-9x]{2}).([0-9x]{2})(.([0-9x]{4}[~?]?))?"
                   adate))
         (parts (if (notnil? parts) (car parts) #f)))
     (if parts
@@ -318,3 +355,50 @@
       ((date-between? Libra adate) 'Libra)
       ((date-between? Scorpio adate) 'Scorpio)
       ((date-between? Sagittarius adate) 'Sagittarius))))
+
+(define (with-month-fullname-ru adate)
+  (let* ((parsed-date (parse-date adate))
+        (day ($ day parsed-date))
+        (month-n (->number ($ month parsed-date)))
+        (month-name (nth months-ru-full month-n))
+        (month-name-gen (nth months-ru-full-genetive month-n))
+        (year ($ year parsed-date))
+        )
+    (cond
+      ((not adate) #f)
+      ((not day)
+        (format "~a ~a" month-name year))
+      (else
+        (format "~a ~a ~a" day month-name-gen year)))))
+
+; get nymber of days from the string of following format: '\d+[dw]?'
+(define-catch (days-count astr)
+  (let* ((regexped (get-matches #px"(\\d+)([dw]?)" (->string astr)))
+        (regexped (car regexped))
+        (num (->number (second regexped)))
+        (postfix (third regexped)))
+    (case postfix
+      (("d" "") num)
+      (("w") (* 7 num)))))
+
+(define-catch (weekday adate)
+  (case (remainder (date->days adate) 7)
+    ((1) 'mon)
+    ((2) 'tue)
+    ((3) 'wed)
+    ((4) 'thu)
+    ((5) 'fri)
+    ((6) 'sat)
+    ((0) 'sun)))
+
+(define-catch (holiday? adate)
+  (indexof? '(sat sun) (weekday adate)))
+
+(define-catch (long-month? mon)
+  (indexof? (list "01" "03" "05" "07" "08" "10" "12") mon))
+
+(define-catch (short-month? mon)
+  (indexof? (list "04" "06" "09" "11") mon))
+
+(define (february? mon)
+  (equal? "02" mon))

@@ -4,10 +4,9 @@
 
 (require (file "c:/denis/denis_core/denis_personal/my_people/all.rkt"))
 (require "../lib/load/all.rkt")
-(require "../pis/people.rkt")
-(require "../pis/people_verify.rkt")
+(require "people.rkt")
 (require "../graphics/console.rkt")
-(require "../reports/csv.rkt")
+(require "../report/csv.rkt")
 
 (define ns (module->namespace (string->path "c:/denis/denis_core/denis_personal/my_people/all.rkt")))
 
@@ -28,9 +27,9 @@
 (define (count-bd people)
   (display
     (str
-      (esc-sec (string-text-color 'green))
+      (string-text-color 'green)
       (length (filter (λ (p) (hash-ref p 'bdate #f)) people))
-      (esc-sec (string-text-color 'default)))))
+      (string-text-color 'default))))
 
 (define (ppl-output fields people-sublist (csvfile ""))
   (if (nil? csvfile)

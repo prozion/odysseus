@@ -29,11 +29,17 @@
     (check-hash
       (hash '(2 (3 1 10)) '(3 4))
       (hash '((10 1 3) 2) '(4 3))
-      #t))
+      #:list-any-order? #t))
 
   (check-true
     (check-hash
       (hash '(((#f S1 (simple chemical)) (#f enzyme)) (#f P1 (simple chemical))) "positive influence")
       (hash '(((#f enzyme) (#f S1 (simple chemical))) (#f P1 (simple chemical))) "positive influence")
-      #t))
+      #:list-any-order? #t))
+
+  (check-false
+    (check-hash
+      (hash '(((#f S1 (simple chemical)) (#f enzyme)) (#f P1 (simple chemical))) "positive influence")
+      (hash '(((#f enzyme) (#f S1 (simple chemical))) (#f P1 (simple chemical))) "positive influence")
+      #:list-any-order? #f))
 )

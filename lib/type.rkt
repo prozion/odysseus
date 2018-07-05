@@ -109,6 +109,7 @@
   (cond
     ((number? x) (number->string x))
     ((symbol? x) (symbol->string x))
+    ((hash? x) (hash-pretty-string x))
     (else x)))
 
 (define (->int x)
@@ -136,4 +137,3 @@
 
 (define (untype-equal? a1 a2)
   (equal? (->string a1) (->string a2)))
-  
