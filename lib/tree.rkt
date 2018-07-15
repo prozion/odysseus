@@ -115,9 +115,9 @@
     ((plain-list? lst) (map f (f lst)))
     (else (map (λ (x) (transform-list-recur x f)) (f lst)))))
 
-(define (same-elements? as bs)
+(define (same-elements? as bs (criterium? equal?))
   (cond
-    ((and (scalar? as) (scalar? bs)) (equal? as bs))
+    ((and (scalar? as) (scalar? bs)) (criterium? as bs))
     ((and (list? as) (list? bs))
       (and
         (for/and
@@ -126,4 +126,15 @@
         (for/and
           ((b bs))
           (ormap (λ (a) (same-elements? b a)) as)))
-    (else (equal? as bs))))
+    (else (criterium? as bs))))
+
+(define (iso-elements? as bs)
+  (cond
+    ((and (empty? as) (empty? bs)) #t)
+    ((and (scalar? as) (scalar? bs)) (equal? (type as) (type bs)))
+    ((and (list? as) (list? bs))
+      (and
+        (= (length as) (length bs))
+        (iso-elements? (car as) (car bs))
+        (iso-elements? (cdr as) (cdr bs))))
+    (else #f)))

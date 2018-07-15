@@ -109,6 +109,14 @@
   (check-true (same-elements?
                 '((((#f S1 (simple chemical)) (#f enzyme)) (#f P1 (simple chemical))) "positive influence")
                 '((((#f enzyme) (#f S1 (simple chemical))) (#f P1 (simple chemical))) "positive influence")))
+
+
+  (check-true (iso-elements? 2 2))
+  (check-false (iso-elements? 2 "3"))
+  (check-false (iso-elements? '(1 2) '(2 3 4)))
+  (check-true (iso-elements? '(1 2) '(20 5)))
+  (check-true (iso-elements? '(1 2 "foo") '(20 5 "3")))
+  (check-false (iso-elements? '(1 "foo" 4) '(20 5 "3")))                
 )
 ; #hash(
 ;   (education . (list

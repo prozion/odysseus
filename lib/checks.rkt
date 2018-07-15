@@ -4,6 +4,7 @@
 (require "base.rkt")
 (require "seqs.rkt")
 (require "tree.rkt")
+(require "type.rkt")
 (require "hash.rkt")
 (require "debug.rkt")
 
@@ -32,6 +33,21 @@
           (and
             (indexof? k2s k1)
             (equal? (hash-ref h1 k1) (hash-ref h2 (nth k2s (indexof k2s k1))))))))))
+
+(define (check-hash-iso h1 h2 #:list-any-order? (list-any-order? #f))
+  (let* ((k1s (hash-keys h1))
+        (k2s (hash-keys h2))
+        (v1s (hash-values h1))
+        (v2s (hash-values h2)))
+    (if list-any-order?
+      (and (same-elements? k1s k2s iso?) (same-elements? v1s v2s iso?)) ; in the case we don't care about elements order in the lists. Although doesn't work for cross-permutations yet
+      (and
+        (same-elements? k1s k2s iso?) ; no extra unchecked keys neither at k1s nor at k2s
+        (for/and
+          ((k1 k1s))
+          (and
+            (indexof? k2s k1)
+            (same-elements? (hash-ref h1 k1) (hash-ref h2 (nth k2s (indexof k2s k1))) iso?)))))))
 
 (define-macro (check-hash-equal? h1 h2)
   `(check-true

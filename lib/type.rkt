@@ -137,3 +137,7 @@
 
 (define (untype-equal? a1 a2)
   (equal? (->string a1) (->string a2)))
+
+(define (iso? a b)
+  (printf "~a ~a ~a ~a~n" a b (type a) (type b))
+  (equal? (type a) (type b)))
