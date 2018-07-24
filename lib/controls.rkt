@@ -7,6 +7,9 @@
 
 (provide (except-out (all-defined-out) while-fun))
 
+(define-macro (if-not condition e1 e2)
+  `(if ,condition ,e2 ,e1))
+
 ; ((-> floor sqrt random) 10)
 (define (-> . fs)
   (define (call-r fs x)

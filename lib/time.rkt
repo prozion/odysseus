@@ -104,9 +104,9 @@
       ; if no checks triggered, consider d a valid date
       (else #t))))
 
-(define-catch (date->days d)
+(define-catch (date->days datestr)
   (let*
-      ((date-lst (split d "."))
+      ((date-lst (split datestr "."))
       ;(day (->number (first (split (first date-lst) "-")))) ; take first day in the days interval
       (day (->number (first date-lst)))
       (month (->number (second date-lst)))
@@ -162,6 +162,16 @@
   (let ((days1 (date->days d1))
         (days2 (date->days d2)))
       (and days1 days2 (- days1 days2))))
+
+(define-catch (hours-diff hdate1 hdate2)
+  (let* (
+        (hour1 (->number ($ hour hdate1)))
+        (hour2 (->number ($ hour hdate2)))
+        (days-diff (date-diff (hdate->datestr hdate1) (hdate->datestr hdate2)))
+        (hours-diff (- hour1 hour2)))
+    (cond
+      ((and (= 0 days-diff)) (- hour1 hour2))
+      (else (+ hour1 (- 24 hour2) (* 24 (dec days-diff)))))))
 
 (define (date-diff-abs d1 d2)
   (abs (date-diff d1 d2)))
@@ -226,7 +236,9 @@
 
 ; 2017-01-19T18:00:00 -> (hash 'year "2017" 'month "01" 'day "19" 'hour "18" 'min "00" 'sec "00")
 (define (parse-time timestr)
-  (let* ((ts (split timestr "T"))
+  (let* (
+        (ts (first (split timestr "+"))) ; exclude time zone
+        (ts (split ts "T"))
         (t1s (split (nth ts 1) "-"))
         (t2s (split (nth ts 2) ":"))
         (year (nth t1s 1))
@@ -257,34 +269,43 @@
     (format-number "dd" ($ hour hdate) #:filler "0")
     (format-number "dd" ($ min hdate) #:filler "0")))
 
+(define (hdate->datestr hdate)
+  (format "~a.~a.~a"
+    (format-number "dd" ($ day hdate) #:filler "0")
+    (format-number "dd" ($ month hdate) #:filler "0")
+    ($ year hdate)))
+
+(define (seconds->datestr seconds)
+  (let* ((date-struct (seconds->date seconds))
+        (day (format-number "dd" (date-day date-struct) #:filler "0"))
+        (month (format-number "dd" (date-month date-struct) #:filler "0"))
+        (year (date-year date-struct)))
+    (format "~a.~a.~a" day month year)))
+
 (define (current-date)
-  (let* ((curdate (seconds->date (current-seconds)))
-        (day (format-number "dd" (date-day curdate) #:filler "0"))
-        (month (format-number "dd" (date-month curdate) #:filler "0"))
-        (year (date-year curdate)))
-    (format "~a.~a.~a" day month year)))
+  (seconds->datestr (current-seconds)))
 
-(define (date->string)
-  (let* ((curdate (seconds->date (current-seconds)))
-        (day (format-number "dd" (date-day curdate) #:filler "0"))
-        (month (format-number "dd" (date-month curdate) #:filler "0"))
-        (year (date-year curdate)))
-    (format "~a.~a.~a" day month year)))
+(define (dd.mm.yyyy->yyyy-mm-dd date-string)
+  (let* ((t (string-split date-string "."))
+        (day (first t))
+        (month (second t))
+        (year (third t)))
+    (format "~a-~a-~a" year month day)))
 
-(define (d.m adate)
+(define (d.m datestr)
   (let* ((parts (get-matches
                   #px"([0-9x]{2}).([0-9x]{2})(.([0-9x]{4}[~?]?))?"
-                  adate))
+                  datestr))
         (parts (if (notnil? parts) (car parts) #f)))
     (if parts
       (str (second parts) "." (third parts))
       "")))
 
-(define (m.y adate)
-  (format "~a.~a" (month adate) (year adate)))
+(define (m.y hdate)
+  (format "~a.~a" (month hdate) (year hdate)))
 
-(define (parse-date adate)
-  (match adate
+(define (parse-date datestr)
+  (match datestr
     ((pregexp #px"^([0-9x]{2})\\.([0-9x]{2})\\.([0-9x]{4})$" (list _ day month year))
         (hash 'day day 'month month 'year year))
     ((pregexp #px"^([0-9x]{2})\\.([0-9x]{2})$" (list _ day month))
@@ -294,11 +315,13 @@
     (else
         (hash))))
 
-(define-catch (vk->date adate)
+(define datestr->hdate parse-date)
+
+(define-catch (vk->date vk-datestr)
   (cond
-    ((or (not adate) (equal? adate "")) #f)
+    ((or (not vk-datestr) (equal? vk-datestr "")) #f)
     (else
-      (let* ((parts (split adate "."))
+      (let* ((parts (split vk-datestr "."))
             (dd (car parts))
             (dd (format-number "dd" dd #:filler "0"))
             (parts (cdr parts))
@@ -309,21 +332,21 @@
             (yyyy (if yyyy (format-number "dddd" yyyy) #f)))
         (format "~a~a~a" (if dd dd "") (if mm (str "." mm) "") (if yyyy (str "." yyyy) ""))))))
 
-(define (day adate)
-  (hash-ref (parse-date adate) 'day #f))
+(define (day datestr)
+  (hash-ref (parse-date datestr) 'day #f))
 
-(define (month adate)
-  (hash-ref (parse-date adate) 'month #f))
+(define (month datestr)
+  (hash-ref (parse-date datestr) 'month #f))
 
-(define (year adate)
-  (hash-ref (parse-date adate) 'year #f))
+(define (year datestr)
+  (hash-ref (parse-date datestr) 'year #f))
 
 ; for finding year ticks on the timeline:
 (define (first-month? month shift)
   (= 1 (remainder (+ month shift) 12)))
 
-(define (get-zodiac-sign adate)
-  (when (not (date? adate)) (error (format "wrong date format: ~a" adate)))
+(define (get-zodiac-sign datestr)
+  (when (not (date? datestr)) (error (format "wrong date format: ~a" datestr)))
   (let* (
         (Capricorn1 (cons "01.01.1979" "19.01.1979")) ; Козерог
         (Aquarius (cons "20.01.1979" "18.02.1979")) ; Водолей
@@ -338,26 +361,25 @@
         (Scorpio (cons "23.10.1979" "21.11.1979")) ; Скорпион
         (Sagittarius (cons "22.11.1979" "21.12.1979")) ; Стрелец
         (Capricorn2 (cons "22.12.1979" "31.12.1979")) ; Козерог
-        (adate-str adate)
-        (adate (parse-date adate))
-        (adate (str (d.m adate-str) ".1979"))
+        (hdate (parse-date datestr))
+        (datestr (str (d.m datestr) ".1979"))
         )
     (cond
-      ((or (date-between? Capricorn1 adate) (date-between? Capricorn2 adate)) 'Capricorn)
-      ((date-between? Aquarius adate) 'Aquarius)
-      ((date-between? Pisces adate) 'Pisces)
-      ((date-between? Aries adate) 'Aries)
-      ((date-between? Taurus adate) 'Taurus)
-      ((date-between? Gemini adate) 'Gemini)
-      ((date-between? Cancer adate) 'Cancer)
-      ((date-between? Leo adate) 'Leo)
-      ((date-between? Virgo adate) 'Virgo)
-      ((date-between? Libra adate) 'Libra)
-      ((date-between? Scorpio adate) 'Scorpio)
-      ((date-between? Sagittarius adate) 'Sagittarius))))
+      ((or (date-between? Capricorn1 datestr) (date-between? Capricorn2 datestr)) 'Capricorn)
+      ((date-between? Aquarius datestr) 'Aquarius)
+      ((date-between? Pisces datestr) 'Pisces)
+      ((date-between? Aries datestr) 'Aries)
+      ((date-between? Taurus datestr) 'Taurus)
+      ((date-between? Gemini datestr) 'Gemini)
+      ((date-between? Cancer datestr) 'Cancer)
+      ((date-between? Leo datestr) 'Leo)
+      ((date-between? Virgo datestr) 'Virgo)
+      ((date-between? Libra datestr) 'Libra)
+      ((date-between? Scorpio datestr) 'Scorpio)
+      ((date-between? Sagittarius datestr) 'Sagittarius))))
 
-(define (with-month-fullname-ru adate)
-  (let* ((parsed-date (parse-date adate))
+(define (with-month-fullname-ru datestr)
+  (let* ((parsed-date (parse-date datestr))
         (day ($ day parsed-date))
         (month-n (->number ($ month parsed-date)))
         (month-name (nth months-ru-full month-n))
@@ -365,13 +387,13 @@
         (year ($ year parsed-date))
         )
     (cond
-      ((not adate) #f)
+      ((not datestr) #f)
       ((not day)
         (format "~a ~a" month-name year))
       (else
         (format "~a ~a ~a" day month-name-gen year)))))
 
-; get nymber of days from the string of following format: '\d+[dw]?'
+; get number of days from the string of following format: '\d+[dw]?'
 (define-catch (days-count astr)
   (let* ((regexped (get-matches #px"(\\d+)([dw]?)" (->string astr)))
         (regexped (car regexped))
@@ -381,8 +403,8 @@
       (("d" "") num)
       (("w") (* 7 num)))))
 
-(define-catch (weekday adate)
-  (case (remainder (date->days adate) 7)
+(define-catch (weekday datestr)
+  (case (remainder (date->days datestr) 7)
     ((1) 'mon)
     ((2) 'tue)
     ((3) 'wed)
@@ -391,8 +413,8 @@
     ((6) 'sat)
     ((0) 'sun)))
 
-(define-catch (holiday? adate)
-  (indexof? '(sat sun) (weekday adate)))
+(define-catch (holiday? datestr)
+  (indexof? '(sat sun) (weekday datestr)))
 
 (define-catch (long-month? mon)
   (indexof? (list "01" "03" "05" "07" "08" "10" "12") mon))

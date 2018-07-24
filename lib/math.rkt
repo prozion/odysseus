@@ -22,6 +22,9 @@
 (define (avg . args)
   (/ (apply + args) (length args)))
 
+(define (favg . args)
+  (/f (apply + args) (length args)))
+
 (define (gavg . args)
   (/ (apply * args) (length args)))
 

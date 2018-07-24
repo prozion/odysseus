@@ -120,6 +120,20 @@
         (hash 'error (@. res.error))
         (car (@. res.response)))))
 
+(define-catch (get-user-id user-name)
+(define plain-name? (re-matches? #px"^(id)(\\d+)$" user-name))
+(if plain-name?
+    (let* ((n (get-matches #px"^(id)(\\d+)$" user-name))
+          (n (third (first n))))
+        n)
+    (let* (
+          (res-user (string->jsexpr
+                      (get-url (format "https://api.vk.com/method/users.get?user_ids=~a&v=5.52&access_token=~a" user-name AT))))
+          (result-user (and ($ response res-user) (not-empty? ($ response res-user)) ($ id (first ($ response res-user))))))
+      (--- user-name result-user res-user)
+      result-user)))
+
+
 (define-catch (get-friends-of-user user-id #:status (status #f) #:friends-limit (friends-limit #f))
   (when status (display status) (flush-output))
   (let ((res (string->jsexpr
@@ -153,12 +167,24 @@
     (--- (length (hash-keys users)))))
 
 ;;; Groups ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(define (get-group-name groupid)
+(define-catch (get-group-name groupid)
   (let ((res (string->jsexpr
                     (get-url (format "https://api.vk.com/method/groups.getById?group_id=~a&v=5.52&access_token=~a" groupid AT)))))
     (if (@. res.error)
       null
       (hash-ref (car (hash-ref res 'response)) 'name))))
+
+(define-catch (get-group-id group-name)
+  (define plain-name? (re-matches? #px"^(club|public)?(\\d+)$" group-name))
+  (if plain-name?
+      (let* ((n (get-matches #px"^(club|public)?(\\d+)$" group-name))
+            (n (third (first n))))
+          n)
+      (let* (
+            (res-group (string->jsexpr
+                        (get-url (format "https://api.vk.com/method/groups.getById?group_id=~a&v=5.52&access_token=~a" group-name AT))))
+            (result-group (and ($ response res-group) (not-empty? ($ response res-group)) ($ id (first ($ response res-group))))))
+        result-group)))
 
 (define (raw-community? type)
   (λ (groupid)
@@ -168,18 +194,18 @@
 (define raw-public? (raw-community? 'public))
 (define raw-event? (raw-community? 'event))
 
-(define (extract-pure-id groupid)
+(define-catch (extract-pure-id groupid)
   (cond
     ((raw-group? groupid) (ltrim groupid (len "club")))
     ((raw-public? groupid) (ltrim groupid (len "public")))
     ((raw-event? groupid) (ltrim groupid (len "event")))
     (else groupid)))
 
-(define (get-group-users groupid)
+(define (get-group-users groupid #:offset (offset 0))
   (when (status-output) (display (format "~a~n" groupid)) (flush-output))
   (let* ( (groupid (extract-pure-id groupid))
           (res (string->jsexpr
-                    (get-url (format "https://api.vk.com/method/groups.getMembers?group_id=~a&v=5.52" groupid)))))
+                    (get-url (format "https://api.vk.com/method/groups.getMembers?group_id=~a&offset=~a&v=5.52&access_token=~a" groupid offset AT)))))
     (if (@. res.error)
       null
       (map str (@. res.response.items)))))
@@ -216,9 +242,16 @@
 
 ;;; Group wall ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define (get-wall-posts gid #:offset (offset #f) #:limit (limit #f))
-  (let* ((reqstr (format "https://api.vk.com/method/wall.get?owner_id=-~a&v=5.8&filter=others&~a~a&access_token=~a"
+(define (get-wall-posts
+          gid
+          #:offset (offset #f)
+          #:limit (limit #f)
+          #:only-group (only-group #f)
+          #:extended (extended #f))
+  (let* ((reqstr (format "https://api.vk.com/method/wall.get?owner_id=-~a&v=5.8&filter=others&~a~a~a~a&access_token=~a"
                     gid
+                    (if extended "&extended=1" "")
+                    (if only-group "&filter=owner" "")
                     (if offset (str "&offset=" offset) "")
                     (if limit (str "&count=" limit) "")
                     AT))

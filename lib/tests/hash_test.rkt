@@ -31,6 +31,7 @@
   (check-equal? ($ a (hash 'a 10 'b 20)) 10)
   (check-equal? ($ a 50) #f)
   (check-equal? ($ a.ab (hash 'a (hash 'aa 200 'ab 300) 'b 20)) 300)
+  (check-equal? ($ a.ab.cd.ef (hash 'a (hash 'aa 200 'ab 300) 'b 20)) #f)
   (check-false ($ c (hash 'a 10 'b 20)))
   (check-false ($ c 100))
 
@@ -614,6 +615,6 @@
 
   (check-equal? (format-hash "{a} - {b}" (hash 'a 10 'b 20)) "10 - 20")
   (check-equal? (format-hash "foo" (hash 'a 10 'b 20)) "foo")
-  (check-equal? (format-hash "{a}/{c}/{a}" (hash 'a 10 'b 20 'c "baz")) "10/baz/10")  
+  (check-equal? (format-hash "{a}/{c}/{a}" (hash 'a 10 'b 20 'c "baz")) "10/baz/10")
 
   )

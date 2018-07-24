@@ -43,7 +43,7 @@
 (define (rand n)
   (add1 (random n)))
 
-(define (nonempty? e) (not (empty? e)))
+(define (nonempty? e) (and (list? e) (not (empty? e))))
 (define not-empty? nonempty?)
 
 (define (not-equal? a b)

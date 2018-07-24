@@ -64,6 +64,26 @@
   (check-false (date-diff "35.03.1999" "01.02.1999"))
   (check-false (date-diff "12.03.1999" "48.02.1999"))
 
+  (check-equal? (hours-diff
+                  (hash 'year 1979 'month 3 'day 10 'hour 22 'min 0 'sec 0)
+                  (hash 'year 1979 'month 3 'day 9 'hour 2 'min 0 'sec 0))
+                44)
+
+  (check-equal? (hours-diff
+                  (hash 'year 1979 'month 3 'day 10 'hour 22 'min 0 'sec 0)
+                  (hash 'year 1979 'month 3 'day 8 'hour 2 'min 0 'sec 0))
+                68)
+
+  (check-equal? (hours-diff
+                  (hash 'year 2018 'month 7 'day 1 'hour 2 'min 0 'sec 0)
+                  (hash 'year 2018 'month 6 'day 30 'hour 22 'min 0 'sec 0))
+                4)
+
+  (check-equal? (hours-diff
+                  (hash 'year 1979 'month 3 'day 10 'hour 22 'min 0 'sec 0)
+                  (hash 'year 1979 'month 3 'day 10 'hour 20 'min 10 'sec 30))
+                2)
+
   (check-equal? (date-diff-abs "15.03.2017" "07.04.2017") 23)
   (check-equal? (date-diff-abs "07.04.2017" "15.03.2017") 23)
   (check-equal? (date-diff-abs "28.08.1979" "07.04.2017") 13737)
