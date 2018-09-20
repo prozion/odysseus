@@ -15,7 +15,7 @@
       (if (> (string-length res) 0) "; " "")
       (format "~a:~a" (->string key) (hash-ref style key)))))
 
-(define (svg sxml (width "100%") (height "100%"))
+(define-catch (svg sxml (width "100%") (height "100%"))
   (format "~a~n~a~n~a~n<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" width=\"~a\" height=\"~a\">~n~a~n</svg>"
             "<?xml version=\"1.1\" standalone=\"no\"?>"
             "<?xml-stylesheet type=\"text/css\" href=\"styles.css\"?>"

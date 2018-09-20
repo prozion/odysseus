@@ -32,6 +32,11 @@
   (check-equal? (time-diff "01:00:48" "00:12:50") "47:58")
   (check-equal? (time-diff "04:12:50" "01:56:48") "02:16:02")
 
+  (check-equal? (last-day "01.2000") 31)
+  (check-equal? (last-day "02.2009") 28)
+  (check-equal? (last-day "02.2004") 29)
+  (check-equal? (last-day "04.936") 30)
+
   (check-true (valid-date? "31.01.1970"))
   (check-true (valid-date? "29.02.2000"))
   (check-true (valid-date? "29.02.1996"))
@@ -124,6 +129,8 @@
   (check-equal? (day "03.11.1965") "03")
   (check-equal? (month "03.11.1965") "11")
   (check-equal? (year "03.11.1965") "1965")
+  (check-equal? (year "11.1965") "1965")
+  (check-equal? (year "1965") "1965")
 
   (check-true (first-month? 12 1))
   (check-true (first-month? 1 0))
@@ -155,6 +162,8 @@
 
 
   (check-hash-equal? (parse-date "28.08.1979") (hash 'day "28" 'month "08" 'year "1979"))
+  (check-hash-equal? (parse-date "08.1979") (hash 'day #f 'month "08" 'year "1979"))
+  (check-hash-equal? (parse-date "1979") (hash 'day #f 'month #f 'year "1979"))
   (check-hash-equal? (parse-date "28.08.xxxx") (hash 'day "28" 'month "08" 'year "xxxx"))
 
   (check-equal? (vk->date "16.6.1964") "16.06.1964")

@@ -2,27 +2,30 @@
 
 (require racket/cmdline)
 
-(require (file "c:/denis/denis_core/denis_personal/my_people/all.rkt"))
 (require "../lib/load/all.rkt")
-(require "people.rkt")
 (require "../graphics/console.rkt")
+(require "people.rkt")
+(require "../knowledge-base/tab-tree.rkt")
 (require "../report/csv.rkt")
-
-(define ns (module->namespace (string->path "c:/denis/denis_core/denis_personal/my_people/all.rkt")))
 
 (define day #f)
 (define total-count (make-parameter #f))
+(define people (get-level-under "people" (parse-tab-tree "c:/denis/denis_core/denis_knowledge/personal/people.tree") 2))
 
 (define (todaybd people (day #f))
   (let* ((curdate (if day day (current-date)))
         (cur-day-month (d.m curdate))
         (filtered-people (filter
-                  (λ (p) (let ((bd (hash-ref p 'bdate #f)))
-                            (if bd
-                                (equal? cur-day-month (d.m bd))
-                                #f)))
+                  (λ (p) (and
+                            ($ bdate p)
+                            (equal? cur-day-month (d.m ($ bdate p)))))
                   people)))
-    (ppl-output '("bdate" "phone" "sn") filtered-people)))
+    (display (people->string
+                filtered-people
+                (list
+                  (λ (x) (or (get-name-surname x) ($ nick x) "?"))
+                  (λ (x) ($ phone x))
+                  (λ (x) (or ($ vk x) ($ fb x) ($ ok x) ($ email x))))))))
 
 (define (count-bd people)
   (display

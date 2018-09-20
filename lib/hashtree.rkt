@@ -298,7 +298,7 @@
             (get-$3 (but-last path) hashtree))))
     (if (empty? res-lst) #f (car res-lst))))
 
-(define (get-$3 path hashtree)
+(define-catch (get-$3 path hashtree)
   (sort
     (hash-keys (get-$4 path hashtree))
     (λ (a b)
@@ -308,7 +308,7 @@
           (< a-order b-order)
           #t)))))
 
-(define (get-$4 path hashtree)
+(define-catch (get-$4 path hashtree)
   (cond
     ((empty? path) hashtree)
     (else
@@ -367,3 +367,29 @@
 (define-macro ($$-flat->str path f-section-content hashtree)
   (let ((path (seqs:split (->string path) ".")))
     `(do-flat-list ,hashtree (list ,@path) ,f-section-content)))
+
+(define (get-level-under path tabtree level-down)
+  (let* ((path (split (->string path) "."))
+        (next-leaves (get-$3 path tabtree))
+        (next-ids (map (λ (x) ($ id x)) next-leaves))
+        (next-paths (map (λ (x) (pushr path x)) next-ids)))
+    (cond
+      ((< level-down 1) tabtree)
+      ((= level-down 1) next-leaves)
+      (else
+        (apply
+          append
+          (map
+            (λ (next-path) (get-level-under (implode next-path ".") tabtree (- level-down 1)))
+            next-paths))))))
+
+; get the next level of leaves
+(define-macro (get-level-under-1 path tabtree)
+  (let ((path (seqs:split (->string path) ".")))
+    `(let ((categories (get-$3 (list ,@path) ,tabtree)))
+        (apply
+          append
+          (map
+            (λ (x)
+              (get-$3 (pushr (list ,@path) ($ id x)) ,tabtree))
+              categories)))))

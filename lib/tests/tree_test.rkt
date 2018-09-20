@@ -74,6 +74,7 @@
   (check-equal? (format-list '(a b ~a d e ~a f g) 'c '$f) '(a b c d e f g))
   (check-equal? (let ((x '$f)) (format-list '(a b ~a d e ~a f g) 'c x)) '(a b c d e f g))
   (check-equal? (format-list '(a b ~a d e ~@a f g) 'c '(1 2)) '(a b c d e 1 2 f g))
+  (check-equal? (format-list '(a b ~a d e ~@a f g) 'c '((a 10) (b 20))) '(a b c d e (a 10) (b 20) f g))
   (check-equal? (format-list '(a b ~a d e ~@a f g) 'c 3) '(a b c d e 3 f g))
   (check-equal? (format-list '(a b ~a d e ~@a f g) 'c '$f) '(a b c d e f g))
   (check-equal? (format-list '(a b ~a d e ~@a f g ~a l) 'c '$f 'k) '(a b c d e f g k l))
@@ -116,7 +117,7 @@
   (check-false (iso-elements? '(1 2) '(2 3 4)))
   (check-true (iso-elements? '(1 2) '(20 5)))
   (check-true (iso-elements? '(1 2 "foo") '(20 5 "3")))
-  (check-false (iso-elements? '(1 "foo" 4) '(20 5 "3")))                
+  (check-false (iso-elements? '(1 "foo" 4) '(20 5 "3")))
 )
 ; #hash(
 ;   (education . (list

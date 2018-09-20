@@ -62,8 +62,9 @@
         ; add name to item, if it is not already defined:
         (name (get-item-name res))
         (res (if name
-                  (hash-insert res (cons 'name name))
-                  res)))
+                  (hash-insert res (cons '_name name))
+                  res))
+        )
     res))
 
 ; Iteratively populates nested list structure (tree) with cons-hashes (item)

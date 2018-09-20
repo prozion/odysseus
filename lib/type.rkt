@@ -35,7 +35,8 @@
 (define (plain-list? x)
   (and
     (list? x)
-    (not (ormap list? x))))
+    (not (ormap list? x))
+    (not (ormap simple-cons? x))))
 
 (define (list-of-cons? x)
   (and
@@ -65,8 +66,10 @@
                       (else #f)))
             (hash-values x)))))
 
-(define (type x)
+(define-catch (type x)
   (cond
+    ((not x) 'boolean)
+    ((empty? x) 'list)
     ((number? x) 'number)
     ((string? x) 'string)
     ((bytes? x) 'bytes)
@@ -110,6 +113,7 @@
     ((number? x) (number->string x))
     ((symbol? x) (symbol->string x))
     ((hash? x) (hash-pretty-string x))
+    ((list? x) (apply string-append (map ->string x)))
     (else x)))
 
 (define (->int x)

@@ -130,7 +130,6 @@
           (res-user (string->jsexpr
                       (get-url (format "https://api.vk.com/method/users.get?user_ids=~a&v=5.52&access_token=~a" user-name AT))))
           (result-user (and ($ response res-user) (not-empty? ($ response res-user)) ($ id (first ($ response res-user))))))
-      (--- user-name result-user res-user)
       result-user)))
 
 

@@ -63,11 +63,14 @@
   (check-false (plain-list? '(1 2 3 (4 5) 4 5)))
   (check-false (plain-list? '(1 2 3 4 (5))))
   (check-false (plain-list? '(((1)) 2 3 4 5)))
+  (check-false (plain-list? #f))
+  (check-false (plain-list? (list (cons 1 2) (cons 1 3))))
 
   (check-pred list-of-simple-cons? (list (cons 1 2) (cons 4 5)))
   (check-equal? (list-of-simple-cons? (list (cons 1 2) (cons 4 5) 10)) #f)
   (check-equal? (list-of-simple-cons? '((1 2) (4 5))) #f)
 
+  (check-equal? (type '()) 'list)
   (check-equal? (type 3) 'number)
   (check-equal? (type "a str") 'string)
   (check-equal? (type #"a str") 'bytes)
@@ -103,6 +106,8 @@
   (check-equal? (->string "00") "00")
   (check-equal? (->string 100) "100")
   (check-equal? (->string 'a) "a")
+  (check-equal? (->string '()) "")
+  (check-equal? (->string '(a b c)) "abc")
 
   (check-equal? (->int "3.5") 3)
   (check-equal? (->int "3,5") 3)

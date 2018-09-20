@@ -586,7 +586,7 @@
   (check-hash-equal?
     (tree->hash '(a (b (c d) e 10) f (g h)))
     (hash 'a (hash 'b '(c d) 'e 10) 'f '(g h)))
-
+    
   (check-hash-equal?
     (tree->hash
       `(a

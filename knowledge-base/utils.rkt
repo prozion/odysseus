@@ -38,3 +38,13 @@
   `(λ (x)
       (let ((x (->number x)))
           (->string ,expr))))
+
+(define (make-index items (index-name "i"))
+  (for/fold
+    ((res empty))
+    ((item items) (idx (in-naturals 1)))
+    (pushr
+      res
+      (hash-union
+        (hash index-name idx)
+        item))))

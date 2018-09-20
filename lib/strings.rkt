@@ -156,3 +156,6 @@
                 (string<? (->string a) (->string b)))))
     ((z-a) (reverse (sort-by-string list-of-something 'a-z)))
     (else (error "unknown order parameter"))))
+
+(define-catch (take-one astr #:f (f (λ (x) (and (not-empty? x) (car x)))) #:delimeter (delimeter ","))
+  (f (string-split (->string astr) delimeter)))

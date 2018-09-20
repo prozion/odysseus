@@ -74,6 +74,14 @@
       (!= 0 (remainder year 100)))
     (= 0 (remainder year 400))))
 
+(define (last-day my)
+  (let* ((month (->number (first (split my "."))))
+        (year (->number (second (split my ".")))))
+    (case month
+      ((1 3 5 7 8 10 12) 31)
+      ((2) (if (leap-year? year) 29 28))
+      (else 30))))
+
 (define (date? adate)
   (let ((adate (->string adate)))
     (and
@@ -312,6 +320,8 @@
         (hash 'day day 'month month 'year #f))
     ((pregexp #px"^([0-9x]{2})\\.([0-9x]{4})$" (list _ month year))
         (hash 'day #f 'month month 'year year))
+    ((pregexp #px"^([0-9x]{4})$" (list _ year))
+        (hash 'day #f 'month #f 'year year))
     (else
         (hash))))
 

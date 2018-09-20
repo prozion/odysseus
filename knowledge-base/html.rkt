@@ -15,10 +15,17 @@
 (define (get-ht-item-name item)
   (titlefy (or ($ name item) ($ id item) "")))
 
-(define (url-if-possible name url)
-  (if (and url (non-empty-string? url))
-    (format "<a href=\"~a\" target=\"_blank\">~a</a>" (httpify url) (namefy name))
-    (namefy name)))
+; (define (url-if-possible name url)
+;   (if (and url (non-empty-string? url))
+;     (format "<a href=\"~a\" target=\"_blank\">~a</a>" (httpify url) (namefy name))
+;     (namefy name)))
+
+(define (namefy-with-url id name . urls)
+  (let* ((url (and (not-empty? urls) (car urls)))
+        (title (if (non-empty-string? name) name (namefy id))))
+    (if (and url (non-empty-string? url))
+      (format "<a href=\"~a\" target=\"_blank\">~a</a>" (httpify url) title)
+      title)))
 
 (define (extend-txt prefix (suffix ""))
   (λ (txt)

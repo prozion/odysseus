@@ -51,4 +51,10 @@
   (check-equal? (sort-by-string '("a" b "cd" "c" "aa" 1 2)) '(1 2 "a" "aa" b "c" "cd"))
   (check-equal? (sort-by-string '("a" b "cd" "c" "aa" 1 2) 'a-z) '(1 2 "a" "aa" b "c" "cd"))
   (check-equal? (sort-by-string '("a" b "cd" "c" "aa" 1 2) 'z-a) (reverse '(1 2 "a" "aa" b "c" "cd")))
+
+  (check-equal? (take-one "foo,bar") "foo")
+  (check-equal? (take-one "foo,bar" #:f second) "bar")
+  (check-equal? (take-one "foo;bar") "foo;bar")
+  (check-equal? (take-one "foo;bar" #:delimeter ";") "foo")
+  (check-equal? (take-one "foo;bar;baz" #:delimeter ";" #:f (λ (x) (string-append (second x) (third x)))) "barbaz")
 )

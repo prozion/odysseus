@@ -141,6 +141,25 @@
     "_"
     (cyr->translit (@. person.surname))))
 
+(define (get-by-contact-level people level)
+  (filter
+    (λ (person) (and ($ l person) (= (->number ($ l person)) level)))
+    people))
+
+(define (get-name person)
+  (let* ((name_surname (split (->string ($ id person)) "_")))
+    (or ($ name person) (first name_surname))))
+
+(define (get-surname person)
+  (let* ((name_surname (split (->string ($ id person)) "_")))
+    (or ($ surname person) (and (> (length name_surname) 1) (second name_surname)))))
+
+(define (get-surname-name person)
+  (format "~a ~a" (get-surname person) (get-name person)))
+
+(define (get-name-surname person)
+  (format "~a ~a" (get-name person) (get-surname person)))
+
 ;; requests:
 ; ods-query "mafia?"
 ; ods-query "(and- mafia? transhumanism?)
@@ -170,36 +189,23 @@
     (filter (λ (field) (hash-ref person (->symbol field) #f)) fields-to-check)))
 
 (define (person->string person fields)
-  (let* ((name (field->str person 'name 'first ""))
-        (surname (field->str person 'surname 'first ""))
-        (nick (field->str person 'nick 'first "n/a"))
-        (default-fields (get-informative-fields person))
-        (fields (if fields
-                    fields
-                    (if (not-empty? default-fields)
-                        (list (car default-fields))
-                        #f))))
-  (string-append
+  (format "~a~a~n~a~a~n~a"
     (esc-sec (string-text-color 'yellow))
-    (if (and (nil? name) (nil? surname))
-      (format " ~a~n" nick)
-      (if (nil? surname)
-        (if (not (nil? nick))
-          (format " ~a ~a~n" name nick)
-          (format " ~a~n" name))
-        (format " ~a ~a~n" name surname)))
+    (if (scalar? (car fields))
+      (hash-ref* person (car fields))
+      ((car fields) person))
     (esc-sec (string-text-color 'grey))
-    (if (not fields)
-      ""
-      (apply string-append
-        (map
-          (λ (x) (format " ~a~n" (field->str person (string->symbol x) 'all "-")))
-          fields)))
-    (esc-sec (string-text-color 'default)))))
+    (for/fold
+      ((res ""))
+      ((field (cdr fields)))
+      (let ((value (if (scalar? field)
+                      (hash-ref* person field)
+                      (field person))))
+        (if value (str res value "\n") res)))
+    (esc-sec (string-text-color 'default))))
 
 (define (people->string subpeople fields)
-  (implode
-    (map
-      (λ (p) (person->string p fields))
-      subpeople)
-    "\n"))
+  (for/fold
+    ((res ""))
+    ((person subpeople))
+    (str res (person->string person fields))))

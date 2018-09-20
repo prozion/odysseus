@@ -19,7 +19,7 @@
   (let ((path (map string->symbol (split (->string field) "."))))
     (if (one-element? path)
       `(if (hash? ,element)
-          (hash-ref ,element ',field #f)
+          (hash-ref* ,element ',field #f)
           #f)
       `($ ,(string->symbol (implode (cdr path) ".")) ($ ,(car path) ,element)))))
 
@@ -115,11 +115,19 @@
         (cons k v)
         res)))
 
-(define (hash-refs h keys (missed null))
+(define (hash-refs h keys (missed #f))
   (define (hash-refs-iter h keys res)
     (cond
       ((empty? keys) res)
-      (else (hash-refs-iter h (cdr keys) (rpush res (hash-ref h (car keys) missed))))))
+      (else (hash-refs-iter
+              h
+              (cdr keys)
+              (rpush
+                res
+                (let ((next-key (car keys)))
+                (if (scalar? next-key)
+                    (hash-ref h next-key missed)
+                    (next-key h))))))))
   (hash-refs-iter h keys empty))
 
 (define (hash-take h n)
