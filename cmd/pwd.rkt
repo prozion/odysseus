@@ -3,7 +3,6 @@
 (require racket/cmdline)
 
 (require (file "c:/denis/denis_core/settings/web.rkt"))
-(require (file "c:/denis/denis_core/settings/mydata.rkt"))
 (require "../lib/load/all.rkt")
 (require "../graphics/console.rkt")
 

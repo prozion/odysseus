@@ -284,6 +284,9 @@
   (check-equal? (intersect '(1 2 3 5) '(3 2 1 1 6) '(1 2 8)) '(1 2))
   (check-equal? (intersect '(1 2 3 5) '(3 2 1 1 6) '()) '())
 
+  (check-true (intersect? '(1 2 3 5) '(3 2 1 1 6)))
+  (check-false (intersect? '(1 2 3 5) '(4 8 10)))
+
   (check-equal? (difference '() '()) '())
   (check-equal? (difference '(1 2 3) '()) '(1 2 3))
   (check-equal? (difference '() '(1 2 3)) '(1 2 3))

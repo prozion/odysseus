@@ -476,6 +476,9 @@
     (else
       (reverse (set-intersect (car seqs) (apply intersect (cdr seqs)))))))
 
+(define (intersect? . seqs)
+  (not-empty? (apply intersect seqs)))
+
 (define (equal-elements? seq1 seq2)
   (empty? (unique-difference seq1 seq2)))
 

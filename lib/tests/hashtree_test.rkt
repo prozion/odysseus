@@ -160,5 +160,10 @@
 
   (check-equal? ($1 root1.b.b1.value hash-tree-2) "10")
 
+  (define planarized-hashtree (list (hash 'id 1 'value 10) (hash 'id 2 'value 5 '_parent 1) (hash 'id 3 'value "abc" '_parent 2)))
+
+  (check-hash-equal? (@id 2 planarized-hashtree) (hash 'id 2 'value 5 '_parent 1))
+  (check-equal? (@id 10 planarized-hashtree) #f)
+
 
 )

@@ -48,3 +48,11 @@
       (hash-union
         (hash index-name idx)
         item))))
+
+; {w,w<r,w>r:first-existed}
+(define (first-existed (fallback-value #f))
+  (λ args
+    (let ((existed (filter-not nil? args)))
+      (if (empty? existed)
+        fallback-value
+        (first existed)))))

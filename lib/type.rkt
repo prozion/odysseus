@@ -114,7 +114,8 @@
     ((symbol? x) (symbol->string x))
     ((hash? x) (hash-pretty-string x))
     ((list? x) (apply string-append (map ->string x)))
-    (else x)))
+    ((string? x) x)
+    (else "")))
 
 (define (->int x)
   (int (->number x)))
@@ -145,3 +146,6 @@
 (define (iso? a b)
   (printf "~a ~a ~a ~a~n" a b (type a) (type b))
   (equal? (type a) (type b)))
+
+(define (equal*? x y)
+  (equal? (->string x) (->string y)))

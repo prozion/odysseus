@@ -10,7 +10,7 @@
 
 (define day #f)
 (define total-count (make-parameter #f))
-(define people (get-level-under "people" (parse-tab-tree "c:/denis/denis_core/denis_knowledge/personal/people.tree") 2))
+(define people (get-level-under "people" (parse-tab-tree "c:/denis/denis_core/denis_personal/my_knowledge/people.tree") 2))
 
 (define (todaybd people (day #f))
   (let* ((curdate (if day day (current-date)))

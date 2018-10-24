@@ -21,7 +21,7 @@
             "<?xml-stylesheet type=\"text/css\" href=\"styles.css\"?>"
             "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">"
             width height
-            (srl:sxml->xml sxml)))
+            (if (string? sxml) sxml (srl:sxml->xml sxml))))
   ; (srl:sxml->xml
   ;   (format-list
   ;     '(svg (@ (xmlns "http://www.w3.org/2000/svg")) ~a)

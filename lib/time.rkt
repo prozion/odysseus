@@ -293,6 +293,12 @@
 (define (current-date)
   (seconds->datestr (current-seconds)))
 
+(define (current-month)
+  (nth (string-split (current-date) ".") 2))
+
+(define (current-year)
+  (nth (string-split (current-date) ".") 3))
+
 (define (dd.mm.yyyy->yyyy-mm-dd date-string)
   (let* ((t (string-split date-string "."))
         (day (first t))

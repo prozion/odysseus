@@ -229,6 +229,10 @@
       ((empty? res) #f)
       (else (car res)))))
 
+; get element by id from the planarized hashtree
+(define ($$ id plained-hash-tree)
+  (get-item-by-id-from-the-list plained-hash-tree id))
+
 ; hash -> list-of-lists
 ; gets  a list of all paths (sequential ids to the end-points)
 (define-catch (get-paths hash-tree (curpath empty) (result empty))

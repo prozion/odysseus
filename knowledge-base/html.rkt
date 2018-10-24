@@ -21,7 +21,9 @@
 ;     (namefy name)))
 
 (define (namefy-with-url id name . urls)
-  (let* ((url (and (not-empty? urls) (car urls)))
+  (let* (
+        (urls (filter-not nil? urls))
+        (url (and (not-empty? urls) (car urls)))
         (title (if (non-empty-string? name) name (namefy id))))
     (if (and url (non-empty-string? url))
       (format "<a href=\"~a\" target=\"_blank\">~a</a>" (httpify url) title)
