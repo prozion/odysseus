@@ -23,6 +23,13 @@
   ; (check-equal? (format-number "dd" 3 #:filler "0") "03")
   (check-equal? (format-number "ddd" 3 #:filler "0") "003")
 
+  (check-equal? (format-string "ccc ccc" "abcdef") "abc def")
+  (check-equal? (format-string "ccc ccc" "hello") "hel lo")
+  (check-equal? (format-string "cc" "hello") "he")
+  (check-equal? (format-string "ccc ccc" "hello" #:filler "#") "hel lo#")
+  (check-equal? (format-string "ccc-ccc" "" #:filler "#") "###-###")
+  (check-equal? (format-string "cc ccc ccc-cc-cc" "+79054817655") "+7 905 481-76-55")
+
   (check-equal? (when/str (> 3 2) (format "~a ~a " "hello" 3) "world") "hello 3 world")
   (check-equal? (when/str (< 3 2) (format "~a ~a " "hello" 3) "world") "")
 
