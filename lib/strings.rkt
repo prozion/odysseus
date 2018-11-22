@@ -58,6 +58,20 @@
               (else (format-number-iter (cdr format-str) number-str (str cur-f res-str))))))))
   (format-number-iter (reverse (split format-str)) (reverse (split (->string number))) ""))
 
+(define (format-string format-str astr #:filler (filler ""))
+  (define (format-string-iter format-str astr res-str)
+      (cond
+        ((empty? format-str) res-str)
+        (else
+          (let ((cur-f (car format-str))
+                (cur-c (if (empty? astr)
+                          filler
+                          (car astr))))
+            (cond
+              ((equal? cur-f "c") (format-string-iter (cdr format-str) (if (empty? astr) empty (cdr astr)) (str res-str cur-c)))
+              (else (format-string-iter (cdr format-str) astr (str res-str cur-f))))))))
+(format-string-iter (split format-str) (split (->string astr)) ""))
+
 (define-macro (when/str condition . expression)
   `(if ,condition (string-append ,@expression) ""))
 
