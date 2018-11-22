@@ -146,19 +146,24 @@
     (λ (person) (and ($ l person) (= (->number ($ l person)) level)))
     people))
 
-(define (get-name person)
+(define-catch (get-name person)
   (let* ((name_surname (split (->string ($ id person)) "_")))
-    (or ($ name person) (first name_surname))))
+    (or ($ name person) (and (not-empty? name_surname) (first name_surname)))))
 
-(define (get-surname person)
+(define-catch (get-surname person)
   (let* ((name_surname (split (->string ($ id person)) "_")))
     (or ($ surname person) (and (> (length name_surname) 1) (second name_surname)))))
 
-(define (get-surname-name person)
+(define (get-surname-name-str person)
   (format "~a ~a" (get-surname person) (get-name person)))
 
-(define (get-name-surname person)
-  (format "~a ~a" (get-name person) (get-surname person)))
+(define (get-name-surname-str person)
+  (let ((name (or (get-name person) ""))
+        (surname (or (get-surname person) ""))
+        (str_possible? (or (get-name person) (get-surname person))))
+    (if str_possible?
+      (format "~a ~a" name surname)
+      #f)))
 
 ;; requests:
 ; ods-query "mafia?"

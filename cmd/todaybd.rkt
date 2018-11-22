@@ -23,7 +23,7 @@
     (display (people->string
                 filtered-people
                 (list
-                  (λ (x) (or (get-name-surname x) ($ nick x) "?"))
+                  (λ (x) (or (get-name-surname-str x) ($ nickname x) "?"))
                   (λ (x) ($ phone x))
                   (λ (x) (or ($ vk x) ($ fb x) ($ ok x) ($ email x))))))))
 
@@ -51,7 +51,7 @@
   #:program "todaybd"
   #:multi
     [("-d" "--day") d
-                    "day in the year for which find the birthdays"
+                    "day in the year for which you want to find the birthdays"
 										(set! day d)]
     [("-c" "--total-count")
                     "total amount of persons with birthdays in database"
