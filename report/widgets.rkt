@@ -32,7 +32,7 @@
           (len (if len (days-count len) 0))
           (end (or ($ end element) (d+ start len))))
       end))
-  ;
+
   (define-catch (get-first-after element jobs)
     (let* (
           (after-ids ($ after element))
