@@ -183,6 +183,12 @@
   (check-equal? (get-zodiac-sign "11.10.2001") 'Libra)
   (check-equal? (get-zodiac-sign "01.04") 'Aries)
 
+  (check-equal? (month-name 11 #:lang 'ru) "ноябрь")
+  (check-equal? (month-name 11 #:lang 'en) "november")
+  (check-equal? (month-name 11) "november")
+  (check-equal? (month-name 13) "?")
+  (check-equal? (month-name 0) "?")
+
   ; (check-= (get-time-length "4") 4)
   (check-equal? (days-count "4d") 4)
   (check-equal? (days-count "4w") 28)

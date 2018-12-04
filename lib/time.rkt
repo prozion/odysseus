@@ -15,6 +15,7 @@
 
 (define days '(31 28 31 30 31 30 31 31 30 31 30 31))
 (define months (split "jan feb mar apr may jun jul aug sep oct nov dec" " "))
+(define months-full (split "january february march april may june july august september october november december" " "))
 (define months-ru (split "янв фев мар апр май июн июл aвг сен окт ноя дек" " "))
 (define months-ru-full (split "январь февраль март апрель май июнь июль aвгуст сентябрь октябрь ноябрь декабрь" " "))
 (define months-ru-full-genetive (split "января февраля марта апреля мая июня июля aвгуста сентября октября ноября декабря" " "))
@@ -123,7 +124,7 @@
       (leap-years (filter leap-year? years))
       (non-leap-years (clean leap-year? years)))
     (cond
-      ((not (valid-date? (date day month year))) #f)
+      ((not (valid-date? (date day month year))) #f) ; (error (format "~a is not a valid date" datestr)))
       (else
         (+
           (* 366 (length leap-years))
@@ -440,3 +441,13 @@
 
 (define (february? mon)
   (equal? "02" mon))
+
+(define-catch (month-name month-number #:lang (lang 'en))
+  (let ((month-number (->number month-number)))
+    (if (< 0 month-number 13)
+      (nth
+        (case lang
+          ((ru) months-ru-full)
+          (else months-full))
+        month-number)
+      "?")))
