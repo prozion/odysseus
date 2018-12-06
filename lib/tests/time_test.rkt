@@ -61,6 +61,7 @@
   (check-equal? (date-diff "15.03.2017" "07.04.2017") -23)
   (check-equal? (date-diff "07.04.2017" "15.03.2017") 23)
   (check-equal? (date-diff "28.08.1979" "07.04.2017") -13737)
+  (check-equal? (date-diff "04.12.2018" "28.08.1979") 14343)
   (check-equal? (date-diff "29.02.2000" "28.02.2000") 1)
   (check-equal? (date-diff "29.02.2000" "01.01.2000") 59)
   (check-equal? (date-diff "31.03.2000" "01.01.2000") 90)

@@ -56,3 +56,11 @@
       (if (empty? existed)
         fallback-value
         (first existed)))))
+
+(define (make-link id . urls)
+  (let* ((name (namefy id)))
+    (if (andmap nil? urls)
+      name
+      (format "<a href =\"~a\" target=\"_blank\">~a</a>"
+              (httpify (for/or ((url urls)) url))
+              name))))

@@ -57,8 +57,8 @@
   (check-false (hash-path h 'a 'ab 'aba))
 
   (check-equal? (hash-refs (hash 'b 20 'a 10 'c 40 'd 30) (list 'a 'b 'd)) (list 10 20 30))
-  (check-equal? (hash-refs (hash 'b 20 'a 10 'c 40 'd 30) (list 'a 'b 'd 'e)) (list 10 20 30 null))
-  (check-equal? (hash-refs (hash) (list 'a 'b 'd 'e)) (list null null null null))
+  (check-equal? (hash-refs (hash 'b 20 'a 10 'c 40 'd 30) (list 'a 'b 'd 'e)) (list 10 20 30 #f))
+  (check-equal? (hash-refs (hash) (list 'a 'b 'd 'e)) (list #f #f #f #f))
   (check-equal? (hash-refs (hash 'b 20 'a 10 'c 40 'd 30) (list 'a 'b 'd 'e) "default") (list 10 20 30 "default"))
   (check-equal? (hash-refs (hash) (list 'a 'b 'd 'e) "") (list "" "" "" ""))
 
