@@ -29,7 +29,9 @@
     ""))
 
 (define (get-first s)
-  (first (string-split s ",")))
+  (and (non-empty-string? s) (first (string-split s ","))))
+
+(define take-first get-first)
 
 (define (get-folder-name id)
   (string-replace (string-downcase id) "_" "-"))
