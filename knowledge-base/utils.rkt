@@ -66,3 +66,8 @@
       (format "<a href =\"~a\" target=\"_blank\">~a</a>"
               (httpify (for/or ((url urls)) url))
               name))))
+
+(define (add-type val list-of-hashes #:attr (attr 'type))
+  (map
+    (λ (x) (hash-union (hash attr val) x))
+    list-of-hashes))

@@ -129,6 +129,7 @@
 
   (check-equal? (day "03.11.1965") "03")
   (check-equal? (month "03.11.1965") "11")
+  (check-equal? (month "05.201") "05")
   (check-equal? (year "03.11.1965") "1965")
   (check-equal? (year "11.1965") "1965")
   (check-equal? (year "1965") "1965")
@@ -139,6 +140,12 @@
   (check-true (first-month? 17 8))
   (check-false (first-month? 13 1))
   (check-false (first-month? 5 3))
+
+  (check-equal? (date->month "03.09.1971") (+ 9 (* 1970 12)))
+
+  (check-equal? (month->year 12) 1)
+  (check-equal? (month->year 13) 2)
+  (check-equal? (month->year 12005) 1001)
 
   (check-true (date? "28.08.1979"))
   (check-true (date? "28.08.xxxx"))
@@ -187,8 +194,8 @@
   (check-equal? (month-name 11 #:lang 'ru) "ноябрь")
   (check-equal? (month-name 11 #:lang 'en) "november")
   (check-equal? (month-name 11) "november")
-  (check-equal? (month-name 13) "?")
-  (check-equal? (month-name 0) "?")
+  (check-equal? (month-name 13) "january")
+  (check-equal? (month-name 0) "december")
 
   ; (check-= (get-time-length "4") 4)
   (check-equal? (days-count "4d") 4)

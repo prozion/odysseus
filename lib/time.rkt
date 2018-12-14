@@ -114,12 +114,21 @@
       (else #t))))
 
 (define-catch (date->days datestr)
+  (define (parse-datestr datestr)
+    (let ((date-lst (split datestr ".")))
+      (cond
+        ((= 3 (length date-lst))
+          (hash 'day (->number (first date-lst)) 'month (->number (second date-lst)) 'year (->number (third date-lst))))
+        ((= 2 (length date-lst))
+          (hash 'day #f 'month (->number (first date-lst)) 'year (->number (second date-lst))))
+        (else (error (format "wrong format for date->days: ~a" datestr))))))
   (let*
-      ((date-lst (split datestr "."))
-      ;(day (->number (first (split (first date-lst) "-")))) ; take first day in the days interval
-      (day (->number (first date-lst)))
-      (month (->number (second date-lst)))
-      (year (->number (third date-lst)))
+      (
+      (parsed (parse-datestr datestr))
+      (day ($ day parsed))
+      (month ($ month parsed))
+      (year ($ year parsed))
+      (day (if (not day) 1 day))
       (years (range 1 year))
       (leap-years (filter leap-year? years))
       (non-leap-years (clean leap-year? years)))
@@ -325,9 +334,9 @@
         (hash 'day day 'month month 'year year))
     ((pregexp #px"^([0-9x]{2})\\.([0-9x]{2})$" (list _ day month))
         (hash 'day day 'month month 'year #f))
-    ((pregexp #px"^([0-9x]{2})\\.([0-9x]{4})$" (list _ month year))
+    ((pregexp #px"^([0-9x]{2})\\.([0-9x]{1,4})$" (list _ month year))
         (hash 'day #f 'month month 'year year))
-    ((pregexp #px"^([0-9x]{4})$" (list _ year))
+    ((pregexp #px"^([0-9x]{1,4})$" (list _ year))
         (hash 'day #f 'month #f 'year year))
     (else
         (hash))))
@@ -361,6 +370,12 @@
 ; for finding year ticks on the timeline:
 (define (first-month? month shift)
   (= 1 (remainder (+ month shift) 12)))
+
+(define (date->month datestr)
+  (+ (->number (month datestr)) (* 12 (dec (->number (year datestr))))))
+
+(define (month->year amonth)
+  (inc (quotient (dec amonth) 12)))
 
 (define (get-zodiac-sign datestr)
   (when (not (date? datestr)) (error (format "wrong date format: ~a" datestr)))
@@ -411,14 +426,16 @@
         (format "~a ~a ~a" day month-name-gen year)))))
 
 ; get number of days from the string of following format: '\d+[dw]?'
+; 14.12.2018 added m option for by-month gantt diagrams
 (define-catch (days-count astr)
-  (let* ((regexped (get-matches #px"(\\d+)([dw]?)" (->string astr)))
+  (let* ((regexped (get-matches #px"(\\d+)([dwm]?)" (->string astr)))
         (regexped (car regexped))
         (num (->number (second regexped)))
         (postfix (third regexped)))
     (case postfix
       (("d" "") num)
-      (("w") (* 7 num)))))
+      (("w") (* 7 num))
+      (("m") (exact-floor (* (if (> num 6) 30.45 30.5) num))))))
 
 (define-catch (weekday datestr)
   (case (remainder (date->days datestr) 7)
@@ -443,7 +460,9 @@
   (equal? "02" mon))
 
 (define-catch (month-name month-number #:lang (lang 'en))
-  (let ((month-number (->number month-number)))
+  (let* ((month-number (->number month-number))
+        (month-number (if (> month-number 12) (remainder month-number 12) month-number))
+        (month-number (if (= month-number 0) 12 month-number)))
     (if (< 0 month-number 13)
       (nth
         (case lang

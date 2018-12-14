@@ -30,6 +30,7 @@
 
   (check-equal? ($ a (hash 'a 10 'b 20)) 10)
   (check-equal? ($ a 50) #f)
+  (check-equal? ($ a #f) #f)
   (check-equal? ($ a.ab (hash 'a (hash 'aa 200 'ab 300) 'b 20)) 300)
   (check-equal? ($ a.ab.cd.ef (hash 'a (hash 'aa 200 'ab 300) 'b 20)) #f)
   (check-false ($ c (hash 'a 10 'b 20)))

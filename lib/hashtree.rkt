@@ -229,6 +229,9 @@
       ((empty? res) #f)
       (else (car res)))))
 
+(define (@id id plained-hash-tree)
+  (get-item-by-id-from-the-list plained-hash-tree id))
+
 ; get element by id from the planarized hashtree
 (define ($$ id plained-hash-tree)
   (get-item-by-id-from-the-list plained-hash-tree id))
