@@ -10,7 +10,7 @@
 
 ; constants
 (define y0 50)
-(define track-h 30) ; height per one job bar
+(define track-h 27) ; height per one job bar
 (define colors (string-split "black #00B6F2 #0096B2 #CC46C7 #89B836 #F29A4C #B22E2A #4C57DB #74D95F" " "))
 ; (define colors (string-split "black #3EA6B2 #5656C2 #559139 #618AB8 #984EB8 #53AB4D" " "))
 
@@ -19,12 +19,19 @@
         (start ($ start element))
         (after ($ after element))
         (after-ids (if after (string-split after ",") empty))
-        (afters (map (λ (id) (get-item-by-id-from-the-list jobs id)) after-ids))
+        (afters (map (λ (id) (@id id jobs)) after-ids))
+        (with ($ with element))
+        (with-parts (and with (string-split with "+")))
+        (with-related-element (and with-parts (first with-parts)))
+        (with-related-element (@id with-related-element jobs))
+        (with-increment (and with-parts (> (length with-parts) 1) (second with-parts)))
         (start
           (cond
             ; ((and afters (not-empty? afters) start) start)
             ((and afters (not-empty? afters))
               (d+ (car (sort (map (λ (x) (get-end-time x jobs)) afters) d>)) 1)) ; as finishing day is inclusive, then increase calculated day by one
+            ((and with with-related-element)
+              (d+ (get-start-time with-related-element jobs) (if with-increment (days-count with-increment) 0)))
             (else
               start))))
     start))
@@ -43,11 +50,19 @@
         (after ($ after element))
         (after-ids (if after (string-split after ",") empty))
         (afters (map (λ (id) (get-item-by-id-from-the-list jobs id)) after-ids))
+        (with ($ with element))
+        (with-parts (and with (string-split with "+")))
+        (with-related-element (and with-parts (first with-parts)))
+        (with-related-element (@id with-related-element jobs))
+        (with-increment (and with-parts (> (length with-parts) 1) (second with-parts)))
         (start
           (cond
             ; ((and afters (not-empty? afters) start) start)
             ((and afters (not-empty? afters))
               (inc (car (sort (map (λ (x) (get-end-month x jobs)) afters) d>))))
+            ((and with with-related-element)
+              (+ (get-start-month with-related-element jobs) (if with-increment (months-count with-increment) 0)))
+            ((not start) (error (format "Undefined start date for '~a'" ($ id element))))
             (else
               (date->month start)))))
     start))
@@ -94,7 +109,7 @@
         (end-times (map (λ (x) (get-end-time x jobs)) jobs))
         (min-start-time (apply min (map date->days start-times)))
         (max-end-time (apply max (map date->days end-times)))
-        (days-length (- max-end-time min-start-time))
+        (days-length (+ 3 (- max-end-time min-start-time)))
         (step (/f svg-width days-length))
         (users-list empty)
         )
@@ -110,7 +125,7 @@
                   (is-leap-year? (leap-year? (->number (third (split full-adate ".")))))
                   (adate-day (->number (first (split adate "."))))
                   (adate-month (second (split adate ".")))
-                  (adate-month-abbr (nth months (->number adate-month)))
+                  (adate-month-abbr (string-titlecase (month-name adate-month #:lang 'ru)))
                   (first-day? (equal? 1 adate-day))
                   (adate (->string adate-day))
                   (canvas-height (- svg-height 50))
@@ -127,7 +142,7 @@
                 (when first-day?
                   (g
                     (line 'stroke "grey" 'stroke-width "1" 'opacity 0.8 'x1 (* step tick) 'y1 (- y1 25) 'x2 (* step tick) 'y2 (+ y1 canvas-height))
-                    (text (@ 'x (+ (* 0.5 step) (* step tick)) 'y 12 'class "labels") adate-month-abbr)))
+                    (text (@ 'x (+ (* 0.5 step) (* step tick)) 'y 12 'class "month-byday") adate-month-abbr)))
                 (when
                   (or (equal? tick-dates 'all)
                       (indexof? (map ->string '(1 3 5 7 10 12 15 17 20 23 25 27 29)) adate))
@@ -156,7 +171,7 @@
                   (min_order (apply min (map (λ (x) ($ _order x)) jobs)))
                   (first-after (get-first-after job jobs))
                   (y-first-after (if first-after (* track-h (- first-after min_order)) #f))
-                  (h (- track-h 5))
+                  (h (- track-h 3))
                   )
               (str
                 res "\n"
@@ -165,7 +180,7 @@
                   (when y-first-after
                     (str (line 'x1 x1 'y1 (+ y h) 'x2 x1 'y2 y-first-after 'class "convergence_line") "\n"))
                   ; bar
-                  (title ($ title job))
+                  (title (or ($ title job) ($ goal job)))
                   (rect 'x x1 'y y 'width width 'height h 'fill color 'opacity 0.6) "\n"
                   ; (text (@ 'x (+ x 6) 'y (+ y 18) 'class "job_title_shadow") (namefy ($ id job))) "\n"
                   (text (@ 'x (+ x1 5) 'y (+ y (/ track-h 2.0) 2) 'class "job_title") (namefy ($ id job))) "\n"
@@ -196,7 +211,6 @@
         (max-end-month (apply max (map ->number end-months)))
         (months-length (- max-end-month min-start-month -2))
         (step (/f svg-width months-length))
-        (_ (--- min-start-month max-end-month step))
         (users-list empty)
         ; geometry
         (header-height 50)

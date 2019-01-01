@@ -8,7 +8,7 @@
 (define (where-am-i)
   (let ((curdir (path->string (current-directory))))
     (cond
-      ((regexp-match #rx"^c:.*" curdir)
+      ((regexp-match #rx"^[cC]:.*" curdir)
         (let* ((user (getenv "userprofile"))
               (ms (get-matches "C:\\\\Users\\\\(.+)" user))
               (ms (and (not-empty? ms) (first ms)))

@@ -138,6 +138,12 @@
                     (cons "'" "\"")
                     (cons #px"(?<=\\S),(?=\\S)" ", "))))
 
+(define linefy (change-text
+                  (list
+                    (cons "\t" " ")
+                    (cons "\n" " ")
+                    (cons "\r" ""))))
+
 (define (httpify txt)
   (cond
     ((not txt) txt)
@@ -173,3 +179,9 @@
 
 (define-catch (take-one astr #:f (f (λ (x) (and (not-empty? x) (car x)))) #:delimeter (delimeter ","))
   (f (string-split (->string astr) delimeter)))
+
+(define-catch (string-ltrim astr num)
+  (cond
+    ((not (string? astr)) astr)
+    ((< (string-length astr) num) astr)
+    (else (substring astr 0 num))))

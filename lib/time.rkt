@@ -115,7 +115,7 @@
 
 (define-catch (date->days datestr)
   (define (parse-datestr datestr)
-    (let ((date-lst (split datestr ".")))
+    (let ((date-lst (string-split datestr ".")))
       (cond
         ((= 3 (length date-lst))
           (hash 'day (->number (first date-lst)) 'month (->number (second date-lst)) 'year (->number (third date-lst))))
@@ -210,15 +210,48 @@
           (b (if (list? b) (car b) b)))
       (comp-op (conversion a) (conversion b)))))
 
-(define d> (comparison-f > date->days))
-(define d>= (comparison-f >= date->days))
-(define d< (comparison-f < date->days))
-(define d<= (comparison-f <= date->days))
-(define d= (comparison-f = date->days))
+; this function must work faster than comparison-f for functions like d> and d<
+(define (compare-date comp-op)
+  (λ (date1 date2)
+    (define (compare-list-neq comp-op lst1 lst2)
+      (cond
+        ((and (empty? lst1) (empty? lst2)) #f)
+        ((empty? lst1) (comp-op 1 (car lst2)))
+        ((empty? lst2) (comp-op (car lst1) 1))
+        ((comp-op (car lst1) (car lst2)) #t)
+        ((= (car lst1) (car lst2)) (compare-list-neq comp-op (cdr lst1) (cdr lst2)))
+        (else #f)))
+    (define (compare-list-eq comp-op lst1 lst2)
+      (cond
+        ((and (empty? lst1) (empty? lst2)) #t)
+        ((empty? lst1) (comp-op 1 (car lst2)))
+        ((empty? lst2) (comp-op (car lst1) 1))
+        ((= (car lst1) (car lst2)) (compare-list-eq comp-op (cdr lst1) (cdr lst2)))
+        ((comp-op (car lst1) (car lst2)) #t)
+        (else #f)))
+    (let* (
+          (parsed1 (reverse (map ->number (string-split date1 "."))))
+          (parsed2 (reverse (map ->number (string-split date2 ".")))))
+      (cond
+        ((ormap (λ (x) (equal? x comp-op)) (list > <)) (compare-list-neq comp-op parsed1 parsed2))
+        ((ormap (λ (x) (equal? x comp-op)) (list = >= <=)) (compare-list-eq comp-op parsed1 parsed2))
+        (else (compare-list-neq comp-op parsed1 parsed2))))))
+
+; (define d> (comparison-f > date->days))
+; (define d>= (comparison-f >= date->days))
+; (define d< (comparison-f < date->days))
+; (define d<= (comparison-f <= date->days))
+; (define d= (comparison-f = date->days))
+
+(define d> (compare-date >))
+(define d>= (compare-date >=))
+(define d< (compare-date <))
+(define d<= (compare-date <=))
+(define d= (compare-date =))
 
 (define (d+ adate days)
   (days->date (+ (date->days adate) days) #:year #t))
-
+  
 (define-catch (date-between? date-interval-cons adate)
   (and
     (d>= adate (car date-interval-cons))
@@ -367,6 +400,11 @@
 (define (year datestr)
   (hash-ref (parse-date datestr) 'year #f))
 
+(define (next-month m)
+  (hash-ref
+    (hash "01" "02" "02" "03" "03" "04" "04" "05" "05" "06" "06" "07" "07" "08" "08" "09" "09" "10" "10" "11" "11" "12" "12" "01")
+    m))
+
 ; for finding year ticks on the timeline:
 (define (first-month? month shift)
   (= 1 (remainder (+ month shift) 12)))
@@ -436,6 +474,15 @@
       (("d" "") num)
       (("w") (* 7 num))
       (("m") (exact-floor (* (if (> num 6) 30.45 30.5) num))))))
+
+(define-catch (months-count astr)
+  (let* ((regexped (get-matches #px"(\\d+)([my]?)" (->string astr)))
+        (regexped (car regexped))
+        (num (->number (second regexped)))
+        (postfix (third regexped)))
+    (case postfix
+      (("m" "") num)
+      (("y") (* 12 num)))))
 
 (define-catch (weekday datestr)
   (case (remainder (date->days datestr) 7)

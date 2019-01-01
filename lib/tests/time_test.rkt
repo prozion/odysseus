@@ -185,6 +185,7 @@
   (check-true (date-between? (cons "01.10.1989" "10.11.1991") "10.06.1990"))
   (check-true (date-between? (cons "01.10.1989" "10.11.1991") "25.12.1990"))
   (check-false (date-between? (cons "01.10.1989" "10.11.1991") "17.07.1987"))
+  (check-false (date-between? (cons "01.01.1979" "19.01.1979") "01.04.1979"))
 
   (check-equal? (get-zodiac-sign "28.08.1979") 'Virgo)
   (check-equal? (get-zodiac-sign "21.01.1979") 'Aquarius)

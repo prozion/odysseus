@@ -18,7 +18,7 @@
                   (format "\"~a\"" (string-replace (->string val) "\"" ""))
                   "")))))
 
-(define (write-csv-file headers data filename #:delimeter (delimeter ","))
+(define-catch (write-csv-file headers data filename #:delimeter (delimeter ","))
   (let* ( (res-header (implode headers delimeter))
           (res-body (implode
                       (map
