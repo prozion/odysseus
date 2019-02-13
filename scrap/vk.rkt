@@ -120,7 +120,7 @@
         (hash 'error (@. res.error))
         (car (@. res.response)))))
 
-(define-catch (get-user-id user-name)
+(define (get-user-id user-name)
 (define plain-name? (re-matches? #px"^(id)(\\d+)$" user-name))
 (if plain-name?
     (let* ((n (get-matches #px"^(id)(\\d+)$" user-name))
@@ -131,7 +131,6 @@
                       (get-url (format "https://api.vk.com/method/users.get?user_ids=~a&v=5.52&access_token=~a" user-name AT))))
           (result-user (and ($ response res-user) (not-empty? ($ response res-user)) ($ id (first ($ response res-user))))))
       result-user)))
-
 
 (define-catch (get-friends-of-user user-id #:status (status #f) #:friends-limit (friends-limit #f))
   (when status (display status) (flush-output))
@@ -173,7 +172,8 @@
       null
       (hash-ref (car (hash-ref res 'response)) 'name))))
 
-(define-catch (get-group-id group-name)
+; I don't define-catch here as it's better to process exceptions in the code upstream, when requesting id in a row among hundreds of urls
+(define (get-group-id group-name)
   (define plain-name? (re-matches? #px"^(club|public)?(\\d+)$" group-name))
   (if plain-name?
       (let* ((n (get-matches #px"^(club|public)?(\\d+)$" group-name))

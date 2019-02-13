@@ -17,6 +17,8 @@
 (define (one-element? seq)
   (and (list? seq) (= (length seq) 1)))
 
+(define single-element-list? one-element?)
+
 (define (more-than-one-element? seq)
   (and (list? seq) (> (length seq) 1)))
 

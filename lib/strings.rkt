@@ -132,6 +132,12 @@
                     (cons "'" "\"")
                     (cons #px"(?<=\\S),(?=\\S)" ", "))))
 
+(define namefy-nbsp (change-text
+                  (list
+                    (cons "_" "&nbsp;")
+                    (cons "'" "\"")
+                    (cons #px"(?<=\\S),(?=\\S)" ", "))))
+
 (define textify (change-text
                   (list
                     (cons " - " " &ndash; ")

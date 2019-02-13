@@ -8,10 +8,10 @@
 (require "../report/csv.rkt")
 (require "../knowledge-base/tab-tree.rkt")
 
-(define timeline-cache "d:/denis/denis_core/denis_data/denis-shirshov.ru/cache/timeline.txt" )
+(define timeline-cache "d:/denis/cache/timeline.txt" )
 
 ; (write-data-to-file
-;     (parse-tab-tree "c:/denis/denis_core/denis_knowledge/personal/timeline.tree")
+;     (parse-tab-tree "c:/denis/denis_core/denis_personal/my_memories/timeline.tree")
 ;     timeline-cache)
 
 (define timeline ($3 timeline (read-serialized-data-from-file timeline-cache)))

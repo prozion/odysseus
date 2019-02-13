@@ -154,6 +154,13 @@
   (check-equal? (inie 0 1 0) #t)
   (check-equal? (inie 0 1 1) #f)
 
+  (check-equal? (ok-or-false (first empty)) #f)
+  (check-equal? (ok-or-false (second '(1))) #f)
+  (check-equal? (ok-or-false (second '(1 2))) 2)
+  (check-equal? (ok-or-false (third '(1 2 3 4 5))) 3)
+  (check-equal? (ok-or-false (/ 1 0)) #f)
+  (check-equal? (ok-or-false (sin 1 2)) #f)
+
   (check-equal? (symbol->list 'asdf) '(a s d f))
   (check-equal? (symbol->list 'a2) '(a |2|))
   (check-equal? (symbol->list 'a) '(a))

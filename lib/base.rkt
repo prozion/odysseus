@@ -123,7 +123,9 @@
   (syntax-case stx ()
     ((_ place code ...)
       #'(with-handlers
-          ((exn:fail? (λ (err) (printf "error in ~a: ~a~n" place (exn-message err)) (exit))))
+          ((exn:fail? (λ (err)
+                        (error (format "~a:~n~a" place (exn-message err))))))
+                        ; (exit))))
           code ...))))
 
 (define-syntax (try stx)
@@ -132,6 +134,14 @@
       #'(with-handlers
           ((exn:fail? (λ (err) result)))
           code))))
+
+; (or-or-false (second '(1))) -> #f
+(define-syntax (ok-or-false stx)
+  (syntax-case stx ()
+    ((_ body ...)
+      #'(with-handlers
+          ((exn:fail? (λ (err) #f)))
+          body ...))))
 
 (define-syntax (define-catch stx)
   (syntax-case stx ()

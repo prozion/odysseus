@@ -14,12 +14,27 @@
 (define colors (string-split "black #00B6F2 #0096B2 #CC46C7 #89B836 #F29A4C #B22E2A #4C57DB #74D95F" " "))
 ; (define colors (string-split "black #3EA6B2 #5656C2 #559139 #618AB8 #984EB8 #53AB4D" " "))
 
-(define (get-start-time element jobs)
+(define (get-afters element jobs)
+  (if-not ($ after element)
+    #f
+    (let* ((after ($ after element))
+          (after-ids (string-split after ","))
+          (afters (for/fold
+                    ((res empty))
+                    ((a after-ids))
+                    (let* ((after-parts (string-split a "+"))
+                          (after-id (first after-parts))
+                          (increment (if (> (length after-parts) 1) (second after-parts) 0))
+                          (after (@id after-id jobs)))
+                      (if after
+                        (pushr res (list after increment))
+                        res)))))
+      afters)))
+
+(define-catch (get-start-time element jobs)
   (let* (
         (start ($ start element))
-        (after ($ after element))
-        (after-ids (if after (string-split after ",") empty))
-        (afters (map (λ (id) (@id id jobs)) after-ids))
+        (afters (get-afters element jobs))
         (with ($ with element))
         (with-parts (and with (string-split with "+")))
         (with-related-element (and with-parts (first with-parts)))
@@ -27,13 +42,21 @@
         (with-increment (and with-parts (> (length with-parts) 1) (second with-parts)))
         (start
           (cond
-            ; ((and afters (not-empty? afters) start) start)
             ((and afters (not-empty? afters))
-              (d+ (car (sort (map (λ (x) (get-end-time x jobs)) afters) d>)) 1)) ; as finishing day is inclusive, then increase calculated day by one
+              (d+
+                (car
+                  (sort
+                    (map (λ (x)
+                            (d+ (get-end-time (first x) jobs) (days-count (second x))))
+                          afters)
+                    d>))
+                1)) ; as finishing day is inclusive, then increase calculated day by one
             ((and with with-related-element)
-              (d+ (get-start-time with-related-element jobs) (if with-increment (days-count with-increment) 0)))
-            (else
-              start))))
+              (d+
+                (get-start-time with-related-element jobs)
+                (if with-increment (days-count with-increment) 0)))
+            (start start)
+            (else (exit) (error (format "Cannot define start time for ~a" ($ id element)))))))
     start))
 
 (define (get-end-time element jobs)
@@ -47,9 +70,7 @@
 (define-catch (get-start-month element jobs)
   (let* (
         (start ($ start element))
-        (after ($ after element))
-        (after-ids (if after (string-split after ",") empty))
-        (afters (map (λ (id) (get-item-by-id-from-the-list jobs id)) after-ids))
+        (afters (get-afters element jobs))
         (with ($ with element))
         (with-parts (and with (string-split with "+")))
         (with-related-element (and with-parts (first with-parts)))
@@ -57,9 +78,16 @@
         (with-increment (and with-parts (> (length with-parts) 1) (second with-parts)))
         (start
           (cond
-            ; ((and afters (not-empty? afters) start) start)
             ((and afters (not-empty? afters))
-              (inc (car (sort (map (λ (x) (get-end-month x jobs)) afters) d>))))
+              (inc
+                (car
+                  (sort
+                    (map (λ (x)
+                            (+
+                              (get-end-month (first x) jobs)
+                              (months-count (second x))))
+                          afters)
+                  d>))))
             ((and with with-related-element)
               (+ (get-start-month with-related-element jobs) (if with-increment (months-count with-increment) 0)))
             ((not start) (error (format "Undefined start date for '~a'" ($ id element))))
@@ -69,33 +97,21 @@
 
 (define-catch (get-end-month element jobs)
   (let* (
-        (start (get-start-time element jobs))
+        (start (get-start-month element jobs))
         (len ($ length element))
-        (len (cond
-                ((false? len) 0)
-                ((re-matches? #rx"\\d+?m" len)
-                  (let* (
-                        (regexped (get-matches #px"(\\d+?)m" len))
-                        (regexped (car regexped))
-                        (num (->number (second regexped))))
-                    num))
-                (else (quotient (days-count len) 30))))
+        (len (if (false? len)
+                  0
+                  (months-count len)))
         (end (and ($ end element) (date->month ($ end element))))
-        (end (or end (+ (date->month start) len -1))))
+        (end (or end (+ start len -1))))
     end))
 
-(define-catch (get-first-after element jobs)
+(define (get-first-after element jobs)
   (let* (
-        (after-ids ($ after element))
-        (after-ids (if after-ids
-                      (string-split ($ after element) ",")
-                      #f))
-        (afters (if after-ids
-                  (map (λ (id) (get-item-by-id-from-the-list jobs id)) after-ids)
-                  #f))
+        (afters (get-afters element jobs))
         (result
-          (if afters
-              (apply min (map (λ (x) ($ _order x)) afters))
+          (if (and afters (not-empty? (cleanmap afters)))
+              (apply min (map (λ (x) ($ _order (first x))) afters))
               #f)))
     result))
 

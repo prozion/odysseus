@@ -19,6 +19,19 @@
   (λ (x)
     (call-r fs x)))
 
+; ((~> sin avg) 10 2 45 6) -> -0.04...
+(define (~> . fs)
+  (λ args
+    (cond
+      ((empty? args) (error "no args for ~>"))
+      ((and (empty? fs) (equal? (length args) 1)) (first args))
+      ((empty? fs) (apply list args))
+      (else (let* ((new-args (apply (apply ~> (cdr fs)) args))
+                  (new-args (if (list? new-args) new-args (list new-args))))
+              (apply
+                (car fs)
+                new-args))))))
+
 ; (->> floor sqrt random 10)
 (define (->> . fs)
   (cond

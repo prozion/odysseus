@@ -142,6 +142,7 @@
   (check-false (first-month? 5 3))
 
   (check-equal? (date->month "03.09.1971") (+ 9 (* 1970 12)))
+  (check-equal? (date->month "09.1971") (+ 9 (* 1970 12)))
 
   (check-equal? (month->year 12) 1)
   (check-equal? (month->year 13) 2)
@@ -202,6 +203,11 @@
   (check-equal? (days-count "4d") 4)
   (check-equal? (days-count "4w") 28)
   (check-equal? (days-count "1w") 7)
+
+  (check-equal? (months-count "3m") 3)
+  (check-equal? (months-count "3y") 36)
+  (check-equal? (months-count "1m") 1)
+  (check-equal? (months-count "14m") 14)
 
   (check-equal? (weekday "15.06.2018") 'fri)
   (check-equal? (weekday "24.06.1990") 'sun)

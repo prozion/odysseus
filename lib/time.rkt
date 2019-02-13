@@ -63,6 +63,21 @@
       ((> minutes 0) (format "~a:~a" minutes-print seconds-print))
       (else (format "~a" seconds-print)))))
 
+; gives a string with 'timestamp' for logging and other purposes
+(define-catch (timestamp (seconds (current-seconds)))
+  (let* ((adate (seconds->date seconds)))
+        ; (adate (struct->list adate)) ; (require racket/struct)
+        ; (_ (when (< (length adate) 9) (error (format "Wrong argument value in (timestamp seconds): ~a" seconds)))))
+    ; (match-let* (((list _ seconds minutes hours day month year ...) reslst))
+      (format "~a:~a:~a ~a.~a.~a"
+        (date-hour adate)
+        (format-number "dd" (date-minute adate) #:filler "0")
+        (format-number "dd" (date-second adate) #:filler "0")
+        (format-number "dd" (date-day adate) #:filler "0")
+        (format-number "dd" (date-month adate) #:filler "0")
+        (date-year adate)
+        )))
+
 (define (time-diff t1 t2)
   (seconds->time
     (abs
@@ -251,7 +266,7 @@
 
 (define (d+ adate days)
   (days->date (+ (date->days adate) days) #:year #t))
-  
+
 (define-catch (date-between? date-interval-cons adate)
   (and
     (d>= adate (car date-interval-cons))
@@ -476,13 +491,16 @@
       (("m") (exact-floor (* (if (> num 6) 30.45 30.5) num))))))
 
 (define-catch (months-count astr)
-  (let* ((regexped (get-matches #px"(\\d+)([my]?)" (->string astr)))
+  (when (not (re-matches? #px"\\d+[myd]?" (->string astr))) (error (format "wrong month string format: ~a" astr)))
+  (let* ((regexped (get-matches #px"(\\d+)([myd]?)" (->string astr)))
         (regexped (car regexped))
         (num (->number (second regexped)))
         (postfix (third regexped)))
     (case postfix
-      (("m" "") num)
-      (("y") (* 12 num)))))
+      (("m") num)
+      (("y") (* 12 num))
+      (("d" "") (quotient num 30))
+      (else (error (format "wrong month string format: ~a" astr))))))
 
 (define-catch (weekday datestr)
   (case (remainder (date->days datestr) 7)

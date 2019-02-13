@@ -78,7 +78,11 @@
                         (result-core (apply
                                         snippet-lambda
                                         (map
-                                          (λ (x) (hash-ref* data x ""))
+                                          (λ (x) (cond
+                                                  ((re-matches? "\"\"" x) #f)
+                                                  ((re-matches? "\".*?\"" x) (triml (trimr x)))
+                                                  ((re-matches? "[0-9]+" x) (->number x))
+                                                  (else (hash-ref* data x #f))))
                                           snippet-varnames)))
                         (result (if (and result-core (non-empty-string? result-core))
                                   result-core
@@ -119,7 +123,7 @@
         (result (apply function-part parameter-values)))
     result))
 
-(define-catch (process-html-template filepath #:tabtree-root (tabtree-root "") #:namespace (namespace #f))
+(define (process-html-template filepath #:tabtree-root (tabtree-root "") #:namespace (namespace #f))
   (define-catch (get-cycle-object lst)
     (let* (
           (template-html (first lst))
@@ -148,7 +152,7 @@
           (result (hash 'matched-template template-html 'collection collection 'data cycled-data 'html html-part))
           )
       result))
-  (define-catch (execute-code-snippet code-snippet)
+  (define (execute-code-snippet code-snippet)
     (eval (read (open-input-string (str "(" code-snippet ")"))) namespace))
   (let* ((filepath (if (path? filepath) filepath (string->path filepath)))
         (html-res (read-file filepath))

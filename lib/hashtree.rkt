@@ -229,8 +229,10 @@
       ((empty? res) #f)
       (else (car res)))))
 
-(define (@id id plained-hash-tree)
-  (get-item-by-id-from-the-list plained-hash-tree id))
+(define (@id id plained-hash-tree #:error (err #f))
+  (let ((res (get-item-by-id-from-the-list plained-hash-tree id)))
+    (when (and err (not res)) (error err))
+    res))
 
 ; get element by id from the planarized hashtree
 (define ($$ id plained-hash-tree)

@@ -21,4 +21,4 @@
           (cond
             ((equal? hostname "xpolaris") 'digitalocean)
             (else 'other-linux))))
-      (else #f))))
+      (else #f))))    
