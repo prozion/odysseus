@@ -1,6 +1,6 @@
 #lang racket
 
-(require "../../lib/load/all.rkt")
+(require "../../lib/_all.rkt")
 (require "../../graphics/svg.rkt")
 (require "../../graphics/color.rkt")
 (require "../../knowledge-base/tab-tree.rkt")

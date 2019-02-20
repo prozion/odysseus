@@ -1,7 +1,7 @@
 #lang racket
 
 (require net/url)
-(require "../lib/load/all.rkt")
+(require "../lib/_all.rkt")
 (require "../scrap/csv.rkt")
 ;(require "../lib/seqs.rkt" "../lib/http.rkt" "../lib/hash.rkt")
 (require json)

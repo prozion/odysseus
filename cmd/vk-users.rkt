@@ -2,7 +2,7 @@
 
 (require racket/cmdline)
 
-(require "../lib/load/all.rkt")
+(require "../lib/_all.rkt")
 (require "../scrap/vk/vk.rkt")
 (require "../scrap/vk/users.rkt")
 (require "../graphics/console.rkt")

@@ -1,6 +1,6 @@
 #lang racket
 
-(require "../../lib/load/all.rkt")
+(require "../../lib/_all.rkt")
 (require "../tab-tree.rkt")
 
 (provide (all-defined-out))

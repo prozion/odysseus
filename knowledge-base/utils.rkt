@@ -2,7 +2,7 @@
 
 ;; in this file we represent functions that modify elements of the tree
 
-(require "../lib/load/all.rkt")
+(require "../lib/_all.rkt")
 
 (provide (all-defined-out))
 

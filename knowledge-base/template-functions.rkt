@@ -2,7 +2,7 @@
 
 ;; in this file we represent functions that are used in the html template files .t's
 
-(require "../lib/load/all.rkt")
+(require "../lib/_all.rkt")
 (require compatibility/defmacro)
 
 (provide (all-defined-out))

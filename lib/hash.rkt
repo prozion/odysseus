@@ -195,6 +195,12 @@
     ((empty? keys) h)
     (else (hash-delete-all (hash-delete h (car keys)) (cdr keys)))))
 
+; (h- h 'name 'state)
+(define (h- h . keys)
+  (cond
+    ((empty? keys) h)
+    (else (apply h- (hash-delete h (car keys)) (cdr keys)))))
+
 (define (hash-substitute h1 arg)
   ;(printf "arg: ~a~n(car arg): ~a~nresulted hash: ~a~n" arg (car arg) (hash-delete h1 (car arg)))
   (cond

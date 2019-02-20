@@ -4,7 +4,7 @@
 (require racket/file)
 
 (require (file "c:/denis/denis_core/denis_personal/goals.rkt"))
-(require "../lib/load/all.rkt")
+(require "../lib/_all.rkt")
 (require "../graphics/console.rkt")
 
 (define level "0")

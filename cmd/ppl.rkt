@@ -3,7 +3,7 @@
 (require racket/cmdline)
 
 (require (file "c:/denis/denis_core/denis_personal/my_people/all.rkt"))
-(require "../lib/load/all.rkt")
+(require "../lib/_all.rkt")
 (require "people.rkt")
 (require "../graphics/console.rkt")
 (require "../report/csv.rkt")

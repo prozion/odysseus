@@ -3,14 +3,13 @@
 (module+ test
 
   (require rackunit)
-  (require "../checks.rkt")
-  (require "../hash.rkt")
-  (require "../alist.rkt")
-  (require "../type.rkt")
-  (require "../regexp.rkt")
+  (require "hash.rkt")
+  (require "checks.rkt")
+  (require "alist.rkt")
+  (require "type.rkt")
+  (require "regexp.rkt")
 
   (define h (hash 'a (hash 'aa 10 'ab 20) 'b (hash 'ba (hash 'baa 300 'bab 30))))
-
 
   (check-true (check-hash (hash) (hash)))
   (check-true (check-hash (@ 'a 1 'b 2) (hash 'a 1 'b 2)))

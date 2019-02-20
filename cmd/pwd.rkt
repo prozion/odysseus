@@ -3,7 +3,7 @@
 (require racket/cmdline)
 
 (require (file "c:/denis/denis_core/settings/web.rkt"))
-(require "../lib/load/all.rkt")
+(require "../lib/_all.rkt")
 (require "../graphics/console.rkt")
 
 (define query "")

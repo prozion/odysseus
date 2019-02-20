@@ -2,7 +2,7 @@
 
 (require racket/cmdline)
 
-(require "../lib/load/all.rkt")
+(require "../lib/_all.rkt")
 (require "../graphics/console.rkt")
 (require "people.rkt")
 (require "../knowledge-base/tab-tree.rkt")

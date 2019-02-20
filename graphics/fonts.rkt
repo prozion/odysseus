@@ -1,6 +1,6 @@
 #lang racket
 
-(require "../lib/load/all.rkt")
+(require "../lib/_all.rkt")
 
 (provide text-length text-height h-centrify v-centrify)
 

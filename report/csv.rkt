@@ -1,7 +1,7 @@
 #lang racket
 
 (require compatibility/defmacro)
-(require "../lib/load/all.rkt")
+(require "../lib/_all.rkt")
 
 (provide (all-defined-out))
 
@@ -56,3 +56,12 @@
                       "\n"))
           (res (str res-header "\n" res-body)))
     (write-file filename res)))
+
+(module+ test
+
+  (require rackunit)
+
+  (check-equal? (hash->csv-line (hash 'a 10 'b 20) '(b a))
+                "20,10")
+
+)

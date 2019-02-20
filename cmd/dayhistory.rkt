@@ -3,7 +3,7 @@
 (require racket/cmdline)
 
 ; (require (file "c:/denis/denis_core/denis_personal/my_memories/timeline.rkt"))
-(require "../lib/load/all.rkt")
+(require "../lib/_all.rkt")
 (require "../graphics/console.rkt")
 (require "../report/csv.rkt")
 (require "../knowledge-base/tab-tree.rkt")

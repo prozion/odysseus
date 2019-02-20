@@ -1,6 +1,6 @@
 #lang racket
 
-(require "../lib/load/all.rkt")
+(require "../lib/_all.rkt")
 (require (for-syntax "../lib/seqs.rkt"))
 (require compatibility/defmacro)
 (require "../graphics/console.rkt")

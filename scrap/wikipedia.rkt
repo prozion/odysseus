@@ -1,7 +1,7 @@
 #lang racket
 
 (require net/url)
-(require "../lib/load/all.rkt")
+(require "../lib/_all.rkt")
 (require json)
 
 (provide (all-defined-out))
