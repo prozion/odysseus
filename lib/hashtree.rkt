@@ -253,6 +253,14 @@
           (else
             res))))))
 
+(define (hash-tree-remove-by-id h id)
+  (hash-delete-f h (λ (key) (equal? ($ id key) id))))
+
+(define (get-root-item hashtree)
+  (let ((keys (hash-keys hashtree)))
+    (and (not-empty? keys) (car keys))))
+
+
 ; handy macros ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ; get key hash or value
@@ -402,6 +410,46 @@
             (λ (x)
               (get-$3 (pushr (list ,@path) ($ id x)) ,tabtree))
               categories)))))
+
+;;; manipulations with parts of the tree
+(define-catch (hash-tree-remove hash-tree id-path)
+  (cond
+    ((empty? id-path) hash-tree)
+    ((empty? (cdr id-path)) (hash-tree-remove-by-id hash-tree (car id-path)))
+    (else (hash-union
+            (hash-tree-remove-by-id hash-tree (car id-path))
+            (hash
+              (get-$2 (list (car id-path)) hash-tree)
+              (hash-tree-remove (get-$4 (list (car id-path)) hash-tree) (cdr id-path)))))))
+
+(define-catch (hash-tree-insert hash-tree id-path hash-tree-part)
+  (cond
+    ((empty? id-path) hash-tree)
+    ((empty? (cdr id-path))
+      (let* ((last-key (car id-path))
+            (final-hash-subtree (get-$4 (list last-key) hash-tree))
+            (final-hash-key (get-$2 (list last-key) hash-tree))
+            (inserted-key (car (hash-keys hash-tree-part)))
+            (inserted-val (hash-ref hash-tree-part inserted-key)))
+        (if final-hash-subtree
+            (hash-union
+              (hash-delete hash-tree final-hash-key)
+              (hash final-hash-key (hash-union final-hash-subtree hash-tree-part)))
+            (hash-union
+              (hash 'id last-key)
+              hash-tree-part))))
+    (else
+      (let* ((next-key (car id-path))
+            (next-hash-key (get-$2 (list next-key) hash-tree))
+            (next-hash-subtree (get-$4 (list next-key) hash-tree)))
+        (if next-hash-subtree
+          (hash-union
+            (hash-delete hash-tree next-hash-key)
+            (hash next-hash-key (hash-tree-insert next-hash-subtree (cdr id-path) hash-tree-part)))
+          (hash-union
+            hash-tree
+            (hash next-hash-key hash-tree-part)))))))
+
 
 (module+ test
 
@@ -566,4 +614,77 @@
 
   (check-hash-equal? (@id 2 planarized-hashtree) (hash 'id 2 'value 5 '_parent 1))
   (check-equal? (@id 10 planarized-hashtree) #f)
+
+  (check-hash-equal?
+                (hash-tree-remove hash-tree-1 (list "category 1" "b"))
+                (hash
+                  (hash 'id "category 1")
+                    (hash
+                      (hash 'id "a" 'value "1")
+                        (hash)
+                      (hash 'id "c" 'value "3")
+                        (hash))
+                  (hash 'id "category 2" 'status "inactive")
+                    (hash
+                      (hash 'id "d" 'value "-1")
+                        (hash) )
+                  ))
+
+  (check-hash-equal?
+                (hash-tree-insert
+                  hash-tree-1
+                  (list "category 1")
+                  (hash
+                    (hash 'id "bb" 'value "10")
+                      (hash
+                        (hash 'id "bb1" 'value "100")
+                        (hash))))
+                (hash
+                  (hash 'id "category 1")
+                    (hash
+                      (hash 'id "a" 'value "1")
+                        (hash)
+                      (hash 'id "bb" 'value "10")
+                        (hash
+                          (hash 'id "bb1" 'value "100")
+                          (hash))
+                      (hash 'id "b" 'value "2")
+                        (hash
+                          (hash 'id "b1" 'value "10")
+                          (hash))
+                      (hash 'id "c" 'value "3")
+                        (hash))
+                  (hash 'id "category 2" 'status "inactive")
+                    (hash
+                      (hash 'id "d" 'value "-1")
+                        (hash))))
+
+  (check-hash-equal?
+                (hash-tree-insert
+                  hash-tree-1
+                  (list "category 2" "d")
+                  (hash
+                    (hash 'id "e" 'value "14")
+                      (hash
+                        (hash 'id "ee" 'value "325")
+                          (hash))))
+                (hash
+                  (hash 'id "category 1")
+                    (hash
+                      (hash 'id "a" 'value "1")
+                        (hash)
+                      (hash 'id "b" 'value "2")
+                        (hash
+                          (hash 'id "b1" 'value "10")
+                            (hash))
+                      (hash 'id "c" 'value "3")
+                        (hash))
+                  (hash 'id "category 2" 'status "inactive")
+                    (hash
+                      (hash 'id "d" 'value "-1")
+                        (hash
+                          (hash 'id "e" 'value "14")
+                            (hash
+                              (hash 'id "ee" 'value "325")
+                                (hash))))))
 )

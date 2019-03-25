@@ -185,6 +185,9 @@
     ((z-a) (reverse (sort-by-string list-of-something 'a-z)))
     (else (error "unknown order parameter"))))
 
+(define (a-z a b) (string<? (string-downcase (->string a)) (string-downcase (->string b))))
+(define (z-a a b) (string>? (string-downcase (->string a)) (string-downcase (->string b))))
+
 (define-catch (take-one astr #:f (f (λ (x) (and (not-empty? x) (car x)))) #:delimeter (delimeter ","))
   (f (string-split (->string astr) delimeter)))
 
@@ -251,6 +254,10 @@
   (check-equal? (sort-by-string '("a" b "cd" "c" "aa" 1 2)) '(1 2 "a" "aa" b "c" "cd"))
   (check-equal? (sort-by-string '("a" b "cd" "c" "aa" 1 2) 'a-z) '(1 2 "a" "aa" b "c" "cd"))
   (check-equal? (sort-by-string '("a" b "cd" "c" "aa" 1 2) 'z-a) (reverse '(1 2 "a" "aa" b "c" "cd")))
+
+  (check-equal? (sort '("a" b "cd" "c" "aa" 1 2) a-z) '(1 2 "a" "aa" b "c" "cd"))
+  (check-equal? (sort '("a" b "cd" "c" "aa" 1 2) a-z) '(1 2 "a" "aa" b "c" "cd"))
+  (check-equal? (sort '("a" b "cd" "c" "aa" 1 2) z-a) (reverse '(1 2 "a" "aa" b "c" "cd")))
 
   (check-equal? (take-one "foo,bar") "foo")
   (check-equal? (take-one "foo,bar" #:f second) "bar")

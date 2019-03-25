@@ -33,6 +33,11 @@
 (define (hash-empty? h)
   (empty? (hash-keys h)))
 
+(define (hashes? alst)
+  (andmap hash? alst))
+
+(define (not-hashes? alst) (not (hashes? alst)))
+
 (define (hasher-by-names . body)
   (λ
     args
@@ -189,6 +194,15 @@
   (cond
     ((immutable? h) (hash-remove h k))
     (else (hash-delete (make-immutable-hash (hash->list h)) k))))
+
+(define (hash-delete-f h f)
+  (cond
+    ((immutable? h) (let ((ks (filter f (hash-keys h))))
+                      (for/fold
+                        ((res-h h))
+                        ((k ks))
+                        (hash-remove res-h k))))
+    (else (hash-delete-f (make-immutable-hash (hash->list h)) f))))
 
 (define (hash-delete-all h keys)
   (cond

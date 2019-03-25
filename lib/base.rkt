@@ -166,6 +166,8 @@
 ;    ((_ frmt syms ...) #'(string->symbol (format frmt syms ...)))
 ;    (else #'null)))
 
+(define not-empty-string? non-empty-string?)
+
 (define (symbol->list sym)
   (map
     string->symbol

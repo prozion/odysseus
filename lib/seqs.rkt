@@ -150,6 +150,9 @@
 (define (indexof? seq el (compare-f equal?))
   (if (= 0 (indexof seq el compare-f)) #f #t))
 
+(define (indexof*? seq el)
+  (indexof? seq el (λ (a b) (equal? (tostring a)  (tostring b)))))
+
 (define (indexof-all seq el)
   (define (indexof-all-iter seq el acclist el-passed)
     (let ((index (indexof seq el)))
@@ -471,10 +474,11 @@
   (remove-duplicates (difference seq1 seq2)))
 
 (define (intersect . seqs)
-  (cond
-    ((null? (cdr seqs)) (car seqs))
-    (else
-      (reverse (set-intersect (car seqs) (apply intersect (cdr seqs)))))))
+  (let ((seqs (filter-not false? seqs)))
+    (cond
+      ((null? (cdr seqs)) (car seqs))
+      (else
+        (reverse (set-intersect (car seqs) (apply intersect (cdr seqs))))))))
 
 (define (intersect? . seqs)
   (not-empty? (apply intersect seqs)))
@@ -613,6 +617,23 @@
             ((s (car seqs)))
             (pushr-unique res s)))
         (cdr seqs)))))
+
+(define (by-index lst . args)
+  (define (get-index arg)
+    (match arg
+      ((list initial-value f) (list initial-value f))
+      (initial-value (list initial-value inc))
+      (else (list 0 inc))))
+  (let* ((indexes (map get-index args))
+        (initial-values (map first indexes))
+        (incrementors (map second indexes))
+        )
+    (for/fold
+      ((res `((,(car lst) ,@initial-values))))
+      ((element (cdr lst)))
+      (let ((last-indexes-values (rest (last res))))
+        (pushr res
+          `(,element ,@(map (λ (x y) (x y)) incrementors last-indexes-values)))))))
 
 (module+ test
 
@@ -1001,4 +1022,8 @@
   (check-equal? (append-unique '(1 2 3) '(4 5 1 6)) '(1 2 3 4 5 6))
   (check-equal? (append-unique '(1 2 1 3) '(4 5 1 6 2 2 2)) '(1 2 1 3 4 5 6))
   (check-equal? (append-unique '(1 2 1 3) '(4 5 1 6 2) '(2 2) '(7 3 8 8 (9) 10)) '(1 2 1 3 4 5 6 7 8 (9) 10))
+
+  (check-equal? (by-index '(0 1 2 3) 0) '((0 0) (1 1) (2 2) (3 3)))
+  (check-equal? (by-index '(0 1 2 3) (list 0 inc)) '((0 0) (1 1) (2 2) (3 3)))
+  (check-equal? (by-index '(0 1 2 3) (list -10 (λ (i) (* i -2)))) '((0 -10) (1 20) (2 -40) (3 80)))
 )

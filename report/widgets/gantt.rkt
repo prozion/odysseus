@@ -174,7 +174,10 @@
             (let* (
                   (track ($ track job))
                   (track (and track (car (split track ","))))
-                  (color ($ color (@id track tracks)))
+                  (color (or
+                            ($ color (@id track tracks))
+                            ($ color (@id "Unknown" tracks))))
+                  (_ (--- color))
                   (color (if (equal? ($ status job) "done") "#bbb" color)) ; (color/shadow (color/desaturate color -55) 15)
                   (start-date (get-start-time job jobs))
                   (end-date (get-end-time job jobs))

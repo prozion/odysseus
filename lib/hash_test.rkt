@@ -3,6 +3,7 @@
 (module+ test
 
   (require rackunit)
+  (require "seqs.rkt")
   (require "hash.rkt")
   (require "checks.rkt")
   (require "alist.rkt")
@@ -229,6 +230,19 @@
 
   (check-hash-equal?
     (hash-delete (hash (hash 'aa 10 'ab 20) 10 'b 20 'c 40) (hash 'aa 10 'ab 20))
+    (hash 'b 20 'c 40))
+
+; hash-delete-f
+  (check-hash-equal?
+    (hash-delete-f (hash 'a 10 'b 20 'c 40) (λ (k) (equal? k 'c)))
+    (hash 'a 10 'b 20))
+
+  (check-hash-equal?
+    (hash-delete-f (hash 'a 10 'b 20 'c 40) (λ (k) (equal? k 'd)))
+    (hash 'a 10 'b 20 'c 40))
+
+  (check-hash-equal?
+    (hash-delete-f (hash 'aa 1 'ab 2 'b 20 'c 40) (λ (k) (indexof? '(aa ab) k)))
     (hash 'b 20 'c 40))
 
 ; hash-delete-all

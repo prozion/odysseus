@@ -117,7 +117,7 @@
     ((hash? x) (hash-pretty-string x))
     ((list? x) (apply string-append (map ->string x)))
     ((string? x) x)
-    (else "")))
+    (else (tostring x))))
 
 (define (->int x)
   (int (->number x)))
