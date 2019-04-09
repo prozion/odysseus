@@ -54,13 +54,6 @@
 		; 								(set! query q)]
   #:args
     (query)
-    ; (cond
-			; ((not (nil? count))
-			; 	(newline)
-      ;   (set-text-color 'green)
-      ;   (displayln
-      ;     (format "Total records: ~a" (hash-count websites)))
-      ;   (set-text-color 'default))
 			(cond
 				((not (nil? count))
 					(newline)
