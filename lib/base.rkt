@@ -32,7 +32,7 @@
 (define *f (make-rounded-op * exact-floor))
 (define *c (make-rounded-op * exact-ceiling))
 
-(define (true? x) (if (equal? #f x) #f #t))
+(define (true? x) (and x #t))
 
 (define (!= a b)
   (not (= a b)))
@@ -263,6 +263,8 @@
   (check-equal? (*c (tan 1) (tan -2)) 4)
 
   (check-pred true? #t)
+  (check-pred true? (+ 2 2))
+  (check-pred true? (hash 'a 10))
   (check-pred true? 0)
   (check-pred true? null)
   (check-equal? (true? #f) #f)

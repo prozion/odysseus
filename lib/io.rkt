@@ -28,6 +28,9 @@
 (define (write-file filename v)
   (display-to-file v filename #:exists 'replace))
 
+(define (append-file filename v)
+  (display-lines-to-file v filename #:exists 'append))
+
 (define (read-file filename)
   (file->string filename #:mode 'text))
 
@@ -76,3 +79,28 @@
 ; read serialized data and converts it to a normal value
 (define (read-serialized-data-from-file filepath)
   (deserialize (file->value filepath)))
+
+;;; shorthands
+(define-syntax (--- stx)
+  (syntax-case stx ()
+    ((_ parameters ...)
+      (with-syntax ((frmt #'(for/fold
+                              ((s "~n"))
+                              ((i (reverse (list parameters ...))))
+                              (string-append "~a " s))))
+        #'(if (debug-output)
+            (append-file (debug-output) (format frmt parameters ...))
+            (printf frmt parameters ...)
+            )))))
+
+(define (print-list lst)
+	(for ((i lst))
+    (if (debug-output)
+      (append-file (debug-output) i)
+	    (println i))))
+
+(define (---- obj)
+  (cond
+    ((list? obj) (print-list obj))
+    ((hash? obj) (print-list (for/list (((k v) obj)) (cons k v))))
+    (else obj)))
