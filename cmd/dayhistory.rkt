@@ -6,7 +6,7 @@
 (require "../lib/_all.rkt")
 (require "../graphics/console.rkt")
 (require "../report/csv.rkt")
-(require "../knowledge-base/tab-tree.rkt")
+(require "../tabtree-format/tab-tree.rkt")
 
 (define timeline-cache "d:/denis/cache/timeline.txt" )
 

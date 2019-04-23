@@ -145,9 +145,9 @@
   (check-equal?
     (svg)
     (rtrim ; remove \r at the end of the string
-    #<<svg
+    #<<SVG
 <svg></svg>
-svg
+SVG
 ))
 
   (check-equal?

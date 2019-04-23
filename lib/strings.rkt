@@ -197,6 +197,9 @@
     ((< (string-length astr) num) astr)
     (else (substring astr 0 num))))
 
+(define (starts-with? astr one-char-string)
+  (equal? (nth astr 1) one-char-string))
+
 (module+ test
 
   (require rackunit)
@@ -264,4 +267,7 @@
   (check-equal? (take-one "foo;bar") "foo;bar")
   (check-equal? (take-one "foo;bar" #:delimeter ";") "foo")
   (check-equal? (take-one "foo;bar;baz" #:delimeter ";" #:f (λ (x) (string-append (second x) (third x)))) "barbaz")
+
+  (check-true (starts-with? "Hector" "H"))
+  (check-false (starts-with? "Hector" "h"))
 )

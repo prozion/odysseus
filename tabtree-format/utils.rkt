@@ -104,3 +104,9 @@
   (if (equal? (->string id) (->string curpage-id))
     (format "class=\"~a\"" class)
     ""))
+
+(define (tabtree-true? v)
+  (cond
+    ((equal? (->string v) "<t>") #t)
+    ((equal? (->string v) "<f>") #f)
+    (else #t)))

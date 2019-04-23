@@ -3,8 +3,8 @@
 (require "../../lib/_all.rkt")
 (require "../../graphics/svg.rkt")
 (require "../../graphics/color.rkt")
-(require "../../knowledge-base/tab-tree.rkt")
-(require "../../knowledge-base/html.rkt")
+(require "../../tabtree-format/tab-tree.rkt")
+(require "../../tabtree-format/html.rkt")
 
 (provide draw-gantt draw-longtime-gantt)
 

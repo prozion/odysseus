@@ -51,49 +51,53 @@
     data))
 
 (define-catch (fill-template data html-template #:ns (ns ns-own))
-  (let* (
-        ;; replace keyword <this> with a hash object (data)
-        (html-template (string-replace html-template "<this>" (~s data)))
-        (snippets (map
-                    (λ (x) (second x))
-                    (get-matches #rx"{(.*?)}" html-template)))
-        (result (for/fold
-                  ((res html-template))
-                  ((snippet snippets))
-                  (let* ((snippet-lst (split snippet ":"))
-                        (snippet-varnames (split (first snippet-lst) ","))
-                        (snippet-lambda (if (> (length snippet-lst) 1) (cdr snippet-lst) #f))
-                        (snippet-lambda (cond
-                                          ((not snippet-lambda) snippet-lambda)
-                                          ((equal? "" snippet-lambda) #f)
-                                          ; if some ':'s in lambda itself - merge on : again
-                                          ((> (length snippet-lambda) 1) (implode snippet-lambda ":"))
-                                          (else (car snippet-lambda))))
-                        (snippet-lambda (if snippet-lambda
-                                          ; (eval (read (open-input-string (str "(λ args (apply " snippet-lambda " args))"))) ns-own)
-                                          (eval (read (open-input-string snippet-lambda)) ns)
-                                          (λ args (implode args ",")))) ; leave e.g. "a,b,c" as it was
-                        (prefix-string (if (> (length snippet-lst) 2) (third snippet-lst) ""))
-                        (postfix-string (if (> (length snippet-lst) 3) (fourth snippet-lst) ""))
-                        (result-core (apply
-                                        snippet-lambda
-                                        (map
-                                          (λ (x) (cond
-                                                  ((re-matches? "\"\"" x) #f)
-                                                  ((re-matches? "\".*?\"" x) (triml (trimr x)))
-                                                  ((re-matches? "[0-9]+" x) (->number x))
-                                                  (else (hash-ref* data x #f))))
-                                          snippet-varnames)))
-                        (result (if (and result-core (non-empty-string? result-core))
-                                  result-core
-                                  ""))
-                        )
-                    (string-replace
-                      res
-                      (str "{" snippet "}")
-                      result
-                      )))))
-    result))
+  (cond
+    ((hash-empty? data) "")
+    (else
+      (let* (
+            ;; replace keyword <this> with a hash object (data)
+            (html-template (string-replace html-template "<this>" (~s data)))
+            (snippets (map
+                        (λ (x) (second x))
+                        (get-matches #rx"{(.*?)}" html-template)))
+            (result (for/fold
+                      ((res html-template))
+                      ((snippet snippets))
+                      (let* (
+                            (snippet-lst (split snippet ":"))
+                            (snippet-varnames (split (first snippet-lst) ","))
+                            (snippet-lambda (if (> (length snippet-lst) 1) (cdr snippet-lst) #f))
+                            (snippet-lambda (cond
+                                              ((not snippet-lambda) snippet-lambda)
+                                              ((equal? "" snippet-lambda) #f)
+                                              ; if some ':'s in lambda itself - merge on : again
+                                              ((> (length snippet-lambda) 1) (implode snippet-lambda ":"))
+                                              (else (car snippet-lambda))))
+                            (snippet-lambda (if snippet-lambda
+                                              ; (eval (read (open-input-string (str "(λ args (apply " snippet-lambda " args))"))) ns-own)
+                                              (eval (read (open-input-string snippet-lambda)) ns)
+                                              (λ args (implode args ",")))) ; leave e.g. "a,b,c" as it was
+                            (prefix-string (if (> (length snippet-lst) 2) (third snippet-lst) ""))
+                            (postfix-string (if (> (length snippet-lst) 3) (fourth snippet-lst) ""))
+                            (result-core (apply
+                                            snippet-lambda
+                                            (map
+                                              (λ (x) (cond
+                                                      ((re-matches? "\"\"" x) #f)
+                                                      ((re-matches? "\".*?\"" x) (triml (trimr x)))
+                                                      ((re-matches? "[0-9]+" x) (->number x))
+                                                      (else (hash-ref* data x #f))))
+                                              snippet-varnames)))
+                            (result (if (and result-core (non-empty-string? result-core))
+                                      result-core
+                                      ""))
+                            )
+                        (string-replace
+                          res
+                          (str "{" snippet "}")
+                          result
+                          )))))
+        result))))
 
 (define-catch (snippet->data snippet #:ns namespace #:tabtree-root (tabtree-root "."))
   (let* (
@@ -123,7 +127,7 @@
         (result (apply function-part parameter-values)))
     result))
 
-(define (process-html-template filepath #:tabtree-root (tabtree-root "") #:namespace (namespace #f))
+(define-catch (process-html-template filepath #:tabtree-root (tabtree-root "") #:namespace (namespace #f))
   (define-catch (get-cycle-object lst)
     (let* (
           (template-html (first lst))
@@ -152,7 +156,7 @@
           (result (hash 'matched-template template-html 'collection collection 'data cycled-data 'html html-part))
           )
       result))
-  (define (execute-code-snippet code-snippet)
+  (define-catch (execute-code-snippet code-snippet)
     (eval (read (open-input-string (str "(" code-snippet ")"))) namespace))
   (let* ((filepath (if (path? filepath) filepath (string->path filepath)))
         (html-res (read-file filepath))
@@ -162,7 +166,7 @@
         (html-res (for/fold
                     ((res html-res))
                     ((code-snippet-r code-snippets-before-results) (code-snippet code-snippets-before))
-                    (string-replace res (str "%%(" code-snippet ")%%") (if (and code-snippet-r (not (void? code-snippet-r))) code-snippet-r ""))))
+                    (string-replace res (str "%%(" code-snippet ")%%") (if (and code-snippet-r (not (void? code-snippet-r))) (->string code-snippet-r) ""))))
         (cycle-snippets (get-matches #rx"\\[{(.+?)}:(.+?)\\]" html-res))
         (cycle-objects (map get-cycle-object cycle-snippets))
         (html-res (for/fold
@@ -173,7 +177,7 @@
                       ($ matched-template cycle-object)
                       (for/fold
                         ((res2 ""))
-                        ((data-item ($ data cycle-object)))
+                        ((data-item (or ($ data cycle-object) (list (hash)))))
                         (str
                           res2
                           (fill-template data-item ($ html cycle-object) #:ns namespace))))))

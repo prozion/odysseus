@@ -243,6 +243,23 @@
         (hash-ref v field)
         (hash k v)))))
 
+(define (fuse-values val1 val2)
+  (cond
+    ((and
+        (hash? val1)
+        (hash? val2))
+          (hash-union val1 val2))
+    ((and
+        (list? val1)
+        (list? val2))
+          (merge-unique val1 val2))
+    ((and
+        (string? val1)
+        (string? val2))
+          (string-append val1 val2))
+    (else
+      val1)))
+
 (define (hash-insert-fuse h1 pair)
   (cond
     ((not (pair? pair)) h1)
@@ -256,17 +273,9 @@
               (hash-delete h1 (car pair))
               (cons
                 (car pair)
-                (cond
-                  ((and
-                      (hash? h1-part-v)
-                      (hash? (cdr pair)))
-                        (hash-union h1-part-v (cdr pair)))
-                  ((and
-                      (list? h1-part-v)
-                      (list? (cdr pair)))
-                        (merge-unique h1-part-v (cdr pair)))
-                  (else
-                    h1-part-v))))))))))
+                (fuse-values
+                  (hash-ref h1 (car pair))
+                  (cdr pair))))))))))
 
 (define (hash-revert h)
   (apply hash (interleave (hash-values h) (hash-keys h))))
@@ -278,7 +287,9 @@
     ((list-of-seqs? pair) (hash-insert (hash-insert h1 (car pair) #:overwrite overwrite) (cdr pair) #:overwrite overwrite)) ; each element of list is either cons or list
     ((not (pair? pair)) h1)
     ((not (hash? h1)) (make-hash (list pair)))
-    ((hash-ref h1 (car pair) #f) (if overwrite (hash-set h1 (car pair) (cdr pair)) h1))
+    ((hash-ref h1 (car pair) #f) (if overwrite
+                                    (hash-set h1 (car pair) (cdr pair))
+                                    h1))
     (else
       (hash-set h1 (car pair) (cdr pair)))))
 
@@ -377,21 +388,24 @@
         ((#t fuse-overwrite) seq2)))))
 
 ;; OUTPUT
-(define (hash-print h #:delimeter (delimeter ", ") #:prefix (prefix "") #:equal-sign (equal-sign "="))
+(define (hash->string h #:delimeter (delimeter ", ") #:prefix (prefix "") #:equal-sign (equal-sign "=") #:conversion-table (conversion-table #f))
   (let ((hl (hash-length h)))
     (for/fold
       ((s ""))
       (((k v) (in-hash h)) (i hl))
-      (let ((vp (cond
+      (let* ((vp (cond
                   ((string? v) (str "\"" v "\""))
-                  (else v))))
+                  (else v)))
+            (vp (if (and conversion-table (hash-ref conversion-table vp #f))
+                      (hash-ref conversion-table vp)
+                      vp)))
       (if (< i (dec hl))
-        (str s prefix k equal-sign vp delimeter)
-        (str s prefix k equal-sign vp))))))
+        (format "~a~a~a~a~a~a" s prefix k equal-sign vp delimeter)
+        (format "~a~a~a~a~a" s prefix k equal-sign vp))))))
 
 (define (hash-print-json h #:prefix (prefix ""))
   (format "{~a}"
-          (hash-print h #:delimeter ", " #:prefix prefix #:equal-sign ": ")))
+          (hash->string h #:delimeter ", " #:prefix prefix #:equal-sign ": ")))
 
 (define (print-hash format-str h)
   (for/fold

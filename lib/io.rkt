@@ -66,9 +66,9 @@
     (build-path path file)
     v)))
 
-(define (read-data-from-file filepath namespace-anchor)
+(define (read-data-from-file filepath namespace)
   (if (file-exists? filepath)
-    (parameterize ([current-namespace (namespace-anchor->namespace namespace-anchor)])
+    (parameterize ([current-namespace namespace])
       (load filepath))
     #f))
 

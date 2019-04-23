@@ -75,11 +75,11 @@
     (list->hash '((1 1 2 3 4) (2 5 6 7 8)) (list 'key 'a 'b 'c 'd) #:columns-exclude '(b d))
     (hash 1 (hash 'a 1 'c 3) 2 (hash 'a 5 'c 7)))
 
-  (check-equal? (hash-print (hash 'a 1 'b 2)) "a=1, b=2")
-  (check-equal? (hash-print (hash 'a 1 'b 2 'c 10) #:delimeter " AND ") "a=1 AND c=10 AND b=2")
-  (check-equal? (hash-print (hash 'a 1 'b 2) #:delimeter " AND " #:prefix "n.") "n.a=1 AND n.b=2")
-  (check-equal? (hash-print (hash 'a 1 'b 2) #:delimeter ", " #:prefix "n." #:equal-sign ": ") "n.a: 1, n.b: 2")
-  (check-equal? (hash-print (hash 'a 1 'b "Polyphem") #:delimeter ", " #:prefix "n." #:equal-sign ": ") "n.a: 1, n.b: \"Polyphem\"")
+  (check-equal? (hash->string (hash 'a 1 'b 2)) "a=1, b=2")
+  (check-equal? (hash->string (hash 'a 1 'b 2 'c 10) #:delimeter " AND ") "a=1 AND c=10 AND b=2")
+  (check-equal? (hash->string (hash 'a 1 'b 2) #:delimeter " AND " #:prefix "n.") "n.a=1 AND n.b=2")
+  (check-equal? (hash->string (hash 'a 1 'b 2) #:delimeter ", " #:prefix "n." #:equal-sign ": ") "n.a: 1, n.b: 2")
+  (check-equal? (hash->string (hash 'a 1 'b "Polyphem") #:delimeter ", " #:prefix "n." #:equal-sign ": ") "n.a: 1, n.b: \"Polyphem\"")
 
   (check-equal? (hash-print-json (hash 'a 1 'b 2)) "{a: 1, b: 2}")
 
@@ -206,6 +206,10 @@
   (check-hash-equal?
     (hash-insert-fuse (hash 'a 10 'b 20 'c '(5 10)) (cons 'c '(30 20)))
     (hash 'a 10 'b 20 'c '(5 10 30 20)))
+
+  (check-hash-equal?
+    (hash-insert-fuse (hash 'a 10 'b 20 'c "foo") (cons 'c "bar"))
+    (hash 'a 10 'b 20 'c "foobar"))    
 
   (check-hash-equal?
     (hash-insert-fuse (hash 'a 10 'b 20 'c (hash 'ca 5 'cb 10)) (cons 'c (hash 'cc 30 'cd 20)))

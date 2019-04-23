@@ -7,6 +7,7 @@
 (require "hash.rkt")
 (require "debug.rkt")
 (require "regexp.rkt")
+(require "strings.rkt")
 (require "optimize.rkt")
 (require compatibility/defmacro)
 
@@ -72,7 +73,7 @@
       (λ (x) (or* special-parameter? key? x))
       (hash-keys h))))
 
-(define-catch (get-special-attrs h )
+(define-catch (get-special-attrs h)
   (filter special-parameter? (hash-keys h)))
 
 (define-catch (get-non-special-attrs h #:exclude (exclude #f))
@@ -82,6 +83,35 @@
               (special-parameter? x)
               (and exclude (indexof? exclude x))))
     (hash-keys h)))
+
+(define-catch (hashtree->string h (order-key #f) #:conversion-table (conversion-table #f))
+  (define-catch (hashtree->string-iter h curlevel res-acc order-key)
+    (cond
+      ((hash-empty? h) "")
+      (else
+        (let* ((ks (hash-keys h))
+              (ks (if order-key
+                      (sort ks (λ (a b) (< (hash-ref a order-key 0) (hash-ref b order-key 0))))
+                      ks))
+              (k (car ks))
+              (v (hash-ref h k))
+              (h-rest (hash-delete h k))
+              (_ (when (not (hash? k)) (error "Any leaf must be a hash in the hashtree")))
+              (_ (when (not ($ id k)) (error "Any item in the hashtree must contain 'id' key")))
+              (id ($ id k))
+              (other-keys (exclude (hash-keys k) 'id))
+              (tabs (dupstr "\t" curlevel))
+              (new-line (format "~a~a ~a\n" tabs id (hash->string (hash-delete k 'id)  #:delimeter " " #:equal-sign ":" #:conversion-table conversion-table)))
+              (res (string-append res-acc new-line))
+              (res (if (hash-empty? v)
+                      res
+                      (hashtree->string-iter v (+ 1 curlevel) res order-key)))
+              (res (if (hash-empty? h-rest)
+                      res
+                      (hashtree->string-iter h-rest curlevel res order-key)))
+              )
+          res))))
+  (hashtree->string-iter h 0 "" order-key))
 
 ; access and modification functions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; find key by known id,
@@ -260,43 +290,6 @@
   (let ((keys (hash-keys hashtree)))
     (and (not-empty? keys) (car keys))))
 
-
-; handy macros ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-; get key hash or value
-; (define-syntax ($4 stx)
-;   (syntax-case stx ()
-;     ((_ path hash-tree id ...)
-;         ; id ... is here to avoid two patterns and duplication of with-syntax code
-;         (let* (
-;               (id-lst (syntax->datum #'(id ...)))
-;               (conditional-id (if (empty? id-lst) #f (car id-lst))))
-;           (with-syntax ((conditional-id-stx (datum->syntax stx conditional-id))
-;                         (path-lst (datum->syntax stx (seqs:split (symbol->string (syntax->datum #'path)) "."))))
-;             (if conditional-id
-;                 #'(hash-tree-get-element-by-id-path hash-tree 'path-lst conditional-id-stx)
-;                 #'(hash-tree-get-element-by-id-path hash-tree 'path-lst)))))))
-;
-; (define-syntax ($3 stx)
-;   (syntax-case stx ()
-;     ((_ path hash-tree id ...)
-;         ; id ... is here to avoid two patterns and duplication of with-syntax code
-;         (let* (
-;               (id-lst (syntax->datum #'(id ...)))
-;               (conditional-id (if (empty? id-lst) #f (car id-lst))))
-;           (with-syntax ((conditional-id-stx (datum->syntax stx conditional-id))
-;                         (path-lst (datum->syntax stx (seqs:split (symbol->string (syntax->datum #'path)) "."))))
-;             (if conditional-id
-;                 #'(hash-tree-get-value-by-id-path hash-tree 'path-lst conditional-id-stx)
-;                 #'(hash-tree-get-value-by-id-path hash-tree 'path-lst)))))))
-;
-; ; take first level elements under the path
-; (define-macro ($3-1 path hash-tree)
-;   `(hash-keys ($3 ,path ,hash-tree)))
-;
-; (define-macro ($3-2 path hash-tree)
-;   `(flatten (map hash-keys (hash-values ($3 ,path ,hash-tree)))))
-
 (define-catch (get-$1 path hashtree)
   (let* ((hash-item (cond ((> (length path) 1)
                             (get-$2 (but-last path) hashtree))
@@ -309,21 +302,27 @@
       #f)))
 
 (define-catch (get-$2 path hashtree)
-  (let ((res-lst
-          (filter
-            (λ (x) (equal-ids? ($ id x) (last path)))
-            (get-$3 (but-last path) hashtree))))
-    (if (empty? res-lst) #f (car res-lst))))
+  (let ((leaves (get-$3 (but-last path) hashtree)))
+    (and
+      leaves
+      (let ((res-lst
+              (filter
+                (λ (x) (equal-ids? ($ id x) (last path)))
+                leaves)))
+        (if (empty? res-lst) #f (car res-lst))))))
 
 (define-catch (get-$3 path hashtree)
-  (sort
-    (hash-keys (get-$4 path hashtree))
-    (λ (a b)
-      (let* ((a-order ($ _order a))
-            (b-order ($ _order b)))
-        (if (and a-order b-order)
-          (< a-order b-order)
-          #t)))))
+  (let ((selected-key-value (get-$4 path hashtree)))
+    (and
+      selected-key-value
+      (sort
+        (hash-keys selected-key-value)
+        (λ (a b)
+          (let* ((a-order ($ _order a))
+                (b-order ($ _order b)))
+            (if (and a-order b-order)
+              (< a-order b-order)
+              #t)))))))
 
 (define-catch (get-$4 path hashtree)
   (cond
@@ -334,7 +333,8 @@
                             (equal-ids? ($ id x) next-id)) (hash-keys hashtree)))
             (next-hash-tree (if (not-empty? key)
                                   (hash-ref* hashtree (car key))
-                                  (error (str "wrong path: " (implode path "."))))))
+                                  #f)))
+                                  ; (error (str "wrong path: " (implode path "."))))))
         (get-$4 (cdr path) next-hash-tree)))))
 
 (define-catch (do-by-sections hashtree path-to-sections f-header-of-section f-section-content)
@@ -449,6 +449,13 @@
           (hash-union
             hash-tree
             (hash next-hash-key hash-tree-part)))))))
+
+(define-catch (make-hash-tree root-name list-of-hash)
+  (hash
+    (hash 'id root-name)
+    (for/hash
+      ((item list-of-hash))
+      (values item (hash)))))
 
 
 (module+ test
@@ -687,4 +694,15 @@
                             (hash
                               (hash 'id "ee" 'value "325")
                                 (hash))))))
+
+  (check-hash-equal?
+                (make-hash-tree 'root (list
+                                        (hash 'id 'a 'value 10)
+                                        (hash 'id 'b 'value 20)))
+                (hash
+                  (hash 'id 'root)
+                  (hash
+                    (hash 'id 'a 'value 10) (hash)
+                    (hash 'id 'b 'value 20) (hash))))
+
 )

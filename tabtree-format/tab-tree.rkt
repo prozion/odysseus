@@ -48,16 +48,22 @@
         (res-parameters
               (get-matches #px"(\\S+?):(\\S+)" line))
         ; accumulate parameters to a hash
-				(parameters (for/hash ((p res-parameters)) (values (->symbol (list-ref p 1)) (->symbol (list-ref p 2)))))
+				(parameters (for/fold
+                      ((res (hash)))
+                      ((p res-parameters))
+                      (hash-insert-fuse res (cons (->symbol (list-ref p 1)) (->symbol (list-ref p 2))))))
         ; in the case of `<code>` there can be 'name:<..>' pattern inside, it should not be evaluated to name as item parameter
         (parameters (hash-delete parameters 'name))
         ; accumulate string parameters to a hash
-				(string-parameters (for/hash ((p res-string-parameters)) (values (->symbol (list-ref p 1)) (list-ref p 2))))
+				(string-parameters (for/fold
+                              ((res (hash)))
+                              ((p res-string-parameters))
+                              (hash-insert-fuse res (cons (->symbol (list-ref p 1)) (list-ref p 2)))))
         ; join two hashes
         (res (hash-union string-parameters parameters))
         ; add id to item
         (res (if res-name
-            (hash-insert res (cons key-name (nth (nth res-name 1) 2)))
+            (hash-insert res (cons key-name (nth (nth res-name 1) 2))) ; if the same key comes several times in item's definition, its values will be fused
             res))
         ; add name to item, if it is not already defined:
         (name (get-item-name res))
@@ -178,3 +184,6 @@
                             line))
                         tree-lines)))
       (fill-tree-iter tree-lines (hash) empty))))
+
+(define-catch (write-tab-tree filename hashtree)
+  (write-file filename (hashtree->string hashtree 'rule-number #:conversion-table (hash #t "<t>" #f "<f>"))))
