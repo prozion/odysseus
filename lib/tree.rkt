@@ -42,7 +42,7 @@
           (map
             (λ (el)
               (if (hash? el)
-                (hash-union el (hash '_path path))
+                (hash-union (hash '_path path) el)
                 el))
             htree))
         (else htree)))

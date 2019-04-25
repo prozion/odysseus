@@ -79,22 +79,15 @@
   (let ((astr (if (symbol? astr) (symbol->string astr) astr)))
     (re-matches? "^[A-ZА-Я].*" astr)))
 
-(define-catch (titlefy astr #:only-first (only-first #f))
-  (cond
-    ((not astr) astr)
-    ((equal? astr "") astr)
-    (only-first
-      (let* (
-            (words (string-replace astr "_" " "))
-            (words (split words " "))
-            (first-word (car words))
-            (rest-words (cdr words))
-            (first-word (string-titlecase first-word))
-            (words (pushl rest-words first-word))
-            (result (implode words " ")))
-        result))
-    (else
-      (string-titlecase (string-replace astr "_" " ")))))
+(define-catch (titlefy astr)
+  (string-append
+    (string-upcase (nth astr 1))
+    (triml astr)))
+
+(define-catch (titlefy-if-sentence astr)
+  (if (string-contains? astr " ")
+    (titlefy astr)
+    astr))
 
 (define (mstring->string astr)
   (string-replace astr "\n" " "))
