@@ -2,6 +2,7 @@
 
 (require racket/file)
 (require "base.rkt")
+(require "type.rkt")
 
 (provide (all-defined-out))
 
@@ -20,3 +21,8 @@
         ((not (file-exists? src)) (format "file ~a doesn't exists" src))
         ((not (file-exists? dest)) (format "file ~a doesn't exists" dest))
         (else "unknown error")))))
+
+(define-catch (get-file-extension path)
+  (let* ((path-parts (string-split (->string path) "."))
+        (extension (if (> (length path) 1) (last path-parts) "")))
+    extension))
