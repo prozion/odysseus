@@ -476,9 +476,13 @@
 (define (intersect . seqs)
   (let ((seqs (filter-not false? seqs)))
     (cond
-      ((null? (cdr seqs)) (car seqs))
+      ((empty? seqs) empty)
+      ((= (length seqs) 1) empty) ; nothing to be intersected with
       (else
-        (reverse (set-intersect (car seqs) (apply intersect (cdr seqs))))))))
+        (for/fold
+          ((res (car seqs)))
+          ((seq (cdr seqs)))
+          (reverse (set-intersect res seq)))))))
 
 (define (intersect? . seqs)
   (not-empty? (apply intersect seqs)))
@@ -918,9 +922,11 @@
   (check-equal? (intersect '(1 2 3 5) '(3 2 1 1 6)) '(1 2 3))
   (check-equal? (intersect '(1 2 3 5) '(3 2 1 1 6) '(1 2 8)) '(1 2))
   (check-equal? (intersect '(1 2 3 5) '(3 2 1 1 6) '()) '())
+  (check-equal? (intersect '(1 2 3 5) #f) '())
 
   (check-true (intersect? '(1 2 3 5) '(3 2 1 1 6)))
   (check-false (intersect? '(1 2 3 5) '(4 8 10)))
+  (check-false (intersect? '(1 2 3 5) #f))
 
   (check-equal? (difference '() '()) '())
   (check-equal? (difference '(1 2 3) '()) '(1 2 3))

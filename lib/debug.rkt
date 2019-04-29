@@ -36,3 +36,6 @@
 
 (define-macro (__t text)
   `(show-status-in-let debug-output ,text))
+
+(define-macro (errorf frmt . args)
+	`(error (format ,frmt ,@args)))

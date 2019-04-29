@@ -22,6 +22,8 @@
 (define (more-than-one-element? seq)
   (and (list? seq) (> (length seq) 1)))
 
+(define several-elements? more-than-one-element?)
+
 (define (simple-cons? x)
   (and (pair? x) (not (list? x))))
 
@@ -57,6 +59,12 @@
     (list? x)
     (not (empty? x))
     (andmap pair? x)))
+
+; some elements in list are lists
+(define (list>=2? lst)
+  (and
+    (list? lst)
+    (ormap (λ (x) (list? x)) lst)))
 
 (define (plain-hash? x)
   (and

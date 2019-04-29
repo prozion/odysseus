@@ -104,3 +104,6 @@
     ((list? obj) (print-list obj))
     ((hash? obj) (print-list (for/list (((k v) obj)) (cons k v))))
     (else obj)))
+
+(define-macro (terpri)
+	`(--- ""))
