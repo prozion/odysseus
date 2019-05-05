@@ -6,7 +6,7 @@
 (provide (all-defined-out))
 
 (define (scalar? x)
-  (or (number? x) (string? x) (symbol? x) (null? x)))
+  (or (number? x) (string? x) (symbol? x)))
 
 (define (sequence? x)
   (or (list? x) (hash? x) (vector? x)))
@@ -168,7 +168,7 @@
   (check-pred scalar? 0.3)
   (check-pred scalar? "key")
   (check-pred scalar? 'key)
-  (check-pred scalar? null)
+  (check-equal? (scalar? '()) #f)
   (check-equal? (scalar? (list 1)) #f)
   (check-equal? (scalar? (hash)) #f)
   (check-equal? (scalar? (hash 'a 1 'b 2)) #f)

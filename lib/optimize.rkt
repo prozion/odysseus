@@ -9,11 +9,11 @@
 (provide (all-defined-out))
 
 (define (memoize f)
-  (let ((args-hash (hash)))
+  (let ((cache (hash)))
     (λ args
-      (let* ((hashed (hash-ref args-hash args #f))
-            (res (or hashed (apply f args))))
-        (when (not hashed) (set! args-hash (hash-insert args-hash (cons args res))))
+      (let* ((cached-res (hash-ref cache args #f)) ; get cached value
+            (res (or cached-res (apply f args))))
+        (when (not cached-res) (set! cache (hash-insert cache (cons args res)))) ; if value was not cached - cache it
         res))))
 
 (define (opt/uniques lst)

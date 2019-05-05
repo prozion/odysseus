@@ -49,6 +49,9 @@
 (define (not-equal? a b)
   (not (equal? a b)))
 
+(define-macro (when-not . expr)
+  `(unless ,@expr))
+
 (define nil?
   (λ (v) (or
             (null? v)
