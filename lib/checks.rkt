@@ -7,6 +7,7 @@
 (require "type.rkt")
 (require "hash.rkt")
 (require "debug.rkt")
+(require "io.rkt")
 
 (provide (all-defined-out))
 

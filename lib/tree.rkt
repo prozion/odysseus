@@ -7,6 +7,7 @@
 (require "debug.rkt")
 (require "strings.rkt")
 (require "regexp.rkt")
+(require "io.rkt")
 
 (provide (all-defined-out))
 
