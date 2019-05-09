@@ -136,7 +136,7 @@
                                                     (->> quotate-if-sentence remove-extra-whitespaces mstring->string ->string chunk-values))
                                                 ((and (list? chunk-values) (andmap symbol? chunk-values))
                                                     (implode
-                                                      (map replace-namespace-for-alias chunk-values)
+                                                      (cleanmap (map replace-namespace-for-alias chunk-values))
                                                       ","))
                                                 (else
                                                     (implode

@@ -20,6 +20,7 @@
 (define count (make-parameter 0))
 
 (define-catch (build-item item-sxml (ontology-id 'root))
+  (own-namespace ontology-id)
   (match item-sxml
     ; meta information
     (`(,_ ,_
@@ -88,10 +89,10 @@
                 'a (map ->symbol types) 'range (map ->symbol ranges) 'domain (map ->symbol domains) 'subproperty-of (map ->symbol subproperty-ofs) 'comment comment 'd description 'note notes)))
     (else
       (count (+ 1 (count)))
-      (when (< (count) 10)
-        (--- (count))
-        (---- item-sxml)
-        (--- "\n"))
+      ; (when (< (count) 10)
+      ;   (--- (count))
+      ;   (---- item-sxml)
+      ;   (--- "\n"))
       #f)))
 
 (define-catch (xml-ontology->context path ontology-id)
@@ -121,8 +122,8 @@
                   (map (curryr build-item ontology-id) item-sexps)))
         (items (cleanmap items))
         (namespaces-in-use (get-namespaces-in-use items))
-        (_ (--- namespaces-in-use))
         (general-namespaces (hash-delete general-namespaces ontology-id)) ; otherwise we have two items with the same id and an endless cycle
+        (general-namespaces (hash-filter (λ (k v) (indexof? namespaces-in-use (->symbol v))) general-namespaces))
         (items (append
                   items
                   (list
