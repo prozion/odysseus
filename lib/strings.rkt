@@ -193,6 +193,16 @@
 (define (starts-with? astr one-char-string)
   (equal? (nth astr 1) one-char-string))
 
+; "foobar" -> "fooobar"
+; "foo bar" -> "\"foo bar\""
+(define-catch (quotate-if-sentence astr)
+  (cond
+    ((re-matches? " " astr) (format "\"~a\"" astr))
+    (else astr)))
+
+(define-catch (remove-extra-whitespaces astr)
+  (string-replace astr #px"\\s\\s+" " "))
+
 (module+ test
 
   (require rackunit)
