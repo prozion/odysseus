@@ -78,7 +78,7 @@
 
 (define-catch (type x)
   (cond
-    ((not x) 'boolean)
+    ((boolean? x) 'boolean)
     ((empty? x) 'list)
     ((number? x) 'number)
     ((string? x) 'string)
@@ -231,6 +231,7 @@
 
   (check-equal? (type '()) 'list)
   (check-equal? (type 3) 'number)
+  (check-equal? (type #t) 'boolean)
   (check-equal? (type "a str") 'string)
   (check-equal? (type #"a str") 'bytes)
   (check-equal? (type '((a 10) (b 20))) 'alist)

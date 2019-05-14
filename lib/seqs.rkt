@@ -661,6 +661,7 @@
   (check-equal? (implode '("long" "sail" "across" "the" "sea") " ") "long sail across the sea")
 
   (check-equal? (implode empty) "")
+  (check-equal? (implode empty "-") "")
   (check-equal? (implode '(" " "b" "a" "k" "e" "\n" "r" "y")) " bake\nry")
   (check-equal? (implode '(1 2 3 4)) "1234")
   (check-equal? (implode '(1 2 3 4) "+") "1+2+3+4")
