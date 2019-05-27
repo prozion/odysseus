@@ -103,7 +103,7 @@
                           (sort-context context fli-id))))))))
     result))
 
-(define-catch (context->string context)
+(define-catch (context->mstring context)
   (define path (make-parameter empty))
   (define (order-keys-by-default-order keys)
     (sort keys

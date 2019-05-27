@@ -66,10 +66,17 @@
     (build-path path file)
     v)))
 
-(define (read-data-from-file filepath namespace)
+; read data from file into the s-expression and evaluate it
+(define (load-data-from-file filepath namespace)
   (if (file-exists? filepath)
     (parameterize ([current-namespace namespace])
       (load filepath))
+    #f))
+
+; read data from file into the s-expression
+(define (read-data-from-file filepath namespace)
+  (if (file-exists? filepath)
+    (read (open-input-string (read-file filepath)))
     #f))
 
 ; serializes data and save it into the file

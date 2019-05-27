@@ -9,6 +9,7 @@
   (require "alist.rkt")
   (require "type.rkt")
   (require "regexp.rkt")
+  (require "tree.rkt")
 
   (define h (hash 'a (hash 'aa 10 'ab 20) 'b (hash 'ba (hash 'baa 300 'bab 30))))
 
@@ -209,7 +210,7 @@
 
   (check-hash-equal?
     (hash-insert-fuse (hash 'a 10 'b 20 'c "foo") (cons 'c "bar"))
-    (hash 'a 10 'b 20 'c "foobar"))    
+    (hash 'a 10 'b 20 'c "foobar"))
 
   (check-hash-equal?
     (hash-insert-fuse (hash 'a 10 'b 20 'c (hash 'ca 5 'cb 10)) (cons 'c (hash 'cc 30 'cd 20)))
@@ -634,5 +635,13 @@
   (check-equal? (format-hash "{a} - {b}" (hash 'a 10 'b 20)) "10 - 20")
   (check-equal? (format-hash "foo" (hash 'a 10 'b 20)) "foo")
   (check-equal? (format-hash "{a}/{c}/{a}" (hash 'a 10 'b 20 'c "baz")) "10/baz/10")
+
+  (check-hash-equal?
+                (hash-minus (hash 'a 10 'b 20 'c 30) (hash 'b 20 'd 40))
+                (hash 'a 10 'c 30))
+
+  (check-hash-equal?
+                (hash-minus (hash 'a '(10 20) 'b 20 'c 30 'e '(1 2 3)) (hash 'a '(20 10) 'b 20 'd 40 'e '(1 3 2 4)) #:e same-elements?)
+                (hash 'c 30 'e '(1 2 3)))
 
   )

@@ -483,3 +483,22 @@
       ((res frmt))
       ((m matches))
       (string-replace res (first m) (->string (hash-ref* h (second m)))))))
+
+;;; set operations
+(define (hash-minus h1 h2 #:e (e? equal?))
+  (let* ((k1s (hash-keys h1))
+        (k2s (hash-keys h2)))
+    (for/fold
+      ((res (hash)))
+      ((k1 k1s) (k2 k2s))
+      (cond
+        ((and (indexof? k2s k1 e?)
+              (let* ((k2-pos (indexof k2s k1 e?))
+                    (k2 (nth k2s k2-pos)))
+                (e? (hash-ref h1 k1) (hash-ref h2 k2))))
+          ; if the same element exists in h2, don't include it in the result:
+          res)
+        (else
+          (hash-union
+            (hash k1 (hash-ref h1 k1))
+            res))))))

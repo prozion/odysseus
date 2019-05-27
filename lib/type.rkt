@@ -102,20 +102,18 @@
 ; to compare say 160 and 160a, we add small number (0.1) to the latter, so 160a comes after 160
 (define (->number x (delta 0))
   (cond
+    ((not x) #f)
     ((number? x) x)
     ((false? x) 0)
+    ((and (string? x) (string->number x))
+        (string->number x))
     ((string? x)
-      (let ((filtered (string-replace x (regexp ",") ".")))
-        (cond
-           ((string->number filtered) (string->number filtered))
-           (else
-            (let* (
-                    (filtered (implode
-                                        (filter
-                                          (λ (x) (or (string->number x) (equal? x ".")))
-                                          (explode filtered))))
-                    (filtered (if (equal? filtered "") "0" filtered)))
-              (+ delta (string->number filtered)))))))
+      (let* ((filtered (string-replace x (regexp ",") "."))
+            (filtered (filter
+                        (λ (x) (or (string->number x) (equal? x ".")))
+                        (explode filtered)))
+            (filtered (if (empty? filtered) #f (implode filtered))))
+        (and filtered (+ delta (string->number filtered)))))
     (else x)))
 
 (define (->string x)
@@ -259,7 +257,9 @@
   (check-= (->number "123.54") 123.54 1e-5)
   (check-= (->number "123,54") 123.54 1e-5)
   (check-= (->number "2 850,40") 2850.4 1e-5)
-  (check-equal? (->number "#f") 0)
+  (check-equal? (->number #f) #f)
+  (check-equal? (->number "#f") #f)
+  (check-equal? (->number "abc") #f)
   (check-equal? (->number "0") 0)
   (check-equal? (->number "00") 0)
 

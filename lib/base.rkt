@@ -227,6 +227,7 @@
   ; checks - Orchestra crue
   ; hashtree - Information and propaganda crue
   ; http - Kamikadze crue
+  ; combinatorics - River fleet crue
 
   ; graphics/tests: spies
   ; color_test - spies and police in the Emerald city and around

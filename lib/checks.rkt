@@ -20,35 +20,45 @@
       (hash-values h2)
       <)))
 
-(define (check-hash h1 h2 #:list-any-order? (list-any-order? #f))
+(define (check-hash h1 h2 #:list-any-order? (list-any-order? #f) #:values-any-order? (values-any-order? #f))
   (let* ((k1s (hash-keys h1))
         (k2s (hash-keys h2))
         (v1s (hash-values h1))
         (v2s (hash-values h2)))
-    (if list-any-order?
-      (and (same-elements? k1s k2s) (same-elements? v1s v2s)) ; in the case we don't care about elements order in the lists. Although doesn't work for cross-permutations yet
-      (and
-        (same-elements? k1s k2s) ; no extra unchecked keys neither at k1s nor at k2s
+    (cond
+      (values-any-order?
         (for/and
           ((k1 k1s))
           (and
-            (indexof? k2s k1)
-            (equal? (hash-ref h1 k1) (hash-ref h2 (nth k2s (indexof k2s k1))))))))))
+            (indexof? k2s k1 same-elements?)
+            (let* ((position (indexof k2s k1 same-elements?))
+                  (k2 (nth k2s position)))
+              (equal? (hash-ref h1 k1) (hash-ref h2 k2))))))
+      (list-any-order?
+        (and (same-elements? k1s k2s) (same-elements? v1s v2s))) ; in the case we don't care about elements order in the lists. Although doesn't work for cross-permutations yet
+      (else
+        (and
+          (same-elements? k1s k2s) ; no extra unchecked keys neither at k1s nor at k2s
+          (for/and
+            ((k1 k1s))
+            (and
+              (indexof? k2s k1)
+              (equal? (hash-ref h1 k1) (hash-ref h2 (nth k2s (indexof k2s k1)))))))))))
 
-(define (check-hash-iso h1 h2 #:list-any-order? (list-any-order? #f))
-  (let* ((k1s (hash-keys h1))
-        (k2s (hash-keys h2))
-        (v1s (hash-values h1))
-        (v2s (hash-values h2)))
-    (if list-any-order?
-      (and (same-elements? k1s k2s iso?) (same-elements? v1s v2s iso?)) ; in the case we don't care about elements order in the lists. Although doesn't work for cross-permutations yet
-      (and
-        (same-elements? k1s k2s iso?) ; no extra unchecked keys neither at k1s nor at k2s
-        (for/and
-          ((k1 k1s))
-          (and
-            (indexof? k2s k1)
-            (same-elements? (hash-ref h1 k1) (hash-ref h2 (nth k2s (indexof k2s k1))) iso?)))))))
+; (define (check-hash-iso h1 h2 #:list-any-order? (list-any-order? #f))
+;   (let* ((k1s (hash-keys h1))
+;         (k2s (hash-keys h2))
+;         (v1s (hash-values h1))
+;         (v2s (hash-values h2)))
+;     (if list-any-order?
+;       (and (same-elements? k1s k2s #:e iso?) (same-elements? v1s v2s #:e iso?)) ; in the case we don't care about elements order in the lists. Although doesn't work for cross-permutations yet
+;       (and
+;         (same-elements? k1s k2s iso?) ; no extra unchecked keys neither at k1s nor at k2s
+;         (for/and
+;           ((k1 k1s))
+;           (and
+;             (indexof? k2s k1)
+;             (same-elements? (hash-ref h1 k1) (hash-ref h2 (nth k2s (indexof k2s k1))) iso?)))))))
 
 (define-macro (check-hash-equal? h1 h2)
   `(check-true
@@ -143,4 +153,24 @@
       (hash '(((#f S1 (simple chemical)) (#f enzyme)) (#f P1 (simple chemical))) "positive influence")
       (hash '(((#f enzyme) (#f S1 (simple chemical))) (#f P1 (simple chemical))) "positive influence")
       #:list-any-order? #f))
+
+  (check-false
+    (check-hash
+      (hash
+        '(((#f S1 (simple chemical)) (#f enzyme)) (#f P1 (simple chemical))) "positive influence"
+        '(((P1 P2) (A1 A2 A3)) (#f P1 (simple chemical))) "negative influence")
+      (hash
+        '(((#f S1 (simple chemical)) (#f enzyme)) (#f P1 (simple chemical))) "positive influence"
+        '(((P1 P2) (A1 A2 A3)) (#f P1 (simple chemical))) "positive influence")
+      #:values-any-order? #t))
+
+  (check-true
+    (check-hash
+      (hash
+        '(((#f S1 (simple chemical)) (#f enzyme)) (#f P1 (simple chemical))) "positive influence"
+        '(((P1 P2) (A1 A2 A3)) (#f P1 (simple chemical))) "negative influence")
+      (hash
+        '((#f P1 (simple chemical)) ((S1 (simple chemical) #f) (#f enzyme))) "positive influence"
+        '((#f P1 (simple chemical)) ((P1 P2) (A3 A1 A2))) "negative influence")
+      #:values-any-order? #t))
 )

@@ -116,9 +116,9 @@
     ((plain-list? lst) (map f (f lst)))
     (else (map (λ (x) (transform-list-recur x f)) (f lst)))))
 
-(define (same-elements? as bs (criterium? equal?))
+(define (same-elements? as bs #:e (e? equal?))
   (cond
-    ((and (scalar? as) (scalar? bs)) (criterium? as bs))
+    ((and (scalar? as) (scalar? bs)) (e? as bs))
     ((and (list? as) (list? bs))
       (and
         (for/and
@@ -127,7 +127,7 @@
         (for/and
           ((b bs))
           (ormap (λ (a) (same-elements? b a)) as)))
-    (else (criterium? as bs))))
+    (else (e? as bs))))
 
 (define (iso-elements? as bs)
   (cond
@@ -245,10 +245,10 @@
   (check-true (same-elements? '(1 1 2) '(2 1)))
   (check-true (same-elements? '((2 1) (3 4)) '((1 2) (4 3))))
   (check-true (same-elements? '((2 (3 1 10)) (3 4)) '(((10 1 3) 2) (4 3))))
+  (check-true (same-elements? '((2 (3 (1 2) 10)) (3 4)) '(((10 3 (2 1)) 2) (4 3))))
   (check-true (same-elements?
                 '((((#f S1 (simple chemical)) (#f enzyme)) (#f P1 (simple chemical))) "positive influence")
-                '((((#f enzyme) (#f S1 (simple chemical))) (#f P1 (simple chemical))) "positive influence")))
-
+                '((((#f enzyme) (#f S1 (simple chemical))) (P1 #f (simple chemical))) "positive influence")))
 
   (check-true (iso-elements? 2 2))
   (check-false (iso-elements? 2 "3"))
