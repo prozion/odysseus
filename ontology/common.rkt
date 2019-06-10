@@ -13,7 +13,8 @@
     'skos "http://www.w3.org/2004/02/skos/core#"
     'dcterms "http://purl.org/dc/terms/"
     'dcels "http://purl.org/dc/elements/1.1/"
-    'dcam "http://purl.org/dc/dcam/"))
+    'dcam "http://purl.org/dc/dcam/"
+    'vocab "http://www.w3.org/2003/06/sw-vocab-status/ns#"))
 
 (define general-namespaces-reverted (hash-revert general-namespaces))
 

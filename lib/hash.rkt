@@ -30,6 +30,8 @@
 (define (hash-key? h key)
   (true? (hash-ref h key #f)))
 
+(define has-key? hash-key?)
+
 (define (hash-empty? h)
   (empty? (hash-keys h)))
 
