@@ -262,6 +262,9 @@
   (check-equal? (->number "abc") #f)
   (check-equal? (->number "0") 0)
   (check-equal? (->number "00") 0)
+  (check-equal? (->number "~10") 10)
+  (check-equal? (->number ">10") 10)
+  (check-equal? (->number "<10") 10)
 
   (check-equal? (->string "00") "00")
   (check-equal? (->string 100) "100")

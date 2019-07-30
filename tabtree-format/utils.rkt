@@ -31,9 +31,10 @@
     list-of-hashes))
 
 (define (tabtree-item->string item keys-order)
-  (define (parameter->string params (delimeter ","))
+  (define (parameter->string key params (delimeter ","))
     (cond
       ((list? params) (implode params delimeter))
+      ((re-matches? "-f$" (->string key)) (format "`~a`" params)) ; a code snippet
       ((and (string? params) (re-matches? " " params)) (format "\"~a\"" params))
       (else (->string params))))
   (let* ((id ($ id item))
@@ -51,7 +52,7 @@
     (for/fold
       ((res (format "~a" id)))
       ((key (append (or keys-ordered empty) (or tail-keys empty))))
-      (format "~a ~a:~a" res key (parameter->string (hash-ref item key))))))
+      (format "~a ~a:~a" res key (parameter->string key (hash-ref item key))))))
 
 (define (tabtree->string tabtree #:parent (parent-item #f) #:level (level 0) #:keys-order (keys-order #f))
   (let* ((sorted-keys-by-id (sort (hash-keys tabtree) (λ (a b) (< (->number (or ($ _order a) 0)) (->number (or ($ _order b) 0))))))
@@ -64,31 +65,61 @@
         (format "~a~a~a~a"
                 (if (or (not-empty-string? res) parent-item) (format "~a~n" res) res) ; don't skip the first line in the file
                 (dupstr "\t" level)
-                (tabtree-item->string k keys-order)
+                (tabtree-item->string k (or ($ keys-order k) keys-order)) ; first check if current item has keys-order attribute - then apply this one, otherwise use normal keys-order from the parent
                 (tabtree->string (hash-ref tabtree k) #:parent k #:level (+ 1 level) #:keys-order keys-order))))) )
+
+; hashtree -> list-of hash
+(define (get-first-level hashtree)
+  (hash-keys hashtree))
+
+; hashtree -> hashtree
+(define (get-level-below hashtree)
+  (let* ((root-element (get-root-item hashtree)))
+    (hash-ref hashtree root-element #f)))
 
 (define (default-sorter a b)
   (a-z ($ id a) ($ id b)))
 
-(define (tabtree-sort-and-print treefile #:ns (ns #f) #:new-treefile (new-treefile #f) #:sort-by (sort-by 'id) #:sort-f (sort-f a-z))
-  (define (tabtree-sort-rec hashtree)
+(define default-sort-f a-z)
+(define default-sort-by 'id)
+
+(define (hash-id h)
+  ($ id h))
+
+; Important! Tabtree file should contain only one root element. Other first level elements and their chikdren will be deleted after sorting.
+(define-catch (tabtree-sort-and-print treefile #:ns (ns #f) #:new-treefile (new-treefile #f) #:sort-by (sort-by default-sort-by) #:sort-f (sort-f default-sort-f))
+  (define-catch (tabtree-sort-rec root-item root-hashtree #:sort-by sort-by #:sort-f sort-f)
     (cond
-      ((not (hash? hashtree)) hashtree)
-      ((hash-empty? hashtree) hashtree) ; empty list
-      ((not-hashes? (hash-keys hashtree)) hashtree) ; end element
+      ((not (hash? root-hashtree)) root-hashtree)
+      ((hash-empty? root-hashtree) root-hashtree) ; empty list
+      ((not-hashes? (hash-keys root-hashtree)) root-hashtree) ; end element
       (else
-        (let* ((root-item (get-root-item hashtree))
+        (let* (
               (embedded-sort-by (and ($ sort-by root-item) ns (read (open-input-string ($ sort-by root-item) ns))))
+              (embedded-sort-by (and embedded-sort-by (->symbol embedded-sort-by)))
               (embedded-sort-f (and ($ sort-f root-item) ns (read (open-input-string ($ sort-f root-item) ns))))
+              (embedded-sort-f (and embedded-sort-f (->symbol embedded-sort-f)))
               (sort-by (or embedded-sort-by sort-by))
               (sort-f (or embedded-sort-f sort-f))
-              (sorter (λ (a b) (sort-f (hash-ref a sort-by) (hash-ref b sort-by)))))
-          (for/hash
-            ((k (sort (hash-keys hashtree) sorter)) (i (range 1 (inc (length (hash-keys hashtree))))))
-            (values (hash-union (hash '_order i) k) (tabtree-sort-rec (hash-ref hashtree k))))))))
+              (root-hashtree-keys (hash-keys root-hashtree))
+              (sorter (λ (a b) (let ((a-val (hash-ref a sort-by #f))
+                                    (b-val (hash-ref b sort-by #f)))
+                                  (cond
+                                    ((and a-val b-val)
+                                      ((eval sort-f ns) a-val b-val))
+                                    (else
+                                      (let ((a-val (hash-ref a default-sort-by #f))
+                                            (b-val (hash-ref b default-sort-by #f)))
+                                      (default-sort-f a-val b-val))))))))
+            (for/hash
+              ((k (sort root-hashtree-keys sorter)) (i (range 1 (inc (length root-hashtree-keys)))))
+              (values (hash-union (hash '_order i) k) (tabtree-sort-rec k (hash-ref root-hashtree k) #:sort-by sort-by #:sort-f sort-f)))))))
   (let* ((hashtree (parse-tab-tree treefile))
-        (hashtree-sorted (tabtree-sort-rec hashtree))
-        ; (_ (--- hashtree-sorted))
+        ; (_ (--- hashtree))
+        (root-item (get-root-item hashtree))
+        (hashtree-sorted (hash
+                            root-item
+                            (tabtree-sort-rec root-item (get-level-below hashtree) #:sort-by sort-by #:sort-f sort-f)))
         (new-treefile-name (if new-treefile
                               new-treefile
                               (let*
