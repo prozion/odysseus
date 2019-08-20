@@ -241,13 +241,14 @@
 
 ;;; Group wall ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define (get-wall-posts
+(define-catch (get-wall-posts
           gid
           #:offset (offset #f)
           #:limit (limit #f)
           #:only-group (only-group #f)
-          #:extended (extended #f))
-  (let* ((reqstr (format "https://api.vk.com/method/wall.get?owner_id=-~a&v=5.8&filter=others&~a~a~a~a&access_token=~a"
+          #:extended (extended #f)
+          #:break-if-error (break-if-error #t))
+  (let* ((reqstr (format "https://api.vk.com/method/wall.get?owner_id=-~a&v=5.8&filter=others~a~a~a~a&access_token=~a"
                     gid
                     (if extended "&extended=1" "")
                     (if only-group "&filter=owner" "")
@@ -259,6 +260,17 @@
         (response ($ response res))
         ; (_ (--- "get-wall-posts: reqstr =" reqstr "count = "  ($ count response) "items-length = " (length ($ items response))))
         (err ($ error res)))
-    (if err
-      (error err)
-      response)))
+    (cond
+      ((and err break-if-error) (error err))
+      (err #f)
+      (else response))))
+
+(define-catch (get-img-url item)
+  (let* ((copy_history ($ copy_history item))
+        (copy_history (and (not-empty? copy_history) (first copy_history)))
+        (attachments (or
+                        (and copy_history ($ attachments copy_history))
+                        ($ attachments item)))
+        (attachment (and (not-empty? attachments) (first attachments)))
+        (attachment_photo_130 (and attachment ($ photo.photo_130 attachment))))
+    attachment_photo_130))

@@ -391,6 +391,22 @@
 
 (define datestr->hdate parse-date)
 
+(define (date->seconds datestr)
+  (let* ((days (date->days datestr)))
+    (* 60 60 24 days)))
+
+(define (datetimestr->seconds datetimestr)
+  (let* ((parsed_datetime (string-split datetimestr " "))
+        (adate (first parsed_datetime))
+        (atime (and (several-elements? parsed_datetime) (second parsed_datetime)))
+        (atime (or
+                (and atime (time->seconds atime))
+                0)))
+    (+ atime (date->seconds adate))))
+
+(define (dtstr->dstr datetime)
+  (take-one datetime #:delimeter " "))
+
 (define-catch (vk->date vk-datestr)
   (cond
     ((or (not vk-datestr) (equal? vk-datestr "")) #f)
