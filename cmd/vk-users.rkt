@@ -4,6 +4,7 @@
 
 (require "../lib/_all.rkt")
 (require "../scrap/vk.rkt")
+(require "../scrap/vk-friends.rkt")
 (require "../graphics/console.rkt")
 (require "../report/html.rkt")
 

@@ -120,11 +120,36 @@
         (hash 'error (@. res.error))
         (car (@. res.response)))))
 
-(define (vk/id->href id)
-  (format "https://vk.com/id~a" id))
+;; user properties
+(define (request-username id (glue " "))
+  (when (status-output) (display "+") (flush-output))
+  (let ((res (string->jsexpr
+                (get-url (format "https://api.vk.com/method/users.get?user_ids=~a&v=5.52" id)))))
+    (if (@. res.error)
+      "n/a"
+      (let ((u (car (@. res.response))))
+        (format "~a~a~a"
+                  (replace-all (@. u.first_name) " " glue)
+                  glue
+                  (replace-all (@. u.last_name) " " glue))))))
 
-(define (vk/ids->hrefs ids)
-  (map vk/id->href ids))
+(define vk/username request-username)
+
+;; output
+(define (vk/id->href id)
+  (format "<a href=\"~a\" target=\"_blank\">~a</a>" (vk/link id) (request-username id)))
+
+(define (vk/ids->hrefs paths)
+  (when (status-output) (display "\nrequesting names"))
+  (let ((m-request-username (memoize request-username))) ; function with static hash through closure
+    (map
+      (λ (x) (map
+                (λ (id) (format "<a href=\"~a\" target=\"_blank\">~a</a>" (vk/link id) (m-request-username id)))
+                x))
+      paths)))
+
+(define (vk/link id)
+  (format "https://vk.com/id~a" id))
 
 (define (get-user-id user-name)
 (define plain-name? (re-matches? #px"^(id)(\\d+)$" user-name))
@@ -212,12 +237,16 @@
 (define raw-public? (raw-community? 'public))
 (define raw-event? (raw-community? 'event))
 
+(define (remove-vk-url-prefix url)
+  (last (string-split url "vk.com/")))
+
 (define-catch (extract-pure-id groupid)
-  (cond
-    ((raw-group? groupid) (ltrim groupid (len "club")))
-    ((raw-public? groupid) (ltrim groupid (len "public")))
-    ((raw-event? groupid) (ltrim groupid (len "event")))
-    (else groupid)))
+  (let ((groupid (remove-vk-url-prefix groupid)))
+    (cond
+      ((raw-group? groupid) (ltrim groupid (len "club")))
+      ((raw-public? groupid) (ltrim groupid (len "public")))
+      ((raw-event? groupid) (ltrim groupid (len "event")))
+      (else groupid))))
 
 (define (get-group-users groupid #:offset (offset 0))
   (when (status-output) (display (format "~a~n" groupid)) (flush-output))

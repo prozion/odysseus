@@ -8,7 +8,9 @@
 (require "../graphics/console.rkt")
 (require "../report/html.rkt")
 
-(define ns (module->namespace (string->path "c:/denis/denis_core/odysseus/scrap/vk/groups.rkt")))
+; (define ns (module->namespace (string->path "c:/denis/denis_core/odysseus/scrap/vk.rkt")))
+(define-namespace-anchor a)
+(define ns (namespace-anchor->namespace a))
 
 (define intersects "")
 (define group-minus "")
