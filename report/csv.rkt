@@ -18,6 +18,20 @@
                   (format "\"~a\"" (string-replace (->string val) "\"" ""))
                   "")))))
 
+(define-catch (transform-csv-fields csv-items transform-hash)
+  (map
+    (λ (item)
+      (for/fold
+        ((res item))
+        (((k v) transform-hash))
+        (cond
+          ((hash-ref res (->symbol k) #f)
+              (hash-union
+                (hash (->symbol k) (v (hash-ref* res k) res))
+                res))
+          (else res))))
+    csv-items))
+
 (define-catch (write-csv-file headers data filename #:delimeter (delimeter ","))
   (let* ( (res-header (implode headers delimeter))
           (res-body (implode

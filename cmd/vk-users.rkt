@@ -3,8 +3,7 @@
 (require racket/cmdline)
 
 (require "../lib/_all.rkt")
-(require "../scrap/vk/vk.rkt")
-(require "../scrap/vk/users.rkt")
+(require "../scrap/vk.rkt")
 (require "../graphics/console.rkt")
 (require "../report/html.rkt")
 

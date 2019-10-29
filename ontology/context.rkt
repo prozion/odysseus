@@ -3,7 +3,7 @@
 (require sxml)
 (require compatibility/defmacro)
 (require "../lib/_all.rkt")
-(require "../tabtree-format/tab-tree.rkt")
+(require "../tabtree/tab-tree.rkt")
 (require "common.rkt")
 (require racket/syntax)
 

@@ -120,6 +120,12 @@
         (hash 'error (@. res.error))
         (car (@. res.response)))))
 
+(define (vk/id->href id)
+  (format "https://vk.com/id~a" id))
+
+(define (vk/ids->hrefs ids)
+  (map vk/id->href ids))
+
 (define (get-user-id user-name)
 (define plain-name? (re-matches? #px"^(id)(\\d+)$" user-name))
 (if plain-name?
@@ -173,17 +179,30 @@
       (hash-ref (car (hash-ref res 'response)) 'name))))
 
 ; I don't define-catch here as it's better to process exceptions in the code upstream, when requesting id in a row among hundreds of urls
-(define (get-group-id group-name)
+(define (get-group-id group-name #:cache (cache #f))
   (define plain-name? (re-matches? #px"^(club|public)?(\\d+)$" group-name))
-  (if plain-name?
-      (let* ((n (get-matches #px"^(club|public)?(\\d+)$" group-name))
-            (n (third (first n))))
-          n)
-      (let* (
-            (res-group (string->jsexpr
-                        (get-url (format "https://api.vk.com/method/groups.getById?group_id=~a&v=5.52&access_token=~a" group-name AT))))
-            (result-group (and ($ response res-group) (not-empty? ($ response res-group)) ($ id (first ($ response res-group))))))
-        result-group)))
+  (or
+    (and cache (hash-ref cache group-name #f))
+    (if plain-name?
+        (let* ((n (get-matches #px"^(club|public)?(\\d+)$" group-name))
+              (n (third (first n))))
+            n)
+        (let* (
+              (res-group (string->jsexpr
+                          (get-url (format "https://api.vk.com/method/groups.getById?group_id=~a&v=5.52&access_token=~a" group-name AT))))
+              (result-group (and ($ response res-group) (not-empty? ($ response res-group)) ($ id (first ($ response res-group))))))
+          result-group))))
+
+(define (get-group-name-from-url group-url)
+  (let* (
+        (group-name (get-matches #px"^vk\\.com/(.*)$" group-url))
+        (group-name (and
+                      (not-empty? group-name)
+                      (match-let
+                          (((list (list _ x)) group-name))
+                        x)))
+        (group-name (and group-name (not (empty? group-name)) group-name)))
+    group-name))
 
 (define (raw-community? type)
   (λ (groupid)
@@ -247,7 +266,8 @@
           #:limit (limit #f)
           #:only-group (only-group #f)
           #:extended (extended #f)
-          #:break-if-error (break-if-error #t))
+          #:break-if-error (break-if-error #t)
+          #:do-when-error (do-when-error #f))
   (let* ((reqstr (format "https://api.vk.com/method/wall.get?owner_id=-~a&v=5.8&filter=others~a~a~a~a&access_token=~a"
                     gid
                     (if extended "&extended=1" "")
@@ -262,6 +282,7 @@
         (err ($ error res)))
     (cond
       ((and err break-if-error) (error err))
+      ((and err do-when-error) (do-when-error err) #f)
       (err #f)
       (else response))))
 

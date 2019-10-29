@@ -5,7 +5,7 @@
 (require "../lib/_all.rkt")
 (require "../graphics/console.rkt")
 (require "people.rkt")
-(require "../tabtree-format/tab-tree.rkt")
+(require "../tabtree/tab-tree.rkt")
 (require "../report/csv.rkt")
 
 (define day #f)

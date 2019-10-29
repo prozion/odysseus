@@ -231,7 +231,8 @@
         new-hash-tree))))
 
 ; filter and hash-tree subset selection functions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(define-catch (get-leaves hash-tree #:exclude (exclude '(name)))
+; ignore-f - function to switch off whole branches (e.g. those that have i:1) or for other operations over branches
+(define-catch (get-leaves hash-tree #:exclude (exclude '(name)) #:ignore-f (ignore-f #f))
   (cond
     ((not (hash? hash-tree)) empty)
     ((hash-empty? hash-tree) empty)
@@ -247,7 +248,9 @@
                 (cond
                   ((and non-special-attrs (not-empty? non-special-attrs)) (pushr res ke))
                   (else res))))
-          (append res (get-leaves (hash-ref hash-tree ke) #:exclude exclude)))))))
+          (cond
+            ((and ignore-f (ignore-f ke)) res)
+            (else (append res (get-leaves (hash-ref hash-tree ke) #:exclude exclude #:ignore-f ignore-f)))))))))
 
 (define-catch (get-item-by-id-from-the-list plained-hash-tree id (id-attr 'id))
   ; (--- "get-item-by-id-from-the-list:" ($ id plained-hash-tree) id)

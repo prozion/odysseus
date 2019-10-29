@@ -47,6 +47,9 @@
                 (read-line-iter (pushr res line) (read-line ff 'any)))))
         (read-line-iter (list) (read-line ff 'any)))))
 
+(define (write-file-by-lines filename alist)
+  (write-file filename (implode alist "\n")))
+
 (define (write-file-to-dir #:file file #:dir dir v)
   ; first try thinking that dir is relative, then absolute path, if both are not directories then write to current-directory
   (let* (
@@ -85,7 +88,9 @@
 
 ; read serialized data and converts it to a normal value
 (define (read-serialized-data-from-file filepath)
-  (deserialize (file->value filepath)))
+  (if (file-exists? filepath)
+    (deserialize (file->value filepath))
+    #f))
 
 ;;; shorthands
 (define-syntax (--- stx)

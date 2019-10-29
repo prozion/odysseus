@@ -2,7 +2,7 @@
 
 (require "../lib/_all.rkt")
 
-(provide (all-defined-out))
+(provide (except-out (all-defined-out) category? vanilla-category?))
 
 ;;;;; For storing data from tabtree format we will use a following model:
 ;;;;; (hash a (hash) b (hash) c (hash c1 (hash) c2 (hash c21 (hash))))
@@ -23,6 +23,11 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+; category (one that starts with a small letter)
+(define-catch (category? line)
+  (re-matches? "^\t*[_a-zа-я.][A-Za-zА-Яа-яё0-9_\\-+/]+\\s*.*$" line))
+
+; just a category without parameters in a mtree variant
 (define-catch (vanilla-category? line)
   (re-matches? "^\t*[A-Za-zА-ЯЁа-яё\\-+/_]+\\s*\\.$" line))
 
@@ -82,6 +87,7 @@
     (else
       (let* ((line (car source-lines)) ; take the next source-line, now it is a "current line"
             (line (first (string-split line ";"))) ; take content just before comments
+            ; (_ (--- line))
             (level (count-tabs line))
             (delta-level (- level (dec (length curpath)))) ; find the level of the current line
             (item (get-item line)) ; parse current line to item
@@ -184,6 +190,22 @@
                             line))
                         tree-lines)))
       (fill-tree-iter tree-lines (hash) empty))))
+
+(define-catch (extract-tabtree-frame input-file output-file)
+  (let* (
+        ;; take all lines from the file:
+        (tree-lines (read-file-by-lines input-file))
+        ;; remove comment lines:
+        (tree-lines (clean
+                      (λ (line) (or
+                                  (re-matches? "^\t*;" line)
+                                  (re-matches? "^\\s*$" line)))
+                      tree-lines))
+        ;; leave just categories:
+        (tree-lines (filter category? tree-lines))
+        )
+    (write-file-by-lines output-file tree-lines))
+    #t)
 
 (define-catch (write-tab-tree filename hashtree)
   (write-file filename (hashtree->string hashtree 'rule-number #:conversion-table (hash #t "<t>" #f "<f>"))))

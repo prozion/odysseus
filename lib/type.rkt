@@ -126,7 +126,9 @@
     (else (tostring x))))
 
 (define (->int x)
-  (int (->number x)))
+  (and
+    (number? (->number x))
+    (int (->number x))))
 
 (define (->symbol x (glue-char "_"))
   (cond
@@ -273,6 +275,7 @@
   (check-equal? (->string '(a b c)) "abc")
 
   (check-equal? (->int "3.5") 3)
+  (check-equal? (->int 3.5) 3)
   (check-equal? (->int "3,5") 3)
   (check-equal? (->int "3") 3)
   (check-equal? (->int "2 850,40") 2850)
