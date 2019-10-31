@@ -124,9 +124,9 @@
 (define (request-username id (glue " "))
   (when (status-output) (display "+") (flush-output))
   (let ((res (string->jsexpr
-                (get-url (format "https://api.vk.com/method/users.get?user_ids=~a&v=5.52" id)))))
+                (get-url (format "https://api.vk.com/method/users.get?user_ids=~a&v=5.52&access_token=~a" id AT)))))
     (if (@. res.error)
-      "n/a"
+      id
       (let ((u (car (@. res.response))))
         (format "~a~a~a"
                   (replace-all (@. u.first_name) " " glue)
@@ -196,8 +196,12 @@
     (--- (length (hash-keys users)))))
 
 ;;; Groups ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(define (remove-vk-url-prefix url)
+  (last (string-split url "vk.com/")))
+
 (define-catch (get-group-name groupid)
-  (let ((res (string->jsexpr
+  (let* ((groupid (remove-vk-url-prefix groupid))
+        (res (string->jsexpr
                     (get-url (format "https://api.vk.com/method/groups.getById?group_id=~a&v=5.52&access_token=~a" groupid AT)))))
     (if (@. res.error)
       null
@@ -236,9 +240,6 @@
 (define raw-group? (raw-community? 'club))
 (define raw-public? (raw-community? 'public))
 (define raw-event? (raw-community? 'event))
-
-(define (remove-vk-url-prefix url)
-  (last (string-split url "vk.com/")))
 
 (define-catch (extract-pure-id groupid)
   (let ((groupid (remove-vk-url-prefix groupid)))

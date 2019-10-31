@@ -31,20 +31,28 @@
           "~a<br>~a<br>"
           (implode
             (map
-              (λ (x) (html-a (str "https://vk.com/" x) (get-group-name x) #:color "#009000"))
+              (λ (x) (html-a
+                        (str "https://vk.com/" (remove-vk-url-prefix x))
+                        (get-group-name x)
+                        #:color "#009000"))
               ,var)
             (html-color ,symbol "red"))
           (format "Всего: <b>~a</b> человек~n" (length res-ids))))
       (display (format "~n~a: ~a человек~n" ,title (length res-ids))))))
 
 (define (process-expression expression)
+  (define (id->href-iter res-ids (res empty))
+    (cond
+      ((empty? res-ids) res)
+      (else (sleep 0.1)
+            (id->href-iter (cdr res-ids) (pushr res (vk/id->href (car res-ids)))))))
   (let ((title "Результат выражения")
         (res-ids (eval (read (open-input-string expression)) ns)))
     (if (notnil? output-file)
       (write-html-file
         output-file
         title
-        (map vk/id->href res-ids)
+        (id->href-iter res-ids)
         #:lead
         (format
           "~a<br>~a<br>"

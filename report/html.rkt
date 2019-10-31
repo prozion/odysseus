@@ -6,7 +6,7 @@
 (provide (all-defined-out))
 
 (define (write-html-file filename title body #:lead (lead ""))
-  (let* ( (html-format (read-file (string-append (getenv "odysseus") "/templates/advanced.fhtml")))
+  (let* ( (html-format (read-file (string-append (getenv "odysseus") "/report/templates/advanced.fhtml")))
           (body (cond
                   ((string? body) body)
                   ((list2? body) (div-iter body ""))

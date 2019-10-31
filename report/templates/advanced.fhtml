@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>~a</title>
+    <style>
+      * { font-family: Arial, sans-serif; line-height: 1.5em;}
+      h1 { font-size: 160%; }
+    </style>
+  </head>
+  <body>
+    <!-- title: -->    
+    <h1>~a</h1>
+    <!-- lead: -->
+    <p>~a</p>
+    <!-- body: -->
+    ~a
+  </body>
+</html>

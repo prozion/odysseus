@@ -79,7 +79,11 @@
     res))
 
 ; Iteratively populates nested list structure (tree) with cons-hashes (item)
-(define-catch (fill-tree-iter source-lines result-tree curpath (n 0))
+(define-catch (fill-tree-iter source-lines result-tree curpath (n 0) #:tags (tags empty))
+  (define (clean-tags tagcons current-level)
+    (filter-not (λ (x) (> (car x) current-level)) tagcons))
+  (define (tagcons->string tagcons)
+    (implode (map cdr tagcons)))
   (cond
     ; if no more lines then exit the iteration and return result-tree
     ((empty? source-lines) result-tree)
@@ -110,6 +114,14 @@
             (item (if (empty? parents)
                       (add-parent item #f) ; root element has no parents
                       (add-parent item (car parents)))) ; otherwise, a parent is the last element in the path sequence
+            ; add tags
+            (tags (clean-tags tags level))
+            (tag ($ t item))
+            (tags (if tag (cons (cons level tag) tags) tags))
+            (tags (uniques tags))
+            (item (if (not-empty? tags)
+                      (hash-union (hash '_t (tagcons->string tags)) item)
+                      item))
             ; add label to item
             (item (hash-union (hash '_order n '_label (if (empty? curpath) "" (last curpath))) item))
             ; add item to the result-tree:
@@ -118,7 +130,8 @@
                                 ((hash-empty? item) result-tree)
                                 ; otherwise add item to the end of parents sequence
                                 (else (hash-tree-add-value-by-id-path* result-tree (reverse parents) item key-name)))))
-        (fill-tree-iter (cdr source-lines) new-result-tree nextpath (+ 1 n)))))) ; repeat the process for the rest of source lines
+        (fill-tree-iter (cdr source-lines) new-result-tree nextpath (+ 1 n) #:tags tags))))) ; repeat the process for the rest of source lines
+
 
 ; Initialize population of a tree with data from tabtree file
 (define-catch (parse-tab-tree tree-file)
