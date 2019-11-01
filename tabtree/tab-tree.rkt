@@ -81,7 +81,7 @@
 ; Iteratively populates nested list structure (tree) with cons-hashes (item)
 (define-catch (fill-tree-iter source-lines result-tree curpath (n 0) #:tags (tags empty))
   (define (clean-tags tagcons current-level)
-    (filter-not (λ (x) (> (car x) current-level)) tagcons))
+    (filter-not (λ (x) (>= (car x) current-level)) tagcons))
   (define (tagcons->string tagcons)
     (implode (map cdr tagcons)))
   (cond
@@ -119,6 +119,7 @@
             (tag ($ t item))
             (tags (if tag (cons (cons level tag) tags) tags))
             (tags (uniques tags))
+            ; (_ (when ($ t item) (--- tags ($ id item))))
             (item (if (not-empty? tags)
                       (hash-union (hash '_t (tagcons->string tags)) item)
                       item))
