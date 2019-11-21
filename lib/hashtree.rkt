@@ -231,7 +231,12 @@
         new-hash-tree))))
 
 ; filter and hash-tree subset selection functions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(define-catch (get-leaves hash-tree #:exclude (exclude '(name)))
+(define-catch (get-leaves hash-tree
+                  #:exclude (exclude '(name))
+                  ; attributes that derived from root items to the leaves:
+                  #:derived-attrs (derived-attrs empty)
+                  ; hash, where keys are names of existed derived attributes and values are actual values of derived attributes:
+                  #:derived-attr-values (derived-attr-values (hash)))
   (cond
     ((not (hash? hash-tree)) empty)
     ((hash-empty? hash-tree) empty)
@@ -243,11 +248,19 @@
               (non-special-attrs (if (hash? ke)
                                   (get-non-special-attrs ke #:exclude exclude)
                                   #f))
+              (local-derived-attrs (intersect derived-attrs non-special-attrs))
+              (local-derived-attr-values (for/hash ((k local-derived-attrs)) (values k (hash-ref* ke k))))
+              (derived-attr-values (hash-union local-derived-attr-values derived-attr-values))
+              (new-ke (hash-union derived-attr-values ke))
               (res
                 (cond
-                  ((and non-special-attrs (not-empty? non-special-attrs)) (pushr res ke))
+                  ((and non-special-attrs (not-empty? non-special-attrs)) (pushr res new-ke))
                   (else res))))
-          (append res (get-leaves (hash-ref hash-tree ke) #:exclude exclude)))))))
+          (append res (get-leaves
+                        (hash-ref hash-tree ke)
+                        #:exclude exclude
+                        #:derived-attrs derived-attrs
+                        #:derived-attr-values derived-attr-values)))))))
 
 (define-catch (get-item-by-id-from-the-list plained-hash-tree id (id-attr 'id))
   ; (--- "get-item-by-id-from-the-list:" ($ id plained-hash-tree) id)

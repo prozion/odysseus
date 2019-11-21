@@ -14,6 +14,12 @@
       (λ (x) txt)
       (range 0 n))))
 
+; defensive version of substring
+(define-catch (substr txt start end)
+  (if (> (string-length txt) end)
+    (substring txt start end)
+    txt))
+
 ;(define (format-n template seq)
 ;  (cond
 ;    ((list? seq) (format-n (re-substitute template "~l\((.*?)\)")
@@ -182,6 +188,9 @@
 (define (z-a a b) (string>? (string-downcase (->string a)) (string-downcase (->string b))))
 
 (define-catch (take-one astr #:f (f (λ (x) (and (not-empty? x) (car x)))) #:delimeter (delimeter ","))
+  (f (string-split (->string astr) delimeter)))
+
+(define-catch (take-last astr #:f (f (λ (x) (and (not-empty? x) (last x)))) #:delimeter (delimeter ","))
   (f (string-split (->string astr) delimeter)))
 
 (define-catch (string-ltrim astr num)
