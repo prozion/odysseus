@@ -34,6 +34,44 @@
 (define-catch (csv-file->hash filename #:delimeter (delimeter ",") #:headers (headers #t) #:key-index (key-index 1))
   (csv->hash (read-file filename) #:delimeter delimeter #:headers headers #:key-index key-index))
 
+(define-catch (csv-file->hashtree filename #:delimeter (delimeter ",") #:headers (headers #t) #:key-index (key-index 1) #:root (root "root") #:id (id 'id))
+  (let* (
+          (content (csv-file->list-rows filename #:delimeter delimeter))
+          (h (if (not headers)
+                (range 1 (inc (length (first content))))
+                (map ->symbol (first content))))
+          (_ (when-not (indexof? h id) (errorf "'~a' is not a field in a given CSV file, failed to detect id field" id)))
+          (content (if (not headers) content (rest content)))
+          (content (filter-not empty? content))
+          ; make list of hashes from list of list of values
+          (hashtree (for/list
+                      ((line content))
+                      (hash-keys-substitute
+                        (for/hash
+                          ((k h) (v line))
+                          (values k v))
+                        (list id)
+                        (list 'id))))
+          ; remove lines with empty ids
+          (hashtree (filter
+                      (λ (h) (and
+                                (hash-ref h 'id #f)
+                                (not-equal? (hash-ref h 'id) "")))
+                      hashtree))
+          ; make id look like id
+          (hashtree (map
+                      (λ (h) (hash-union (hash 'id (->symbol (hash-ref h 'id) #:transform-function idfy)) h))
+                      hashtree))
+          ; make true hashtree in its form
+          (hashtree (for/hash
+                      ((h hashtree))
+                      (values h (hash))))
+          ; append root over the resulted hashtree
+          (hashtree (hash
+                      (hash 'id root)
+                      hashtree)))
+    hashtree))
+
 (define-catch (list->csv-file filename lst #:delimeter (delimeter ",") #:headers (headers #t) #:quoted (quoted #t))
   (let* ((content
             (opt/implode

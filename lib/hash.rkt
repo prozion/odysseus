@@ -1,7 +1,7 @@
 #lang racket
 
 (require compatibility/defmacro)
-(require "base.rkt" "seqs.rkt" "type.rkt" "regexp.rkt" "debug.rkt" (for-syntax "seqs.rkt" "type.rkt"))
+(require "base.rkt" "seqs.rkt" "type.rkt" "regexp.rkt" "debug.rkt" "controls.rkt" "strings.rkt" (for-syntax "seqs.rkt" "type.rkt"))
 
 (provide (all-defined-out))
 
@@ -390,20 +390,41 @@
         ((#t fuse-overwrite) seq2)))))
 
 ;; OUTPUT
-(define (hash->string h #:delimeter (delimeter ", ") #:prefix (prefix "") #:equal-sign (equal-sign "=") #:conversion-table (conversion-table #f))
-  (let ((hl (hash-length h)))
+(define-catch (hash->string
+                h
+                #:delimeter (delimeter ", ")
+                #:prefix (prefix "")
+                #:equal-sign (equal-sign "=")
+                #:attributes (attributes #f)
+                #:default-type (default-type 'plain)
+                #:conversion-table (conversion-table #f))
+  (let ((hl (hash-length h))
+        (ks (cond
+              (attributes (map (λ (x) (if (pair? x) (car x) x)) attributes))
+              (else (hash-keys h)))))
     (for/fold
       ((s ""))
-      (((k v) (in-hash h)) (i hl))
-      (let* ((vp (cond
-                  ((string? v) (str "\"" v "\""))
+      ((k ks) (i hl))
+      (let* (
+              (v-type (if-not attributes
+                        default-type
+                        (for/fold
+                          ((res default-type))
+                          ((a attributes))
+                          (cond
+                            ((and (pair? a) (equal? k (car a))) (cdr a))
+                            (else res)))))
+              (v (hash-ref h k))
+              (vp (cond
+                  ((equal? v-type 'string) (str "\"" v "\""))
+                  ((equal? v-type 'plain) (str (idfy v)))
                   (else v)))
             (vp (if (and conversion-table (hash-ref conversion-table vp #f))
                       (hash-ref conversion-table vp)
                       vp)))
-      (if (< i (dec hl))
-        (format "~a~a~a~a~a~a" s prefix k equal-sign vp delimeter)
-        (format "~a~a~a~a~a" s prefix k equal-sign vp))))))
+        (cond
+          ((< i (dec hl)) (format "~a~a~a~a~a~a" s prefix k equal-sign vp delimeter))
+          (else (format "~a~a~a~a~a" s prefix k equal-sign vp)))))))
 
 (define (hash-print-json h #:prefix (prefix ""))
   (format "{~a}"
@@ -461,7 +482,7 @@
               )
         (loop res (cdr lst-rest)))))))
 
-(define (hash-keys-substitute h original-keys subst-keys)
+(define-catch (hash-keys-substitute h original-keys subst-keys)
   (cond
     ((empty? subst-keys) h)
     ((empty? original-keys) h)

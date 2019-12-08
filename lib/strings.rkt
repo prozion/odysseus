@@ -131,6 +131,11 @@
                     (cons "'" "\"")
                     (cons #px"(?<=\\S),(?=\\S)" ", "))))
 
+(define idfy (change-text
+                  (list
+                    (cons " " "_")
+                    (cons "-" "_"))))
+
 (define namefy-nbsp (change-text
                   (list
                     (cons "_" "&nbsp;")
@@ -151,12 +156,12 @@
 
 (define clean-newlines linefy)
 
-(define (httpify txt)
+(define (httpify txt (prefix "http"))
   (cond
     ((not txt) txt)
     ((re-matches? "^https?://" txt) txt)
     ((re-matches? "^\\./" txt) txt)
-    (else (str "http://" txt))))
+    (else (str prefix "://" txt))))
 
 ; used for comparing messages in vk
 (define simplify-text

@@ -130,9 +130,10 @@
     (number? (->number x))
     (int (->number x))))
 
-(define (->symbol x (glue-char "_"))
+(define (->symbol x (glue-char "_") #:transform-function (transform-function #f))
   (cond
     ((number? x) (string->symbol (number->string x)))
+    ((and transform-function (string? x)) (string->symbol (transform-function x)))
     ((string? x) (string->symbol (string-replace x " " glue-char)))
     (else x)))
 
@@ -275,6 +276,7 @@
   (check-equal? (->string '(a b c)) "abc")
 
   (check-equal? (->int "3.5") 3)
+  (check-equal? (->int "00") 0)
   (check-equal? (->int 3.5) 3)
   (check-equal? (->int "3,5") 3)
   (check-equal? (->int "3") 3)

@@ -296,6 +296,7 @@
           #:limit (limit #f)
           #:only-group (only-group #f)
           #:extended (extended #f)
+          #:success-display (success-display #f)
           #:break-if-error (break-if-error #t)
           #:do-when-error (do-when-error #f))
   (let* ((reqstr (format "https://api.vk.com/method/wall.get?owner_id=-~a&v=5.8&filter=others~a~a~a~a&access_token=~a"
@@ -314,7 +315,11 @@
       ((and err break-if-error) (error err))
       ((and err do-when-error) (do-when-error err) #f)
       (err #f)
-      (else response))))
+      (else
+        (when success-display
+              (display success-display)
+              (flush-output))
+        response))))
 
 (define-catch (get-img-url item)
   (let* ((copy_history ($ copy_history item))

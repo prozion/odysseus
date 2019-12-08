@@ -84,14 +84,25 @@
               (and exclude (indexof? exclude x))))
     (hash-keys h)))
 
-(define-catch (hashtree->string h (order-key #f) #:conversion-table (conversion-table #f))
+(define-catch (hashtree->string
+                  h
+                  #:order-key (order-key #f)
+                  #:attributes (attributes #f)
+                  #:exclude-lines? (exclude-lines? #f)
+                  #:conversion-table (conversion-table #f))
   (define-catch (hashtree->string-iter h curlevel res-acc order-key)
     (cond
       ((hash-empty? h) "")
       (else
         (let* ((ks (hash-keys h))
               (ks (if order-key
-                      (sort ks (λ (a b) (< (hash-ref a order-key 0) (hash-ref b order-key 0))))
+                      (sort ks (λ (a b) (let* ((aval (hash-ref a order-key 0))
+                                              (bval (hash-ref b order-key 0)))
+                                          (cond
+                                            ((and (number? aval) (number? bval))
+                                                (< aval bval))
+                                            (else
+                                              (string<? (->string aval) (->string bval)))))))
                       ks))
               (k (car ks))
               (v (hash-ref h k))
@@ -101,8 +112,10 @@
               (id ($ id k))
               (other-keys (exclude (hash-keys k) 'id))
               (tabs (dupstr "\t" curlevel))
-              (new-line (format "~a~a ~a\n" tabs id (hash->string (hash-delete k 'id)  #:delimeter " " #:equal-sign ":" #:conversion-table conversion-table)))
-              (res (string-append res-acc new-line))
+              (new-line (format "~a~a ~a\n" tabs id (hash->string (hash-delete k 'id)  #:delimeter " " #:equal-sign ":" #:attributes attributes #:conversion-table conversion-table)))
+              (res (cond
+                      ((and exclude-lines? (exclude-lines? k)) res-acc)
+                      (else (string-append res-acc new-line))))
               (res (if (hash-empty? v)
                       res
                       (hashtree->string-iter v (+ 1 curlevel) res order-key)))
@@ -469,7 +482,6 @@
     (for/hash
       ((item list-of-hash))
       (values item (hash)))))
-
 
 (module+ test
 

@@ -43,9 +43,9 @@
         ; read <name>
         (res-name (if (mtree)
                     ; if parsing in mtree mode:
-                    (get-matches #px"^\t*([\"#A-Za-zА-ЯЁа-яё0-9@\\-_+/|<>\\?]+)" line)
+                    (get-matches #px"^\t*([\"#A-Za-zА-ЯЁа-яё0-9@\\-_+/|<>\\?!]+)" line)
                     ; if parsing in tree mode, include dot:
-                    (get-matches #px"^\t*([\"#A-Za-zА-ЯЁа-яё0-9@.\\-_+/|<>\\?]+)" line)))
+                    (get-matches #px"^\t*([\"#A-Za-zА-ЯЁа-яё0-9@.\\-_+/|<>\\?!]+)" line)))
         ; read all parameters, that have a string value
         (res-string-parameters
               (get-matches #px"(\\S+?):[\"`]([^\"`]+?)[\"`]" line))
@@ -220,6 +220,3 @@
         )
     (write-file-by-lines output-file tree-lines))
     #t)
-
-(define-catch (write-tab-tree filename hashtree)
-  (write-file filename (hashtree->string hashtree 'rule-number #:conversion-table (hash #t "<t>" #f "<f>"))))
