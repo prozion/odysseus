@@ -51,6 +51,13 @@
         (λ (k v) (values k (if q (str q v q) v)))
         h))))
 
+(define (make-json-string val)
+  (string->bytes/utf-8
+    (format "~a"
+      (cond
+        ((not val) "Invalid format")
+        (else (alist->json val))))))
+
 (module+ test
 
   (require rackunit)

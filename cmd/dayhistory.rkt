@@ -8,7 +8,7 @@
 (require "../report/csv.rkt")
 (require "../tabtree/tab-tree.rkt")
 
-(define timeline-cache "d:/denis/cache/timeline.txt" )
+(define timeline-cache "d:/denis/data/timeline/cache/timeline.txt" )
 
 ; (write-data-to-file
 ;     (parse-tab-tree "c:/denis/denis_core/denis_personal/my_memories/timeline.tree")
