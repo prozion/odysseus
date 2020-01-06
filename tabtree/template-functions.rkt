@@ -80,10 +80,12 @@
       ((line (string-split (->string attrs) ",")))
       (format "~a~n<li>~a</li>" res (f line)))))
 
-(define (format-phone phone #:prefix (prefix "81554") #:landline-regex (landline-regex "\\d{5}"))
+(define (format-phone phone #:prefix (prefix "81554") #:landline-regex (landline-regex "^\\d{5}$"))
   (cond
     ((re-matches? "\\+\\d{11}" phone)
       (format-string "cc ccc ccc-cc-cc" phone))
+    ((re-matches? "8\\d{10}" phone)
+      (format-string "+7 ccc ccc-cc-cc" (ltrim phone)))
     ((re-matches? landline-regex phone)
       (format "8 (~a) ~a" prefix
                           (case (string-length phone)

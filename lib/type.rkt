@@ -116,6 +116,16 @@
         (and filtered (+ delta (string->number filtered)))))
     (else x)))
 
+; ->number* transforming is used when working with dates
+(define (->number* x (delta 0))
+  (cond
+    ((equal? x "xx") 1)
+    ((equal? x "0x") 1)
+    ((equal? x "1x") 10)
+    ((equal? x "2x") 20)
+    ((equal? x "3x") 30)
+    (else (->number x delta))))
+
 (define (->string x)
   (cond
     ((number? x) (number->string x))

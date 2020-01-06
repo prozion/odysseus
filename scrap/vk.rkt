@@ -321,12 +321,23 @@
               (flush-output))
         response))))
 
-(define-catch (get-img-url item)
+(define-catch (get-img-urls item)
   (let* ((copy_history ($ copy_history item))
         (copy_history (and (not-empty? copy_history) (first copy_history)))
         (attachments (or
                         (and copy_history ($ attachments copy_history))
                         ($ attachments item)))
-        (attachment (and (not-empty? attachments) (first attachments)))
-        (attachment_photo_130 (and attachment ($ photo.photo_130 attachment))))
-    attachment_photo_130))
+        (attachment (or (and attachments (first attachments)) (hash)))
+        )
+    ; (--- "photo" ($ photo attachment))
+    ; (--- "photo.photo_604" ($ photo.photo_604 attachment))
+    (hash
+      '1x (and attachments ($ photo.photo_75 attachment))
+      '2x (and attachments ($ photo.photo_130 attachment))
+      '3x (and attachments ($ photo.photo_604 attachment))
+      '4x (and attachments ($ photo.photo_807 attachment))
+      '5x (and attachments ($ photo.photo_1280 attachment))
+    )))
+
+(define-catch (get-img-url item #:image-size (image-size '2x))
+  (hash-ref (get-img-urls item) image-size))

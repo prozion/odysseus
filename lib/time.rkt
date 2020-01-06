@@ -245,8 +245,8 @@
         ((comp-op (car lst1) (car lst2)) #t)
         (else #f)))
     (let* (
-          (parsed1 (reverse (map ->number (string-split date1 "."))))
-          (parsed2 (reverse (map ->number (string-split date2 ".")))))
+          (parsed1 (reverse (map ->number* (string-split date1 "."))))
+          (parsed2 (reverse (map ->number* (string-split date2 ".")))))
       (cond
         ((ormap (λ (x) (equal? x comp-op)) (list > <)) (compare-list-neq comp-op parsed1 parsed2))
         ((ormap (λ (x) (equal? x comp-op)) (list = >= <=)) (compare-list-eq comp-op parsed1 parsed2))
@@ -665,6 +665,7 @@
 
   (check-false (d>= "01.10.1985" "07.12.1998"))
   (check-true (d<= "01.10.1985" "07.12.1998"))
+  (check-true (d<= "xx.10.1985" "07.12.1998"))
   (check-true (d<= "01.10.1985" "01.10.1985"))
 
   (check-equal? (d+ "01.10.1985" 1) "02.10.1985")

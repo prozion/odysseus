@@ -261,7 +261,10 @@
               (non-special-attrs (if (hash? ke)
                                   (get-non-special-attrs ke #:exclude exclude)
                                   #f))
-              (local-derived-attrs (intersect derived-attrs non-special-attrs))
+              (local-derived-attrs (cond
+                                      ((list? derived-attrs) (intersect derived-attrs non-special-attrs))
+                                      ((procedure? derived-attrs) (filter derived-attrs non-special-attrs))
+                                      (else (errorf "wrong type of 'derived-attrs' function argument, which has the following value: ~a" derived-attrs))))
               (local-derived-attr-values (for/hash ((k local-derived-attrs)) (values k (hash-ref* ke k))))
               (derived-attr-values (hash-union local-derived-attr-values derived-attr-values))
               (new-ke (hash-union derived-attr-values ke))
@@ -275,18 +278,21 @@
                         #:derived-attrs derived-attrs
                         #:derived-attr-values derived-attr-values)))))))
 
-(define-catch (get-item-by-id-from-the-list plained-hash-tree id (id-attr 'id))
+(define-catch (get-item-by-id-from-the-list plained-hash-tree id (id-attr 'id) #:one-of? (one-of? #t))
   ; (--- "get-item-by-id-from-the-list:" ($ id plained-hash-tree) id)
   (let ((res
           (filter
-            (λ (e) (equal? (hash-ref* e id-attr) id))
+            (λ (e) (cond
+                      (one-of? (indexof*? (string-split (->string (hash-ref* e id-attr)) ",") id))
+                      (else
+                        (equal? (hash-ref* e id-attr) id))))
             plained-hash-tree)))
     (cond
       ((empty? res) #f)
       (else (car res)))))
 
-(define (@id id plained-hash-tree #:error (err #f))
-  (let ((res (get-item-by-id-from-the-list plained-hash-tree id)))
+(define (@id id plained-hash-tree #:error (err #f) #:attr (attr 'id))
+  (let ((res (get-item-by-id-from-the-list plained-hash-tree id attr)))
     (when (and err (not res)) (error err))
     res))
 

@@ -194,7 +194,16 @@
         (html-res (for/fold
                     ((res html-res))
                     ((code-snippet-r code-snippets-results) (code-snippet code-snippets))
-                    (string-replace res (str "%(" code-snippet ")%") (if (and code-snippet-r (not (void? code-snippet-r))) (->string code-snippet-r) ""))))
+                    (string-replace
+                      res
+                      (str "%(" code-snippet ")%")
+                      (if (and code-snippet-r (not (void? code-snippet-r)))
+                        (->string code-snippet-r)
+                        ""))))
+        ; clean empty lines after snippets
+        (html-res (string-replace html-res #px"\n\\s*?\r?\n" "\n\n"))
+        (html-res (string-replace html-res #px"\n\\s+?\n" "\n\n"))
+        (html-res (string-replace html-res #px"(?m:\n\n+)" "\n\n"))
         )
     ; (--- html-res)
     html-res))
