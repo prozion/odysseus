@@ -351,6 +351,9 @@
 (define (current-date)
   (seconds->datestr (current-seconds)))
 
+(define (current-day)
+  (nth (string-split (current-date) ".") 1))
+
 (define (current-month)
   (nth (string-split (current-date) ".") 2))
 

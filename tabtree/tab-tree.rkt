@@ -95,6 +95,7 @@
             (level (count-tabs line))
             (delta-level (- level (dec (length curpath)))) ; find the level of the current line
             (item (get-item line)) ; parse current line to item
+            ; get all +parameters in the current line
             ; convert to string all general (not special) parameters:
             (item (hash-map
                     (λ (k v) (if (and k (special-parameter? k))
@@ -133,6 +134,17 @@
                                 (else (hash-tree-add-value-by-id-path* result-tree (reverse parents) item key-name)))))
         (fill-tree-iter (cdr source-lines) new-result-tree nextpath (+ 1 n) #:tags tags))))) ; repeat the process for the rest of source lines
 
+(define-catch (add-inherities tab-tree #:inherities (inherities (hash)))
+  (hash-map
+    (λ (k v)
+      (let* ((local-inherities (hash-filter
+                                  (λ (k1 v1) (re-matches? "\\+[\\-a-z0-9]+" (->string k1)))
+                                  k))
+            (inherities (hash-union local-inherities inherities)))
+        (values
+          (hash-union inherities k)
+          (add-inherities v #:inherities inherities))))
+    tab-tree))
 
 ; Initialize population of a tree with data from tabtree file
 (define-catch (parse-tab-tree tree-file)
@@ -147,7 +159,8 @@
                                     (re-matches? "^\\s*$" line)))
                         tree-lines)))
         ;; start populating the tree
-        (fill-tree-iter tree-lines (hash) empty))))
+        (add-inherities
+          (fill-tree-iter tree-lines (hash) empty)))))
 
 (define-catch (parse-tab-mtree tree-file)
   (parameterize ((mtree #t))
