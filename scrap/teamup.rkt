@@ -26,7 +26,7 @@
                               (format "endDate=~a" end-date))
                           (else ""))
                       ))
-        (res (get-url req header))
+        (res (get-url req #:header header))
         (res (string->jsexpr res))
         )
     ($ events res)))

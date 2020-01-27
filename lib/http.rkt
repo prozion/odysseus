@@ -37,10 +37,10 @@
       3)))
 
 ;;;;
-
-(define (get-url url (header null))
-  (port->string
-    (get-pure-port (string->url url) header)))
+(define (get-url url #:header (header null) #:encoding (encoding #f))
+  (let* ((a_port (get-pure-port (string->url url) header))
+        (a_port (if encoding (reencode-input-port a_port encoding) a_port)))
+  (port->string a_port)))
 
 (define (get-url-bytes url)
   (port->bytes

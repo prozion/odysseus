@@ -134,6 +134,12 @@
 (define idfy (change-text
                   (list
                     (cons " " "_")
+                    (cons "«" "")
+                    (cons "»" "")
+                    (cons "(" "")
+                    (cons ")" "")
+                    (cons "," "")
+                    (cons ":" "")
                     (cons "-" "_"))))
 
 (define namefy-nbsp (change-text
@@ -220,6 +226,15 @@
 
 (define-catch (remove-extra-whitespaces astr)
   (string-replace astr #px"\\s\\s+" " "))
+
+; either a or b is a substring of the counterpart
+(define-catch (symmetric-substring? a b)
+  (let* ((a_length (string-length a))
+        (b_length (string-length b)))
+    (if (> a_length b_length)
+      (string-contains? a b)
+      (string-contains? b a))))
+
 
 (module+ test
 
