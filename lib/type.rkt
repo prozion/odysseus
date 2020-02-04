@@ -147,6 +147,11 @@
     ((string? x) (string->symbol (string-replace x " " glue-char)))
     (else x)))
 
+(define (->boolean x)
+  (cond
+    ((boolean? x) x)
+    (else (if (equal? (->string x) "#f") #f #t))))
+
 (define (atom? x)
   (indexof? '(number string) (type x)))
 

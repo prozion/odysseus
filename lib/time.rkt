@@ -17,7 +17,7 @@
 (define months (split "jan feb mar apr may jun jul aug sep oct nov dec" " "))
 (define months-full (split "january february march april may june july august september october november december" " "))
 (define months-ru (split "янв фев мар апр май июн июл aвг сен окт ноя дек" " "))
-(define months-ru-full (split "январь февраль март апрель май июнь июль aвгуст сентябрь октябрь ноябрь декабрь" " "))
+(define months-ru-full (split "январь февраль март апрель май июнь июль август сентябрь октябрь ноябрь декабрь" " "))
 (define months-ru-full-genetive (split "января февраля марта апреля мая июня июля aвгуста сентября октября ноября декабря" " "))
 (define leap-days '(31 29 31 30 31 30 31 31 30 31 30 31))
 

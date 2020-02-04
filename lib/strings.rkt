@@ -140,7 +140,11 @@
                     (cons ")" "")
                     (cons "," "")
                     (cons ":" "")
-                    (cons "-" "_"))))
+                    (cons "—" "_")
+                    (cons "-" "_")
+                    (cons "ё" "е")
+                    (cons "__" "_")
+                    )))
 
 (define namefy-nbsp (change-text
                   (list
@@ -229,7 +233,10 @@
 
 ; either a or b is a substring of the counterpart
 (define-catch (symmetric-substring? a b)
-  (let* ((a_length (string-length a))
+  (let* (
+        (a (string-downcase a))
+        (b (string-downcase b))
+        (a_length (string-length a))
         (b_length (string-length b)))
     (if (> a_length b_length)
       (string-contains? a b)

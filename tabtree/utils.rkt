@@ -30,7 +30,7 @@
     (λ (x) (hash-union (hash attr val) x))
     list-of-hashes))
 
-(define (tabtree-item->string item keys-order)
+(define-catch (tabtree-item->string item keys-order)
   (define (parameter->string key params (delimeter ","))
     (cond
       ((list? params) (implode params delimeter))
@@ -39,7 +39,6 @@
       (else (->string params))))
   (let* ((id ($ id item))
         (keys-to-print (filter-not (λ (x) (let ((x (->string x))) (or (string-prefix? x "_") (equal? x "id")))) (hash-keys item)))
-        (keys-order (and keys-order (string-split keys-order ",")))
         (keys-ordered (if keys-order
                             (for/fold
                               ((res empty))
@@ -54,19 +53,29 @@
       ((key (append (or keys-ordered empty) (or tail-keys empty))))
       (format "~a ~a:~a" res key (parameter->string key (hash-ref item key))))))
 
-(define (tabtree->string tabtree #:parent (parent-item #f) #:level (level 0) #:keys-order (keys-order #f))
-  (let* ((sorted-keys-by-id (sort (hash-keys tabtree) (λ (a b) (< (->number (or ($ _order a) 0)) (->number (or ($ _order b) 0))))))
-        (keys-order (or (and parent-item ($ keys-order parent-item)) keys-order))) ; such a way we can define keys-order only in the topmost element and it will be inherited by all lower elements unless they define their own keys-order
+(define-catch (tabtree->string tabtree #:parent (parent-item #f) #:level (level 0) #:keys-order (keys-order #f) #:sort-f (sort-f (λ (a b) (< (->number (or ($ _order a) 0)) (->number (or ($ _order b) 0))))))
+  (let* ((sorted-keys (sort (hash-keys tabtree) sort-f))
+        (keys-order (or (and parent-item ($ keys-order parent-item)) keys-order)) ; such a way we can define keys-order only in the topmost element and it will be inherited by all lower elements unless they define their own keys-order
+        (keys-order (cond
+                      ((string? keys-order) (string-split keys-order ","))
+                      ((list? keys-order) keys-order)
+                      (else keys-order))))
     (for/fold
       ((res ""))
-      ((k sorted-keys-by-id))
-      (begin
-        ; (---- sorted-keys-by-id)
-        (format "~a~a~a~a"
-                (if (or (not-empty-string? res) parent-item) (format "~a~n" res) res) ; don't skip the first line in the file
-                (dupstr "\t" level)
-                (tabtree-item->string k (or ($ keys-order k) keys-order)) ; first check if current item has keys-order attribute - then apply this one, otherwise use normal keys-order from the parent
-                (tabtree->string (hash-ref tabtree k) #:parent k #:level (+ 1 level) #:keys-order keys-order))))) )
+      ((k sorted-keys))
+      (let* ((leaf? (hash-empty? (hash-ref tabtree k))))
+        (cond
+          (leaf?
+            (format "~a~a~a"
+                    (if (or (not-empty-string? res) parent-item) (format "~a~n" res) res)
+                    (dupstr "\t" level)
+                    (tabtree-item->string k (or ($ keys-order k) keys-order))))
+          (else
+            (format "~a~a~a~a"
+                    (if (or (not-empty-string? res) parent-item) (format "~a~n" res) res) ; don't skip the first line in the file
+                    (dupstr "\t" level)
+                    (tabtree-item->string k (or ($ keys-order k) keys-order)) ; first check if current item has keys-order attribute - then apply this one, otherwise use normal keys-order from the parent
+                    (tabtree->string (hash-ref tabtree k) #:parent k #:level (+ 1 level) #:keys-order keys-order #:sort-f sort-f))))))))
 
 ; hashtree -> list-of hash
 (define (get-first-level hashtree)

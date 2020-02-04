@@ -164,6 +164,8 @@
 (define (hash-clean lambdakv h)
   (hash-filter (λ (k v) (not (lambdakv k v))) h))
 
+(define hash-filter-not hash-clean)
+
 (define (hash-regex-filter reg h)
   (make-hash
     (filter

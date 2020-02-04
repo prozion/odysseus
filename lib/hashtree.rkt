@@ -482,6 +482,14 @@
             hash-tree
             (hash next-hash-key hash-tree-part)))))))
 
+(define-catch (insert-leaf hash-tree id-path leaf)
+  (let* ((inserted-hash-tree (hash leaf (hash))))
+    (hash-tree-insert hash-tree id-path inserted-hash-tree)))
+
+(define-catch (insert-leaves hash-tree id-path leaves)
+  (let* ((inserted-hash-tree (for/hash ((leaf leaves)) (values leaf (hash)))))
+    (hash-tree-insert hash-tree id-path inserted-hash-tree)))
+
 (define-catch (make-hash-tree root-name list-of-hash)
   (hash
     (hash 'id root-name)

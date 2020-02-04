@@ -151,7 +151,7 @@
   (if (= 0 (indexof seq el compare-f)) #f #t))
 
 (define (indexof*? seq el)
-  (indexof? seq el (λ (a b) (equal? (tostring a)  (tostring b)))))
+  (indexof? seq el (λ (a b) (equal? (tostring a) (tostring b)))))
 
 (define (indexof-all seq el)
   (define (indexof-all-iter seq el acclist el-passed)
