@@ -91,8 +91,10 @@
     (= 0 (remainder year 400))))
 
 (define (last-day my)
-  (let* ((month (->number (first (split my "."))))
-        (year (->number (second (split my ".")))))
+  (let* (
+        (parts (string-split my (regexp "[\\.\\.]")))
+        (month (->number (first parts)))
+        (year (->number (second parts))))
     (case month
       ((1 3 5 7 8 10 12) 31)
       ((2) (if (leap-year? year) 29 28))
@@ -665,6 +667,12 @@
   (check-true (d>= "01.10.1985" "07.12.1978"))
   (check-false (d<= "01.10.1985" "07.12.1978"))
   (check-true (d>= "01.10.1985" "01.10.1985"))
+
+  ; latin and cyrillic dot?
+  (check-true (d<= "01.03.2020" "01.12.2020"))
+  (check-true (d<= "01.03.2020" "01.12.2020"))
+  (check-true (d<= "01.03.2020" "01.12.2020"))
+  (check-true (d<= "01.03.2020" "01.12.2020"))
 
   (check-false (d>= "01.10.1985" "07.12.1998"))
   (check-true (d<= "01.10.1985" "07.12.1998"))
