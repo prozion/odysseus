@@ -21,4 +21,10 @@
           (cond
             ((equal? hostname "xpolaris") 'digitalocean)
             (else 'other-linux))))
-      (else #f))))    
+      (else #f))))
+
+(define (server?)
+  (case (where-am-i)
+    ((inwin-win7 unknown-win) #f)
+    ((digitalocean) #t)
+    (else #f)))
