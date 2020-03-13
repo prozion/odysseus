@@ -222,16 +222,16 @@
               (result-group (and ($ response res-group) (not-empty? ($ response res-group)) ($ id (first ($ response res-group))))))
           result-group))))
 
-(define (get-group-name-from-url group-url)
+(define (get-vk-name-from-url vk-url)
   (let* (
-        (group-name (get-matches #px"^vk\\.com/(.*)$" group-url))
-        (group-name (and
-                      (not-empty? group-name)
+        (vk-name (get-matches #px"^vk\\.com/(.*)$" vk-url))
+        (vk-name (and
+                      (not-empty? vk-name)
                       (match-let
-                          (((list (list _ x)) group-name))
+                          (((list (list _ x)) vk-name))
                         x)))
-        (group-name (and group-name (not (empty? group-name)) group-name)))
-    group-name))
+        (vk-name (and vk-name (not (empty? vk-name)) vk-name)))
+    vk-name))
 
 (define (raw-community? type)
   (λ (groupid)
@@ -291,7 +291,8 @@
 ;;; Group wall ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define-catch (get-wall-posts
-          gid
+          id
+          #:group? (group? #t)
           #:offset (offset #f)
           #:limit (limit #f)
           #:only-group (only-group #f)
@@ -299,8 +300,9 @@
           #:success-display (success-display #f)
           #:break-if-error (break-if-error #t)
           #:do-when-error (do-when-error #f))
-  (let* ((reqstr (format "https://api.vk.com/method/wall.get?owner_id=-~a&v=5.8&filter=others~a~a~a~a&access_token=~a"
-                    gid
+  (let* ((reqstr (format "https://api.vk.com/method/wall.get?owner_id=~a~a&v=5.8&filter=others~a~a~a~a&access_token=~a"
+                    (if group? "-" "")
+                    id
                     (if extended "&extended=1" "")
                     (if only-group "&filter=owner" "")
                     (if offset (str "&offset=" offset) "")

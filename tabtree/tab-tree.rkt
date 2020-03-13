@@ -29,7 +29,7 @@
 
 ; just a category without parameters in a mtree variant
 (define-catch (vanilla-category? line)
-  (re-matches? "^\t*[A-Za-zА-ЯЁа-яё\\-+/_]+\\s*\\.$" line))
+  (re-matches? "^\t*[A-Za-zА-ЯЁа-яё0-9\\-+/_]+\\s*\\.$" line))
 
 ;;; Reads one line from a tab-tree file into a hash.
 ;;; Line has a following format:

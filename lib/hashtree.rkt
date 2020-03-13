@@ -245,7 +245,7 @@
 
 ; filter and hash-tree subset selection functions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define-catch (get-leaves hash-tree
-                  #:exclude (exclude '(name))
+                  #:exclude (exclude '(name keys-order))
                   ; attributes that derived from root items to the leaves:
                   #:derived-attrs (derived-attrs empty)
                   ; hash, where keys are names of existed derived attributes and values are actual values of derived attributes:
@@ -282,7 +282,8 @@
   ; (--- "get-item-by-id-from-the-list:" ($ id plained-hash-tree) id)
   (let ((res
           (filter
-            (λ (e) (cond
+            (λ (e)  
+                    (cond
                       (one-of? (indexof*? (string-split (->string (hash-ref* e id-attr)) ",") id))
                       (else
                         (equal? (hash-ref* e id-attr) id))))

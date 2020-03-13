@@ -96,8 +96,8 @@
   ($ id h))
 
 ; Important! Tabtree file should contain only one root element. Other first level elements and their chikdren will be deleted after sorting.
-(define-catch (tabtree-sort-and-print treefile #:ns (ns #f) #:new-treefile (new-treefile #f) #:sort-by (sort-by default-sort-by) #:sort-f (sort-f default-sort-f))
-  (define-catch (tabtree-sort-rec root-item root-hashtree #:sort-by sort-by #:sort-f sort-f)
+(define-catch (tabtree-sort-and-print #:tabtree (tabtree #f) #:tabtree-file (tabtree-file #f) #:ns (ns #f) #:new-treefile (new-treefile #f) #:sort-by (sort-by default-sort-by) #:sort-by-f (sort-by-f #f) #:sort-f (sort-f default-sort-f))
+  (define-catch (tabtree-sort-rec root-item root-hashtree #:sort-by sort-by #:sort-f sort-f #:sort-by-f sort-by-f)
     (cond
       ((not (hash? root-hashtree)) root-hashtree)
       ((hash-empty? root-hashtree) root-hashtree) ; empty list
@@ -111,8 +111,12 @@
               (sort-by (or embedded-sort-by sort-by))
               (sort-f (or embedded-sort-f sort-f))
               (root-hashtree-keys (hash-keys root-hashtree))
-              (sorter (λ (a b) (let ((a-val (hash-ref a sort-by #f))
-                                    (b-val (hash-ref b sort-by #f)))
+              (sorter (λ (a b) (let ((a-val (if sort-by-f
+                                                (sort-by-f a)
+                                                (hash-ref a sort-by #f)))
+                                    (b-val (if sort-by-f
+                                              (sort-by-f b)
+                                              (hash-ref b sort-by #f))))
                                   (cond
                                     ((and a-val b-val)
                                       ((eval sort-f ns) a-val b-val))
@@ -122,23 +126,39 @@
                                       (default-sort-f a-val b-val))))))))
             (for/hash
               ((k (sort root-hashtree-keys sorter)) (i (range 1 (inc (length root-hashtree-keys)))))
-              (values (hash-union (hash '_order i) k) (tabtree-sort-rec k (hash-ref root-hashtree k) #:sort-by sort-by #:sort-f sort-f)))))))
-  (let* ((hashtree (parse-tab-tree treefile))
-        ; (_ (--- hashtree))
+              (values (hash-union (hash '_order i) k) (tabtree-sort-rec k (hash-ref root-hashtree k) #:sort-by sort-by #:sort-by-f sort-by-f #:sort-f sort-f)))))))
+  (let* ((hashtree
+                (cond
+                  (tabtree tabtree)
+                  (tabtree-file (parse-tab-tree tabtree-file))
+                  (else (errorf "neither #tabtree nor #tabtree-file are given in tabtree-sort-and-print"))))
         (root-item (get-root-item hashtree))
         (hashtree-sorted (hash
                             root-item
-                            (tabtree-sort-rec root-item (get-level-below hashtree) #:sort-by sort-by #:sort-f sort-f)))
+                            (tabtree-sort-rec root-item (get-level-below hashtree) #:sort-by sort-by #:sort-by-f sort-by-f #:sort-f sort-f)))
         (new-treefile-name (if new-treefile
                               new-treefile
-                              (let*
-                                  ((filename-parts (string-split treefile #rx"(?<=[A-Za-zА-Яа-я0-9_])\\.(?=[A-Za-zА-Яа-я0-9_])"))
-                                  (aname (car filename-parts))
-                                  (ext (and (not-empty? (cdr filename-parts)) (cadr filename-parts))))
-                                (str aname "_" (if ext (str "." ext) "")))))
+                              (cond
+                                (tabtree-file
+                                  (let*
+                                      ((filename-parts (string-split tabtree-file #rx"(?<=[A-Za-zА-Яа-я0-9_])\\.(?=[A-Za-zА-Яа-я0-9_])"))
+                                      (aname (car filename-parts))
+                                      (ext (and (not-empty? (cdr filename-parts)) (cadr filename-parts))))
+                                    (str aname "_" (if ext (str "." ext) ""))))
+                                (else "_new_tabtree.tree"))))
         (new-treefile-str (tabtree->string hashtree-sorted)))
       (write-file new-treefile-name new-treefile-str)
       #t))
+
+(define-catch (filter-tabtree f tabtree)
+  (cond
+    ((hash-empty? tabtree) tabtree)
+    (else
+      (let* ((filtered-keys (filter f (hash-keys tabtree))))
+        (for/fold
+          ((res (hash)))
+          ((k filtered-keys))
+          (hash-union res (hash k (filter-tabtree f (hash-ref tabtree k)))))))))
 
 (define (set-current-page-mark id curpage-id (class "current_page_nav"))
   (if (equal? (->string id) (->string curpage-id))
