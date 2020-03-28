@@ -3,6 +3,7 @@
 (require compatibility/defmacro)
 (require "../graphics/svg.rkt")
 (require "../graphics/color.rkt")
+(require "../graphics/fonts.rkt")
 (require "../lib/_all.rkt")
 
 (provide piechart)
@@ -27,6 +28,7 @@
             #:data data
             #:value (value (f 'value 0))
             #:label (label (f 'label ""))
+            #:label-text (label-text (f 'label ""))
             #:color (color (f 'color #f))
             #:gap (gap 0)
             #:donut (donut (λ (x) (/ x 8.0)))
@@ -34,14 +36,13 @@
             #:style (style "stroke: none;")
             #:style-circle (style-circle "stroke: black; stroke-width: 0; fill: none")
             #:color-raw-model (color-raw-model 'cmyk-based)
+            #:label-font-size (label-font-size 11)
 
             #:debug (debug #f) ; debug info passed here if any
      )
   (let* (
           ; geometry
           (label-margin-r 15)
-          (label-font-size 11)
-          (label-text-style (format "font-size: ~a" label-font-size))
 
           (data-values (map value data))
           (min-data (apply min (filter (λ (x) (> x 0)) data-values)))
@@ -82,6 +83,7 @@
                               (y1 (- y (* r (sin φ))))
                               (x2 (+ x (* r (cos (+ φ dφ)))))
                               (y2 (- y (* r (sin (+ φ dφ)))))
+                              (text (label-text d))
                               (text-position
                                       (cond
                                         ((and (< x1 x) (< x2 x)) 'left)
@@ -95,12 +97,15 @@
                                               (else "middle")))
                               (half-label-font-size (/ label-font-size 2.0))
                               (quart-label-font-size (/ label-font-size 4.0))
+                              (text-len (text-length text #:font-size label-font-size))
                               (label-margin-r (case text-position
                                                 ((left right) (/ label-margin-r 2.0))
                                                 ((top) (+ half-label-font-size (* label-margin-r 1)))
                                                 ((bottom) (+ half-label-font-size (* label-margin-r 1.3)))))
-                              (text-x (+ x (* (+ r label-margin-r) (cos (+ φ (/ dφ 2.0))))))
-                              (text-y (- y (- quart-label-font-size) (* (+ r label-margin-r) (sin (+ φ (/ dφ 2.0))))))
+                              (x-coeff (+ 1 (abs (* 0.1 (sin φ)))))
+                              (text-x (+ x (* (+ r label-margin-r) (* x-coeff (cos (+ φ (/ dφ 2.0)))))))
+                              (text-x (if (equal? text-position 'left) (- text-x text-len) text-x))
+                              (text-y (- y (- quart-label-font-size) (* (+ r label-margin-r) (* 0.95 (sin (+ φ (/ dφ 2.0)))))))
                               (style (format "fill: ~a; ~a" (color d) style)))
                         (values
                           (pushr
@@ -116,6 +121,6 @@
                                         (style ,style)))
                               ; if only one part:
                               `(circle (@ (cx ,x) (cy ,y) (r ,r) (style ,style))))
-                            `(text (@ (x ,text-x) (y ,text-y) (style ,label-text-style)) ,(label d)))
+                            `(text (@ (x ,text-x) (y ,text-y)) ,(label d)))
                           (+ φ dφ)))))))
         result))

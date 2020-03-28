@@ -5,6 +5,17 @@
 
 (provide (all-defined-out))
 
+(define (positive-number? x)
+  (and (number? x) (> (->number x) 0)))
+
+(define (non-negative-number? x)
+  (and
+    (number? (->number x))
+    (>= (->number x) 0)))
+
+(define (negative-number? x)
+  (not (non-negative-number? x)))
+
 (define (scalar? x)
   (or (number? x) (string? x) (symbol? x)))
 

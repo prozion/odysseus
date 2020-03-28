@@ -282,7 +282,7 @@
   ; (--- "get-item-by-id-from-the-list:" ($ id plained-hash-tree) id)
   (let ((res
           (filter
-            (λ (e)  
+            (λ (e)
                     (cond
                       (one-of? (indexof*? (string-split (->string (hash-ref* e id-attr)) ",") id))
                       (else

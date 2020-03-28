@@ -233,6 +233,16 @@
         (vk-name (and vk-name (not (empty? vk-name)) vk-name)))
     vk-name))
 
+(define (vk/get-photoalbums group-id #:group? (group? #t))
+  (let*
+      ((res (string->jsexpr
+                  (get-url (format "https://api.vk.com/method/photos.getAlbums?owner_id=~a~a&need_system=1&v=5.52&access_token=~a"
+                                    (if group? "-" "")
+                                    group-id
+                                    AT))))
+      (res (and ($ response res) ($ items ($ response res)))))
+    res))
+
 (define (raw-community? type)
   (λ (groupid)
     (regexp-match (pregexp (str (symbol->string type) "\\d+")) groupid)))
@@ -284,6 +294,7 @@
             groups)))
       (apply ,op uids-by-groups))))
 
+(define g+ (g-op append-unique))
 (define g^ (g-op set-intersect))
 (define g- (g-op minus))
 (define g-- (g-op difference))
