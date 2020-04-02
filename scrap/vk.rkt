@@ -11,7 +11,9 @@
 (define friends-limit (make-parameter #f))
 
 (define CID ($ id vk/odysseus))
-(define AT ($ access_token vk/odysseus))
+(define AT1 ($ access_token vk/odysseus))
+(define AT2 ($ access_token vk/postagg2))
+(define AT AT2)
 
 (provide (all-defined-out))
 
@@ -176,6 +178,17 @@
             (take items friends-limit)
             items))))))
 
+(define-catch (get-groups-of-user user-id)
+  (let ((res (string->jsexpr
+                    (get-url (format "https://api.vk.com/method/groups.get?user_id=~a&v=5.52&access_token=~a" user-id AT)))))
+    ; (--- res)
+    (cond
+      ((@. res.error)
+        (list "<user-deactivated>"))
+      (else
+        (let ((items (@. res.response.items)))
+          items)))))
+
 (define-catch (output-user-file filename)
   (let ((users (read-serialized-data-from-file filename)))
     (for ((user (hash-values users)))
@@ -210,17 +223,21 @@
 ; I don't define-catch here as it's better to process exceptions in the code upstream, when requesting id in a row among hundreds of urls
 (define (get-group-id group-name #:cache (cache #f))
   (define plain-name? (re-matches? #px"^(club|public)?(\\d+)$" group-name))
-  (or
-    (and cache (hash-ref cache group-name #f))
-    (if plain-name?
-        (let* ((n (get-matches #px"^(club|public)?(\\d+)$" group-name))
-              (n (third (first n))))
-            n)
-        (let* (
-              (res-group (string->jsexpr
-                          (get-url (format "https://api.vk.com/method/groups.getById?group_id=~a&v=5.52&access_token=~a" group-name AT))))
-              (result-group (and ($ response res-group) (not-empty? ($ response res-group)) ($ id (first ($ response res-group))))))
-          result-group))))
+  (define (get-name-from-full-url group-url)
+    (last (string-split group-url "/")))
+  (let* ((group-name (get-name-from-full-url group-name)))
+    (or
+      (and cache (hash-ref cache group-name #f))
+      (if plain-name?
+          (let* ((n (get-matches #px"^(club|public)?(\\d+)$" group-name))
+                (n (third (first n))))
+              n)
+          (let* (
+                (res-group (string->jsexpr
+                            (get-url (format "https://api.vk.com/method/groups.getById?group_id=~a&v=5.52&access_token=~a" group-name AT))))
+                ; (_ (--- "(get-group-id):" res-group))
+                (result-group (and ($ response res-group) (not-empty? ($ response res-group)) ($ id (first ($ response res-group))))))
+            result-group)))))
 
 (define (get-vk-name-from-url vk-url)
   (let* (

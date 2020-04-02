@@ -5,6 +5,7 @@
 (require "strings.rkt")
 (require "type.rkt")
 (require "debug.rkt")
+(require "hash.rkt")
 (require compatibility/defmacro)
 (require (for-syntax racket/list))
 
@@ -82,6 +83,32 @@
     ((i lst1) (j lst2))
     (pushr s (cons i j))))
 
+(define (frequency-clist lst)
+  (let* ((hash-res
+          (for/fold
+            ((res (hash)))
+            ((el lst))
+            (cond
+              ((hash-ref res el #f)
+                  (let* ((cnt (hash-ref res el))
+                        (cnt (+ 1 cnt)))
+                    (hash-union
+                      (hash-delete res el)
+                      (hash el cnt))))
+              (else (hash-union res (hash el 1)))))))
+    (sort (hash->list hash-res)
+          (λ (a b)
+            (cond
+              ((= (cdr a) (cdr b))
+                (cond
+                  ((and (number? (car a)) (number? (car b)))
+                    (< (car a) (car b)))
+                  ((and (string? (car a)) (string? (car b)))
+                    (string<? (car a) (car b)))
+                  (else #t)))
+              (else
+                (> (cdr a) (cdr b))))))))
+
 (module+ test
 
   (require rackunit)
@@ -97,9 +124,9 @@
   (check-equal? (alookup '((a 10) (b 20)) 'c) #f)
   (check-equal? (alookup '(((a d) 10) (b 20)) '(a d)) 10)
 
-  (check-speed
-              (alist-expand (dup-alist (1 2 3) 100) (range 1 1000) 50)
-              10)
+  ; (check-speed
+  ;             (alist-expand (dup-alist (1 2 3) 100) (range 1 1000) 50)
+  ;             10)
 
   (check-equal? (alist-flatten '((a 10) (b 20))) '(a 10 b 20))
   (check-equal? (alist-flatten '((a 10) (b 20) (c (30 40)))) '(a 10 b 20 c (30 40)))
@@ -141,5 +168,7 @@
 
   (check-equal? (pairwise '(1 2 3 10) '(4 5 6))
                 '((1 . 4) (2 . 5) (3 . 6)))
+
+  (check-equal? (frequency-clist '(1 1 1 1 4 5 2 9 1 6 8 0 2 4 2)) '((1 . 5) (2 . 3) (4 . 2) (0 . 1) (5 . 1) (6 . 1) (8 . 1) (9 . 1)))
 
 )
