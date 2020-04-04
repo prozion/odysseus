@@ -155,3 +155,39 @@
                             (user_reposted . 0)))
               (text . "")))))
 )
+
+; https://vk.com/wall-6726778_1633368
+; Новая газета
+(define group-post-with-article-cover
+  #hasheq(
+    (count . 53587)
+    (items . (#hasheq(
+                (attachments . (#hasheq(
+                                  (link . #hasheq(
+                                            (description . "В Москве индивидуальных предпринимателей и юридических лиц будут штрафовать за нарушение дистанции в 1,5 м между работниками и посетителями. Об этом сообщается на сайте мэра столицы Сергея Собянина. «Из рекомендательного это требование становится обязательным. Это важно не только для...")
+                                            (image_big . "https://sun1-96.userapi.com/c856520/v856520653/147809/Dn629cjUVNA.jpg")
+                                            (image_src . "https://sun1-84.userapi.com/c856520/v856520653/147807/d1OqyDoNNH4.jpg")
+                                            (target . "internal")
+                                            (title . "В Москве юридические лица и ИП будут штрафовать за нарушение дистанции между работниками")
+                                            (url . "http://amp.gs/Kjnb")))
+                                  (type . "link"))))
+                (comments . #hasheq(
+                              (can_post . 1)
+                              (count . 8)))
+                (date . 1586030427)
+                (from_id . -6726778)
+                (id . 1633368)
+                (likes . #hasheq(
+                            (can_like . 1)
+                            (can_publish . 1)
+                            (count . 18)
+                            (user_likes . 0)))
+                (marked_as_ads . 0)
+                (owner_id . -6726778)
+                (post_source . #hasheq(
+                                  (type . "api")))
+                (post_type . "post")
+                (reposts . #hasheq(
+                              (count . 2)
+                              (user_reposted . 0)))
+                (text . "«Из рекомендательного это требование (соблюдать дистанцию — прим.) становится обязательным. Это важно не только для уменьшения скорости распространения инфекции, но и для самих предприятий, для здоровья их работников», — говорится в сообщении http://amp.gs/Kjnb"))))))
