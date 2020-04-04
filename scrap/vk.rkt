@@ -137,6 +137,9 @@
 
 (define vk/username request-username)
 
+(define (repost? item)
+  (true? ($ copy_history item)))
+
 ;; output
 (define (vk/id->href id)
   (format "<a href=\"~a\" target=\"_blank\">~a</a>" (vk/link id) (request-username id)))
@@ -239,7 +242,7 @@
                 (result-group (and ($ response res-group) (not-empty? ($ response res-group)) ($ id (first ($ response res-group))))))
             result-group)))))
 
-(define (get-vk-name-from-url vk-url)
+(define-catch (get-vk-name-from-url vk-url)
   (let* (
         (vk-name (get-matches #px"^vk\\.com/(.*)$" vk-url))
         (vk-name (and
@@ -323,23 +326,22 @@
           #:group? (group? #t)
           #:offset (offset #f)
           #:limit (limit #f)
-          #:only-group (only-group #f)
+          #:filtered-by (filtered-by "owner")
           #:extended (extended #f)
           #:success-display (success-display #f)
           #:break-if-error (break-if-error #t)
           #:do-when-error (do-when-error #f))
-  (let* ((reqstr (format "https://api.vk.com/method/wall.get?owner_id=~a~a&v=5.8&filter=others~a~a~a~a&access_token=~a"
+  (let* ((reqstr (format "https://api.vk.com/method/wall.get?owner_id=~a~a&v=5.8&~a~a~a~a&access_token=~a"
                     (if group? "-" "")
                     id
                     (if extended "&extended=1" "")
-                    (if only-group "&filter=owner" "")
+                    (format "&filter=~a" filtered-by)
                     (if offset (str "&offset=" offset) "")
                     (if limit (str "&count=" limit) "")
                     AT))
         (res (string->jsexpr
                     (get-url reqstr)))
         (response ($ response res))
-        ; (_ (--- "get-wall-posts: reqstr =" reqstr "count = "  ($ count response) "items-length = " (length ($ items response))))
         (err ($ error res)))
     (cond
       ((and err break-if-error) (error err))
@@ -367,6 +369,26 @@
       '3x (and attachments ($ photo.photo_604 attachment))
       '4x (and attachments ($ photo.photo_807 attachment))
       '5x (and attachments ($ photo.photo_1280 attachment))
+    )))
+
+(define-catch (get-video-img-urls item)
+  (let* ((copy_history ($ copy_history item))
+        (copy_history (and (not-empty? copy_history) (first copy_history)))
+        (attachments (or
+                        (and copy_history ($ attachments copy_history))
+                        ($ attachments item)))
+        (attachment (or (and attachments (first attachments)) (hash)))
+        )
+    (hash
+      '2x (and attachments ($ video.photo_130 attachment))
+      '3x (and attachments ($ video.photo_320 attachment))
+      '4x (and attachments ($ video.photo_800 attachment))
+      '5x (and attachments ($ video.photo_1280 attachment))
+      '1x_first_frame (and attachments ($ video.first_frame_130 attachment))
+      '2x_first_frame (and attachments ($ video.first_frame_160 attachment))
+      '3x_first_frame (and attachments ($ video.first_frame_320 attachment))
+      '4x_first_frame (and attachments ($ video.first_frame_800 attachment))
+      '5x_first_frame (and attachments ($ video.first_frame_1280 attachment))
     )))
 
 (define-catch (get-img-url item #:image-size (image-size '2x))
