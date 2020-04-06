@@ -45,7 +45,7 @@
   (for/fold
     ((res ""))
     ((s seq))
-    (str res s "\n")))
+    (string-append res s "\n")))
 
 (define (implode lst (sep ""))
   (let ([seq (map
