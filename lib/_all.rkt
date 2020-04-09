@@ -25,6 +25,7 @@
   "strings.rkt"
   "symbols.rkt"
   "time.rkt"
+  "text.rkt"
   "tree.rkt"
   "type.rkt"
   "units.rkt")
@@ -54,6 +55,7 @@
   "strings.rkt"
   "symbols.rkt"
   "time.rkt"
+  "text.rkt"
   "tree.rkt"
   "type.rkt"
   "units.rkt"))

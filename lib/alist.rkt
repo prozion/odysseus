@@ -69,6 +69,11 @@
         ((equal? k (car (car clst))) (cdr (car clst)))
         (else (clist-ref (cdr clst) k not-found))))
 
+(define (clist-remove clst k)
+  (filter-not
+    (λ (x) (equal? (car x) k))
+    clst))
+
 (define (clist-sort clst f)
   (sort
     clst

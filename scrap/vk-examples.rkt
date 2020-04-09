@@ -191,3 +191,44 @@
                               (count . 2)
                               (user_reposted . 0)))
                 (text . "«Из рекомендательного это требование (соблюдать дистанцию — прим.) становится обязательным. Это важно не только для уменьшения скорости распространения инфекции, но и для самих предприятий, для здоровья их работников», — говорится в сообщении http://amp.gs/Kjnb"))))))
+
+; https://vk.com/wall-26284064_3057270
+; ТАСС
+(define group-post-with-animated-gif
+  #hasheq(
+    (count . 167797)
+    (items . (#hasheq(
+                (attachments . (#hasheq(
+                                  (doc . #hasheq(
+                                            (access_key . "25b603dd97717f8e17")
+                                            (date . 1586282442)
+                                            (ext . "gif")
+                                            (id . 545142003)
+                                            (owner_id . 135986758)
+                                            (photo_100 . "https://sun9-25.userapi.com/c856436/u135986758/d3/-3/s_85b068c309.jpg")
+                                            (photo_130 . "https://sun9-34.userapi.com/c856436/u135986758/d3/-3/m_85b068c309.jpg")
+                                            (size . 5282423)
+                                            (title . "754f98aa-e117-4162-b41c-62ffa2e18ca9.gif")
+                                            (type . 3)
+                                            (url . "https://vk.com/doc135986758_545142003?hash=375082e9700e4f9fc7&dl=GU2TMMRXG4YTKMQ:1586283542:b18acfbd90c288abbe&api=1&no_preview=1")))
+                                  (type . "doc"))))
+                (comments . #hasheq(
+                              (can_post . 1)
+                              (count . 1)))
+                (date . 1586282444)
+                (from_id . -26284064)
+                (id . 3057270)
+                (likes . #hasheq(
+                          (can_like . 1)
+                          (can_publish . 1)
+                          (count . 24)
+                          (user_likes . 0)))
+                (marked_as_ads . 0)
+                (owner_id . -26284064)
+                (post_source . #hasheq(
+                                  (type . "api")))
+                (post_type . "post")
+                (reposts . #hasheq(
+                              (count . 2)
+                              (user_reposted . 0)))
+                (text . "Загородный гольф-клуб Urubo в Санта-Крус-де-ла-Сьерра, который пришлось закрыть из-за вспышки коронавируса, сегодня заполонен дружелюбными капибарами. Десятки грызунов купаются под солнцем в лагуне пустынного курорта."))))))

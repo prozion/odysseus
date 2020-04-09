@@ -370,6 +370,7 @@
       '4x (and attachments ($ photo.photo_807 attachment))
       '5x (and attachments ($ photo.photo_1280 attachment))
       'link_img (and attachments ($ link.image_big attachment))
+      'doc_img (and attachments ($ doc.url attachment))
     )))
 
 (define-catch (get-video-img-urls item)
