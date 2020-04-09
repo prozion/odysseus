@@ -13,7 +13,7 @@
 (define CID ($ id vk/odysseus))
 (define AT1 ($ access_token vk/odysseus))
 (define AT2 ($ access_token vk/postagg2))
-(define AT AT2)
+(define AT AT1)
 
 (provide (all-defined-out))
 

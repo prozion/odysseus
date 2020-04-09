@@ -37,9 +37,6 @@
       ; remove vk links
       (cons #rx"\\[.+?\\|" "")
       (cons #rx"\\]" "")
-      ; remove hashtags
-      ; (cons #rx"#[A-Za-zА-Яа-яЁё0-9_]+\\ *?\\." "")
-      ; (cons #rx"#[A-Za-zА-Яа-яЁё0-9_]+" "")
       ; improve punctuation
       (cons #rx"\\ +?\\)" ")")
       (cons #rx"\\(\\ +?" "(")
@@ -56,6 +53,19 @@
       (cons "\n" "<br>"))))
 
 (define clean-htmlify (-> clean-text htmlify-text))
+
+(define clean-value
+          (change-text
+            (list
+              (cons "\"" " ")
+              (cons "&nbsp;" " ")
+              ; (cons "," "")
+              (cons "\n" " ")
+              (cons "\t" "")
+              (cons "  " " ")
+              (cons " ." ".")
+              (cons "<span>" "")
+              (cons "</span>" ""))))
 
 (define remove-hashtags
   (change-text
