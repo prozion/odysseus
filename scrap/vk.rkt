@@ -4,7 +4,6 @@
 (require "../../settings/APIs.rkt")
 (require net/url)
 (require json)
-; (require browser/external)
 (require compatibility/defmacro)
 
 (define status-output (make-parameter #f))
@@ -14,7 +13,8 @@
 ; -- открываем https://vk.com/apps?act=manage
 ; -- создаем приложение [выбираем "standalone приложение", вводим имя]
 ; -- оставляем "приложение отключено"
-; -- загружаем ссылку в адресное поле браузера https://oauth.vk.com/authorize?client_id=[id]&display=page&scope=friends,offline,groups,stats,wall,notes,pages,video,audio,photos,stories,status,docs&response_type=token&v=5.103
+; -- переходим на вкладку "настройки", записываем id
+; -- загружаем ссылку в адресное поле браузера, где вместо [id] вписываем значение id из предыдущего этапа https://oauth.vk.com/authorize?client_id=[id]&display=page&scope=friends,offline,groups,stats,wall,notes,pages,video,audio,photos,stories,status,docs&response_type=token&v=5.103
 ; -- подтверждаем доступ
 ; -- возвращается новая адресная строка с параметром access_token. Он нам и нужен, записываем его в укромное место (в данном случае в отдельный файл вне публичного репозитория)
 
