@@ -4,6 +4,7 @@
 
 (require "../lib/_all.rkt")
 (require "tab-tree.rkt")
+(require compatibility/defmacro)
 
 (provide (all-defined-out))
 
@@ -30,7 +31,7 @@
     (λ (x) (hash-union (hash attr val) x))
     list-of-hashes))
 
-(define-catch (tabtree-item->string item keys-order)
+(define-catch (tabtree-item->string item keys-order #:remove-derived-keys (remove-derived-keys #t))
   (define (parameter->string key params (delimeter ","))
     (cond
       ((list? params) (implode params delimeter))
@@ -39,6 +40,9 @@
       (else (->string params))))
   (let* ((id ($ id item))
         (keys-to-print (filter-not (λ (x) (let ((x (->string x))) (or (string-prefix? x "_") (equal? x "id")))) (hash-keys item)))
+        (keys-to-print (if remove-derived-keys
+                            (filter-not (λ (k) (regexp-match? #rx"^\\+.+" (->string k))) keys-to-print)
+                            keys-to-print))
         (keys-ordered (if keys-order
                             (for/fold
                               ((res empty))
@@ -170,3 +174,9 @@
     ((equal? (->string v) "<t>") #t)
     ((equal? (->string v) "<f>") #f)
     (else #t)))
+
+(define-macro ($* k item)
+  (let ((kplus (string-append "+" (format "~a" k))))
+    `(or
+        (hash-ref* ,item ',k)
+        (hash-ref* ,item ,kplus))))

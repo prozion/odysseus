@@ -10,10 +10,12 @@
 (define status-output (make-parameter #f))
 (define friends-limit (make-parameter #f))
 
-(define CID ($ id vk/odysseus))
+; (define CID ($ id vk/odysseus))
 (define AT1 ($ access_token vk/odysseus))
-(define AT2 ($ access_token vk/postagg2))
-(define AT AT1)
+(define AT2 ($ access_token vk/postagg2_1))
+(define AT3 ($ access_token vk/postagg2_2))
+(define AT4 ($ access_token vk/postagg2_3))
+(define AT AT3)
 
 (provide (all-defined-out))
 
@@ -109,7 +111,7 @@
 
 (define user-fields (append user-basic-fields-used user-optional-fields-used))
 
-(define-catch (get-user-info user-id #:fields (fields user-fields) #:status (status #f) #:access-token (access-token #f))
+(define-catch (get-user-info user-id #:fields (fields user-fields) #:status (status #f) #:access-token (access-token AT))
   (when status (display status) (flush-output))
   (let* (
         (fields (implode fields ","))
@@ -156,17 +158,19 @@
 (define (vk/link id)
   (format "https://vk.com/id~a" id))
 
-(define (get-user-id user-name)
-(define plain-name? (re-matches? #px"^(id)(\\d+)$" user-name))
-(if plain-name?
-    (let* ((n (get-matches #px"^(id)(\\d+)$" user-name))
-          (n (third (first n))))
-        n)
-    (let* (
-          (res-user (string->jsexpr
-                      (get-url (format "https://api.vk.com/method/users.get?user_ids=~a&v=5.52&access_token=~a" user-name AT))))
-          (result-user (and ($ response res-user) (not-empty? ($ response res-user)) ($ id (first ($ response res-user))))))
-      result-user)))
+(define (get-user-id user-name #:delay (delay-time #f))
+  (let* ((user-name (last (string-split user-name "/")))
+        (plain-name? (re-matches? #px"^(id)(\\d+)$" user-name)))
+    (if plain-name?
+        (let* ((n (get-matches #px"^(id)(\\d+)$" user-name))
+              (n (third (first n))))
+            n)
+        (let* (
+              (_ (when delay-time (sleep delay-time)))
+              (res-user (string->jsexpr
+                          (get-url (format "https://api.vk.com/method/users.get?user_ids=~a&v=5.52&access_token=~a" user-name AT))))
+              (result-user (and ($ response res-user) (not-empty? ($ response res-user)) ($ id (first ($ response res-user))))))
+          result-user))))
 
 (define-catch (get-friends-of-user user-id #:status (status #f) #:friends-limit (friends-limit #f))
   (when status (display status) (flush-output))
@@ -224,7 +228,7 @@
       (hash-ref (car (hash-ref res 'response)) 'name))))
 
 ; I don't define-catch here as it's better to process exceptions in the code upstream, when requesting id in a row among hundreds of urls
-(define (get-group-id group-name #:cache (cache #f))
+(define (get-group-id group-name #:cache (cache #f) #:delay (delay-time #f))
   (define plain-name? (re-matches? #px"^(club|public)?(\\d+)$" group-name))
   (define (get-name-from-full-url group-url)
     (last (string-split group-url "/")))
@@ -236,6 +240,7 @@
                 (n (third (first n))))
               n)
           (let* (
+                (_ (when delay-time (sleep delay-time)))
                 (res-group (string->jsexpr
                             (get-url (format "https://api.vk.com/method/groups.getById?group_id=~a&v=5.52&access_token=~a" group-name AT))))
                 ; (_ (--- "(get-group-id):" res-group))
@@ -270,23 +275,39 @@
 (define raw-group? (raw-community? 'club))
 (define raw-public? (raw-community? 'public))
 (define raw-event? (raw-community? 'event))
+(define raw-person? (raw-community? 'id))
 
-(define-catch (extract-pure-id groupid)
-  (let ((groupid (remove-vk-url-prefix groupid)))
+(define-catch (pure-id? vk-url)
+  (let* ((vk-url (->string vk-url))
+        (vk-url (remove-vk-url-prefix vk-url)))
+    (or
+      (raw-group? vk-url)
+      (raw-public? vk-url)
+      (raw-event? vk-url)
+      (raw-person? vk-url))))
+
+(define-catch (extract-pure-id vk-url)
+  (let* ((vk-url (->string vk-url))
+        (vk-url (remove-vk-url-prefix vk-url)))
     (cond
-      ((raw-group? groupid) (ltrim groupid (len "club")))
-      ((raw-public? groupid) (ltrim groupid (len "public")))
-      ((raw-event? groupid) (ltrim groupid (len "event")))
-      (else groupid))))
+      ((raw-group? vk-url) (ltrim vk-url (len "club")))
+      ((raw-public? vk-url) (ltrim vk-url (len "public")))
+      ((raw-event? vk-url) (ltrim vk-url (len "event")))
+      ((raw-person? vk-url) (ltrim vk-url (len "id")))
+      (else vk-url))))
 
-(define (get-group-users groupid #:offset (offset 0))
+(define (get-group-users groupid #:offset (offset 0) #:delay (delay-time #f))
+  (define (get-next-users groupid offset (acc-result empty))
+    (when delay-time (sleep delay-time))
+    (let ((res (string->jsexpr
+            (get-url (format "https://api.vk.com/method/groups.getMembers?group_id=~a&offset=~a&v=5.52&access_token=~a" groupid offset AT)))))
+      (cond
+        ((@. res.error) acc-result)
+        ((empty? (@. res.response.items)) acc-result)
+        (else (get-next-users groupid (+ 1000 offset) (append acc-result (map str (@. res.response.items))))))))
   (when (status-output) (display (format "~a~n" groupid)) (flush-output))
-  (let* ( (groupid (extract-pure-id groupid))
-          (res (string->jsexpr
-                    (get-url (format "https://api.vk.com/method/groups.getMembers?group_id=~a&offset=~a&v=5.52&access_token=~a" groupid offset AT)))))
-    (if (@. res.error)
-      null
-      (map str (@. res.response.items)))))
+  (let* ((groupid (extract-pure-id groupid)))
+    (get-next-users groupid 0)))
 
 (define (vk/intersect-groups . groups)
   (when (status-output) (display "\nscanning groups: \n"))
