@@ -10,28 +10,23 @@
 (define status-output (make-parameter #f))
 (define friends-limit (make-parameter #f))
 
-; (define CID ($ id vk/odysseus))
+; Алгоритм получения access_token ВКонтакте
+; -- открываем https://vk.com/apps?act=manage
+; -- создаем приложение [выбираем "standalone приложение", вводим имя]
+; -- оставляем "приложение отключено"
+; -- загружаем ссылку в адресное поле браузера https://oauth.vk.com/authorize?client_id=[id]&display=page&scope=friends,offline,groups,stats,wall,notes,pages,video,audio,photos,stories,status,docs&response_type=token&v=5.103
+; -- подтверждаем доступ
+; -- возвращается новая адресная строка с параметром access_token. Он нам и нужен, записываем его в укромное место (в данном случае в отдельный файл вне публичного репозитория)
+
 (define AT1 ($ access_token vk/odysseus))
 (define AT2 ($ access_token vk/postagg2_1))
 (define AT3 ($ access_token vk/postagg2_2))
 (define AT4 ($ access_token vk/postagg2_3))
 (define AT AT3)
 
-(provide (all-defined-out))
+(define VK_API_VERSION "5.103")
 
-; gets a new access_token if old is expired
-; after launching this function it opens the browser, where you should accept the app permissions and then, on the redirected page, check access_token in the GET parameters in the browser address string
-; (define (authenticate-through-browser)
-;   (let* ((auth-url "https://oauth.vk.com/authorize")
-;         (redirect_uri "")
-;         (display "page")
-;         (scope #b111111011110111011111)
-;         (response_type "token")
-;         (v "5.8")
-;         (state "odysseus")
-;         (request-string (url-with-parameters auth-url CID redirect_uri display scope response_type v state)))
-;     (send-url request-string)))
-    ; (json->hash (get-url request-string))))
+(provide (all-defined-out))
 
 (define-catch (dump-ids-to-file ids)
   (let ((comma-separated-ids (implode ids ",")))
@@ -296,16 +291,35 @@
       ((raw-person? vk-url) (ltrim vk-url (len "id")))
       (else vk-url))))
 
-(define (get-group-users groupid #:offset (offset 0) #:delay (delay-time #f))
-  (define (get-next-users groupid offset (acc-result empty))
-    (when delay-time (sleep delay-time))
-    (let ((res (string->jsexpr
-            (get-url (format "https://api.vk.com/method/groups.getMembers?group_id=~a&offset=~a&v=5.52&access_token=~a" groupid offset AT)))))
+; Функция по заданному id группы groupid возвращает список id ее участников.
+(define (get-group-users
+          groupid ; id группы (это цифры в url группы типа vk.com/club14881917, либо получаемые по алиасу группы через get-group-id)
+          #:offset (offset 0) ; смещение по выборке, если 0 - то приходит первая тысяча id, если 10000 - то id с позицией от 10001 до 11000 в общем списке участников
+          #:delay (delay-time #f) ; задержка между последовательными обращениями к серверу ВКонтакте по API, нужна, чтобы не словить ошибку "Too many requests per second"
+          )
+  ; Внутренняя рекурсивная функция.
+  ; Зачем? - За один запрос по VK API можно получить лишь 1000 id участников. Бывают группы, где количество участников несколько сотен тысяч и даже миллионы. Поэтому нужно последовательно делать запросы с использованием параметра offset. Для этого создаем рекурсивную функцию, которая будет запрашивать следующую и следующую тысячу id пользователей, пока не уткнется в ошибку или пустой результат.
+  (define (get-next-users
+              groupid
+              offset
+              (acc-result empty) ; результат после каждой итерации накапливается сюда
+              )
+    (when delay-time (sleep delay-time)) ; если задано время задержки, самое время сделать паузу и скушать Твикс
+    (let ((res (string->jsexpr ; ответ приходит в виде текстовой строки формата JSON, парсим его в структуру данных типа вложенного хэша
+                  (get-url ; эта функция посылает по указанному URL HTTP запрос типа GET
+                    (format
+                      ; запрос формируем согласно документации https://vk.com/dev/groups.getMembers. Этот адрес с подставленными значениями можно прямо вставить в адресную строку браузера и получить ответ в виде JSON (e.g. {"response":{"count":377421,"items":[56,121,134,149,175,193,243,341,364,404]}} )
+                      "https://api.vk.com/method/groups.getMembers?group_id=~a&offset=~a&filter=friends,unsure&v=~a&access_token=~a"
+                      groupid
+                      VK_API_VERSION
+                      offset
+                      AT ; ключ доступ пользователя. Как его получить см. комментарии в заголовке этого файла (в районе строки 13)
+                      )))))
       (cond
-        ((@. res.error) acc-result)
-        ((empty? (@. res.response.items)) acc-result)
-        (else (get-next-users groupid (+ 1000 offset) (append acc-result (map str (@. res.response.items))))))))
-  (when (status-output) (display (format "~a~n" groupid)) (flush-output))
+        ((@. res.error) acc-result) ; если ошибка возвращаем накопленный список id
+        ((empty? (@. res.response.items)) acc-result) ; если пустой результат, значит все уже перебрали, возвращаем накопленный список id участнкиов
+        (else (get-next-users groupid (+ 1000 offset) (append acc-result (map str (@. res.response.items)))))))) ; запрашиваем следующую 1000 id
+  ; Инициализация считывания. Получаем чистый id группы из URL группы и запрашиваем id участников, начиная с первой тысячи:
   (let* ((groupid (extract-pure-id groupid)))
     (get-next-users groupid 0)))
 
