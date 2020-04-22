@@ -18,6 +18,12 @@
                   (format "\"~a\"" (string-replace (->string val) "\"" ""))
                   "")))))
 
+(define text->csv-text
+  (change-text
+    (list
+      (cons "#f" "")
+      (cons "\"" "\"\""))))
+
 (define-catch (transform-csv-fields csv-items transform-hash)
   (map
     (λ (item)
@@ -33,22 +39,20 @@
     csv-items))
 
 (define-catch (write-csv-file headers data filename #:delimeter (delimeter ","))
-  (let* ( (res-header (implode headers delimeter))
-          (res-body (implode
+  (let* ( (res-header (string-join (map ->string headers) delimeter))
+          (res-body (string-join
                       (map
                         (λ (row)
-                          (implode
-                            (cond
-                              ((hash? row)
-                                (hash-refs row headers ""))
-                              ((list? row)
-                                row)
-                              (else
-                                row))
-                            delimeter))
+                          (cond
+                            ((hash? row)
+                              (string-join (map ->string (hash-refs row headers "")) delimeter))
+                            ((list? row)
+                              (string-join (map ->string row) delimeter))
+                            (else
+                              row)))
                         data)
                       "\n"))
-          (res (str res-header "\n" res-body)))
+          (res (string-append res-header "\n" res-body)))
     (write-file filename res)))
 
 (define (write-csv-file* #:columns columns #:data data #:csvfile filename #:delimeter (delimeter ","))

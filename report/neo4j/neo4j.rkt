@@ -84,13 +84,14 @@
     command))
     ; (neo4j/cypher command)))
 
+(define (neo4j-command/clean-database #:label (label #f) #:limit (limit #f))
+  (format
+    "MATCH (n~a) ~a DETACH DELETE n"
+    (if label (str ":" label) "")
+    (if limit (format "WITH n LIMIT ~a" limit) "")))
 
 (define (gdb/delete-nodes #:label (label #f) #:limit (limit #f))
-  (neo4j/cypher
-    (format
-      "MATCH (n~a) ~a DETACH DELETE n"
-      (if label (str ":" label) "")
-      (if limit (format "WITH n LIMIT ~a" limit) ""))))
+  (neo4j/cypher neo4j-command/clean-database #:label label #:limit limit))
 
 (define (gdb/create-index label property)
   (neo4j/cypher
@@ -100,7 +101,7 @@
   (neo4j/cypher
     (format "DROP INDEX ON :~a(~a)" label property)))
 
-; (gdb/import-csv "http://data.rusvegia.com/odysseus/test.csv" #:headers '(name surname rate) #:labels "Test")
+; (gdb/import-csv "http://data.rusvegia.com/odysseus/test.csv" #:headers '(name surname rate) #:label "Test")
 (define (gdb/import-csv csvfile #:headers (headers #f) #:label (label "Node") #:large-dataset (large-dataset #f))
   (let ((req
           (format "~a LOAD CSV ~a FROM '~a' AS row CREATE (:~a {~a});"
@@ -118,3 +119,22 @@
        )))
     ;(println req)
     (neo4j/cypher req)))
+
+
+;  new code
+
+    (define-catch (clear-neo4j-db)
+      (string-append
+        (format "match (n) optional match (n)-[r]-() delete n,r")
+        (format "match (n) detach delete n")))
+
+    (define-catch (load-from-csv csvfile)
+      (format
+          #<<TEXT
+            USING PERIODIC COMMIT 5000
+            LOAD CSV FROM ~a AS line
+            MATCH (a:Author { authorid: line[0] })
+            MATCH (b:Author { authorid: line[1] })
+            CREATE (a)-[r:co_author { collaborations: line[2] }]->(b)
+TEXT
+        csvfile))

@@ -22,7 +22,7 @@
 (define AT2 ($ access_token vk/postagg2_1))
 (define AT3 ($ access_token vk/postagg2_2))
 (define AT4 ($ access_token vk/postagg2_3))
-(define AT AT3)
+(define AT AT1)
 
 (define VK_API_VERSION "5.103")
 
@@ -106,13 +106,11 @@
 
 (define user-fields (append user-basic-fields-used user-optional-fields-used))
 
-(define-catch (get-user-info user-id #:fields (fields user-fields) #:status (status #f) #:access-token (access-token AT))
-  (when status (display status) (flush-output))
+(define-catch (get-user-info user-id #:fields (fields user-fields) #:status (status #f) #:access-token (access-token AT) #:display? (display? #f))
+  (when display? (display display?) (flush-output))
   (let* (
         (fields (implode fields ","))
-        (request (format "https://api.vk.com/method/users.get?user_ids=~a&fields=~a&v=5.52" user-id fields))
-        (access_token (@. vk/odysseus.access_token)) ; comment this line if you need get-user-info function to be more universal
-        (request (if access_token (format "~a&access_token=~a" request access_token) request))
+        (request (format "https://api.vk.com/method/users.get?user_ids=~a&fields=~a&v=5.52&access_token=~a" user-id fields AT))
         (res (json->hash (get-url request))))
         ; (res (hash)))
     (if (@. res.error)
@@ -163,17 +161,17 @@
         (let* (
               (_ (when delay-time (sleep delay-time)))
               (res-user (string->jsexpr
-                          (get-url (format "https://api.vk.com/method/users.get?user_ids=~a&v=5.52&access_token=~a" user-name AT))))
+                          (get-url (format "https://api.vk.com/method/users.get?user_ids=~a&v=~a&access_token=~a" user-name VK_API_VERSION AT))))
               (result-user (and ($ response res-user) (not-empty? ($ response res-user)) ($ id (first ($ response res-user))))))
           result-user))))
 
 (define-catch (get-friends-of-user user-id #:status (status #f) #:friends-limit (friends-limit #f))
   (when status (display status) (flush-output))
   (let ((res (string->jsexpr
-                    (get-url (format "https://api.vk.com/method/friends.get?user_id=~a&v=5.52" user-id)))))
+                    (get-url (format "https://api.vk.com/method/friends.get?user_id=~a&v=~a&access_token=~a" user-id VK_API_VERSION AT)))))
     (cond
       ((@. res.error)
-        (list "<user-deactivated>"))
+        empty)
       (else
         (let ((items (@. res.response.items)))
           (if (and friends-limit (> (length items) friends-limit))
@@ -182,11 +180,11 @@
 
 (define-catch (get-groups-of-user user-id)
   (let ((res (string->jsexpr
-                    (get-url (format "https://api.vk.com/method/groups.get?user_id=~a&v=5.52&access_token=~a" user-id AT)))))
+                    (get-url (format "https://api.vk.com/method/groups.get?user_id=~a&v=~a&access_token=~a" user-id VK_API_VERSION AT)))))
     ; (--- res)
     (cond
       ((@. res.error)
-        (list "<user-deactivated>"))
+        empty)
       (else
         (let ((items (@. res.response.items)))
           items)))))
@@ -223,7 +221,7 @@
       (hash-ref (car (hash-ref res 'response)) 'name))))
 
 ; I don't define-catch here as it's better to process exceptions in the code upstream, when requesting id in a row among hundreds of urls
-(define (get-group-id group-name #:cache (cache #f) #:delay (delay-time #f))
+(define (get-pid group-name #:cache (cache #f) #:delay (delay-time #f) #:display? (display? #f))
   (define plain-name? (re-matches? #px"^(club|public)?(\\d+)$" group-name))
   (define (get-name-from-full-url group-url)
     (last (string-split group-url "/")))
@@ -236,9 +234,11 @@
               n)
           (let* (
                 (_ (when delay-time (sleep delay-time)))
+                (_ (when display?
+                        (display display?)
+                        (flush-output)))
                 (res-group (string->jsexpr
-                            (get-url (format "https://api.vk.com/method/groups.getById?group_id=~a&v=5.52&access_token=~a" group-name AT))))
-                ; (_ (--- "(get-group-id):" res-group))
+                            (get-url (format "https://api.vk.com/method/groups.getById?group_id=~a&v=~a&access_token=~a" group-name VK_API_VERSION AT))))
                 (result-group (and ($ response res-group) (not-empty? ($ response res-group)) ($ id (first ($ response res-group))))))
             result-group)))))
 
@@ -293,9 +293,10 @@
 
 ; Функция по заданному id группы groupid возвращает список id ее участников.
 (define (get-group-users
-          groupid ; id группы (это цифры в url группы типа vk.com/club14881917, либо получаемые по алиасу группы через get-group-id)
+          groupid ; id группы (это цифры в url группы типа vk.com/club14881917, либо получаемые по алиасу группы через get-pid)
           #:offset (offset 0) ; смещение по выборке, если 0 - то приходит первая тысяча id, если 10000 - то id с позицией от 10001 до 11000 в общем списке участников
           #:delay (delay-time #f) ; задержка между последовательными обращениями к серверу ВКонтакте по API, нужна, чтобы не словить ошибку "Too many requests per second"
+          #:display? (display? #f) ; отображать каждый запрос по API в консоли, и если да, то какие символы?
           )
   ; Внутренняя рекурсивная функция.
   ; Зачем? - За один запрос по VK API можно получить лишь 1000 id участников.
@@ -309,6 +310,9 @@
               (acc-result empty) ; результат после каждой итерации накапливается в итоговый список
               )
     (when delay-time (sleep delay-time)) ; если задано время задержки, самое время сделать паузу и скушать Твикс
+    (when display?
+          (display display?)
+          (flush-output))
     (let ((res (string->jsexpr ; ответ приходит в виде текстовой строки формата JSON, парсим его в структуру данных типа вложенного хэша
                   (get-url ; эта функция посылает по указанному URL HTTP запрос типа GET
                     (format
@@ -324,7 +328,8 @@
       (cond
         ((@. res.error)
             ; если вдруг ошибка, а такое бывает, подаем сигнал на консоль:
-            (display (format "error: ~a" (@. res.error)))
+            ; (display (format "error: ~a" (@. res.error)))
+            (display (format " x[club~a ~a] " groupid (length acc-result)))
             (flush-output)
             ; и возвращаем накопленный список id. Не пропадать же добру!
             acc-result)
@@ -344,7 +349,7 @@
                 ))
           )))))
   ; Инициализация считывания. Получаем чистый id группы из URL группы и запрашиваем id участников, начиная с первой тысячи.
-  ; Тем самым запускаем рекурсию (точнее итерацию), которая будеn крутиться, пока не выгребет все айдишники:
+  ; Тем самым запускаем рекурсию (точнее итерацию), которая будет крутиться, пока не выгребет все айдишники:
   (let* ((groupid (extract-pure-id groupid)))
     (get-next-users groupid 0)))
 
