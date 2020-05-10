@@ -22,7 +22,7 @@
 (define AT2 ($ access_token vk/postagg2_1))
 (define AT3 ($ access_token vk/postagg2_2))
 (define AT4 ($ access_token vk/postagg2_3))
-(define AT AT1)
+(define AT AT2)
 
 (define VK_API_VERSION "5.103")
 
@@ -221,8 +221,9 @@
       (hash-ref (car (hash-ref res 'response)) 'name))))
 
 ; I don't define-catch here as it's better to process exceptions in the code upstream, when requesting id in a row among hundreds of urls
-(define (get-pid group-name #:cache (cache #f) #:delay (delay-time #f) #:display? (display? #f))
+(define (get-gid group-name #:cache (cache #f) #:delay (delay-time #f) #:display? (display? #f))
   (define plain-name? (re-matches? #px"^(club|public)?(\\d+)$" group-name))
+  ; (--- group-name plain-name?)
   (define (get-name-from-full-url group-url)
     (last (string-split group-url "/")))
   (let* ((group-name (get-name-from-full-url group-name)))
@@ -241,6 +242,8 @@
                             (get-url (format "https://api.vk.com/method/groups.getById?group_id=~a&v=~a&access_token=~a" group-name VK_API_VERSION AT))))
                 (result-group (and ($ response res-group) (not-empty? ($ response res-group)) ($ id (first ($ response res-group))))))
             result-group)))))
+
+(define get-group-id get-gid)
 
 (define-catch (get-vk-name-from-url vk-url)
   (let* (
@@ -293,7 +296,7 @@
 
 ; Функция по заданному id группы groupid возвращает список id ее участников.
 (define (get-group-users
-          groupid ; id группы (это цифры в url группы типа vk.com/club14881917, либо получаемые по алиасу группы через get-pid)
+          groupid ; id группы (это цифры в url группы типа vk.com/club14881917, либо получаемые по алиасу группы через get-gid)
           #:offset (offset 0) ; смещение по выборке, если 0 - то приходит первая тысяча id, если 10000 - то id с позицией от 10001 до 11000 в общем списке участников
           #:delay (delay-time #f) ; задержка между последовательными обращениями к серверу ВКонтакте по API, нужна, чтобы не словить ошибку "Too many requests per second"
           #:display? (display? #f) ; отображать каждый запрос по API в консоли, и если да, то какие символы?

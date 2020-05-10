@@ -22,7 +22,10 @@
   (change-text
     (list
       (cons "#f" "")
-      (cons "\"" "\"\""))))
+      (cons "\\" "")
+      ; (cons "\"" "'")
+      (cons "\"" "\"\"")
+    )))
 
 (define-catch (transform-csv-fields csv-items transform-hash)
   (map
@@ -38,6 +41,7 @@
           (else res))))
     csv-items))
 
+;  data: (list (list ...) ...)
 (define-catch (write-csv-file headers data filename #:delimeter (delimeter ","))
   (let* ( (res-header (string-join (map ->string headers) delimeter))
           (res-body (string-join

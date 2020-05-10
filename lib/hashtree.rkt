@@ -498,6 +498,21 @@
       ((item list-of-hash))
       (values item (hash)))))
 
+; get items that keep pointers to their children (rather than parents in the usual case)
+; (define-catch (get-forward-tree hash-tree)
+;   (define (get-forward-tree-0 root-item items)
+;     (let* ((children (filter (λ (item) (equal? ($ id root-item) ($ _parent item))) items))
+;           (children-ids (map (λ (item) ($ id item)) children)))
+;       (cond
+;         ((not-empty? children) (pushl
+;                                   (apply append (map (curryr get-forward-tree-0 items) children))
+;                                   (hash-set root-item '_children children-ids)))
+;         (else (list (hash-set root-item '_children empty))))))
+;   (let* (
+;         (items (planarize hash-tree))
+;         (root-elements (filter (λ (item) (not ($ _parent item))) items)))
+;     (apply append (map (curryr get-forward-tree-0 items) root-elements))))
+
 (module+ test
 
   (require rackunit)

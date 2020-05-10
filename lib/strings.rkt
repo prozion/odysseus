@@ -142,6 +142,7 @@
                     (cons ":" "")
                     (cons "—" "_")
                     (cons "-" "_")
+                    (cons "/" "_")
                     (cons "ё" "е")
                     (cons "__" "_")
                     )))
@@ -242,6 +243,37 @@
       (string-contains? a b)
       (string-contains? b a))))
 
+(define-catch (string-car str)
+  (cond
+    ((empty-string? str) (error (format "строка ~a пуста" str)))
+    (else (substring str 0 1))))
+
+(define-catch (string-cdr str)
+  (cond
+    ((empty-string? str) (error (format "строка ~a пуста" str)))
+    ((equal? (string-length str) 1) "")
+    (else (substring str 1))))
+
+(define-catch (cyr> a b)
+  (cond
+    ((empty-string? a) #f)
+    ((empty-string? b) #t)
+    (else
+      (let* ((letters (explode "_абвгдеёжзийклмнопрстуфхцчшщьыъэюяabscdefghijklmnoprstuvwxyz0123456789"))
+            (a (string-downcase a))
+            (b (string-downcase b))
+            (a-first (string-car a))
+            (a-rest (string-cdr a))
+            (b-first (string-car b))
+            (b-rest (string-cdr b))
+            (a-pos (indexof letters a-first))
+            (b-pos (indexof letters b-first)))
+        (cond
+          ((equal? a-first b-first) (cyr> a-rest b-rest))
+          (else (> a-pos b-pos)))))))
+
+(define (cyr< a b)
+  (not (cyr> a b)))
 
 (module+ test
 
@@ -314,4 +346,11 @@
 
   (check-true (starts-with? "Hector" "H"))
   (check-false (starts-with? "Hector" "h"))
+
+  (check-true (cyr> "Питер" "Москва"))
+  (check-true (cyr> "Washington" "Питер"))
+  (check-true (cyr> "Самойлово" "Самара"))
+  (check-true (cyr> "Самойлово" "самара"))
+  (check-true (cyr> "Washington" "Boston"))
+  (check-false (cyr> "Boston" "Seattle"))
 )

@@ -175,6 +175,7 @@
     ((equal? (->string v) "<f>") #f)
     (else #t)))
 
+; get either '<key>' or inherited '<key>+' value of item
 (define-macro ($* k item)
   (let ((kplus (string-append "+" (format "~a" k))))
     `(or

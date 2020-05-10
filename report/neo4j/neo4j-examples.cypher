@@ -13,3 +13,9 @@ match
 
 // clean database
 match (n) detach delete n
+
+// make index on the property
+create index index_user_uid for (u:User) on (u.uid)
+
+// show db schema
+call db.schema.visualization

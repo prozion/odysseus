@@ -639,6 +639,9 @@
         (pushr res
           `(,element ,@(map (λ (x y) (x y)) incrementors last-indexes-values)))))))
 
+(define (first-or-false seq)
+  (and seq (not-empty? seq) (first seq)))
+
 (module+ test
 
   (require rackunit)
