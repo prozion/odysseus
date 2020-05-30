@@ -18,11 +18,14 @@
 ; -- подтверждаем доступ
 ; -- возвращается новая адресная строка с параметром access_token. Он нам и нужен, записываем его в укромное место (в данном случае в отдельный файл вне публичного репозитория)
 
-(define AT1 ($ access_token vk/odysseus))
+(define AT0 ($ access_token vk/odysseus))
+(define AT1 ($ access_token vk/postagg1_1))
 (define AT2 ($ access_token vk/postagg2_1))
 (define AT3 ($ access_token vk/postagg2_2))
 (define AT4 ($ access_token vk/postagg2_3))
-(define AT AT2)
+(define AT5 ($ access_token vk/postagg3_1))
+(define AT6 ($ access_token vk/postagg3_2))
+(define AT AT1)
 
 (define VK_API_VERSION "5.103")
 
@@ -441,12 +444,17 @@
       'doc_img (and attachments ($ doc.url attachment))
     )))
 
-(define-catch (get-video-img-urls item)
+(define-catch (get-attachments item)
   (let* ((copy_history ($ copy_history item))
         (copy_history (and (not-empty? copy_history) (first copy_history)))
         (attachments (or
                         (and copy_history ($ attachments copy_history))
-                        ($ attachments item)))
+                        ($ attachments item))))
+    attachments))
+
+(define-catch (get-video-img-urls item)
+  (let* (
+        (attachments (get-attachments item))
         (attachment (or (and attachments (first attachments)) (hash)))
         )
     (hash
@@ -463,3 +471,98 @@
 
 (define-catch (get-img-url item #:image-size (image-size '2x))
   (hash-ref (get-img-urls item) image-size))
+
+(define-catch (post-contains-img? item)
+  (ormap
+    true?
+    (hash-values (get-img-urls item))))
+
+(define-catch (attachment-is-a-photo? attachment)
+  (equal? ($ type attachment) "photo"))
+
+(define-catch (get-photo-id attachment)
+  (and
+    (attachment-is-a-photo? attachment)
+    ($ photo.id attachment)))
+
+(define-catch (move-post-images item group_id target_album_id #:delay (delay-time #f) #:count-parameter (count #f) #:break-if-error (break-if-error #t) #:do-when-error (do-when-error #f))
+  (and
+    (post-contains-img? item)
+    (let* ((attachments (get-attachments item))
+          (photo_ids (map
+                        get-photo-id
+                        attachments)))
+      (for ((photo_id photo_ids))
+        ; https://vk.com/dev/photos.delete?params[owner_id]=231485211&params[photo_id]=305326320&params[v]=5.107
+        (let* (
+              (_ (when count (count (+ (count) 1)) #t))
+              (_ (--- photo_id (when count (count))))
+              ; (_ (--- group_id target_album_id photo_id VK_API_VERSION AT))
+              (reqstr (format "https://api.vk.com/method/photos.move?owner_id=-~a&target_album_id=~a&photo_id=~a&v=~a&access_token=~a"
+                                group_id
+                                target_album_id
+                                photo_id
+                                VK_API_VERSION
+                                AT))
+              (_ (when delay-time (sleep delay-time)))
+              (res (string->jsexpr
+                          (get-url reqstr)))
+              (response ($ response res))
+              (err ($ error res)))
+          (cond
+            ((and err break-if-error) (error err))
+            ((and err do-when-error) (do-when-error err) #f)
+            (err #f)
+            (else
+              response)))))))
+
+; works only for groups, for users it might be implemented later
+(define-catch (delete-post-images item group_id #:delay (delay-time #f) #:count-parameter (count #f) #:break-if-error (break-if-error #t) #:do-when-error (do-when-error #f))
+  (and
+    (post-contains-img? item)
+    (let* ((attachments (get-attachments item))
+          (photo_ids (map
+                        get-photo-id
+                        attachments)))
+      (for ((photo_id photo_ids))
+        ; https://vk.com/dev/photos.delete?params[owner_id]=231485211&params[photo_id]=305326320&params[v]=5.107
+        (let* (
+              (_ (when count (count (+ (count) 1)) #t))
+              (_ (--- photo_id (when count (count))))
+              (reqstr (format "https://api.vk.com/method/photos.delete?owner_id=-~a&photo_id=~a&v=~a&access_token=~a"
+                                group_id
+                                photo_id
+                                VK_API_VERSION
+                                AT))
+              (_ (when delay-time (sleep delay-time)))
+              (res (string->jsexpr
+                          (get-url reqstr)))
+              (response ($ response res))
+              (err ($ error res)))
+          (cond
+            ((and err break-if-error) (error err))
+            ((and err do-when-error) (do-when-error err) #f)
+            (err #f)
+            (else
+              response)))))))
+
+; (define-catch (get-all-images group_id offset #:delay (delay-time #f) #:break-if-error (break-if-error #t) #:do-when-error (do-when-error #f))
+;   (let* (
+;         (reqstr (format "https://api.vk.com/method/photos.getAll?owner_id=-~a&extended=~a&offset=~a&count=~a&v=~a&access_token=~a"
+;                           group_id
+;                           0
+;                           offset
+;                           200
+;                           VK_API_VERSION
+;                           AT))
+;         (_ (when delay-time (sleep delay-time)))
+;         (res (string->jsexpr
+;                     (get-url reqstr)))
+;         (response ($ response res))
+;         (err ($ error res)))
+;     (cond
+;       ((and err break-if-error) (error err))
+;       ((and err do-when-error) (do-when-error err) #f)
+;       (err #f)
+;       (else
+;         response))))
