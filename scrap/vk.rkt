@@ -528,7 +528,7 @@
         ; https://vk.com/dev/photos.delete?params[owner_id]=231485211&params[photo_id]=305326320&params[v]=5.107
         (let* (
               (_ (when count (count (+ (count) 1)) #t))
-              (_ (--- photo_id (when count (count))))
+              ; (_ (--- photo_id (when count (count))))
               (reqstr (format "https://api.vk.com/method/photos.delete?owner_id=-~a&photo_id=~a&v=~a&access_token=~a"
                                 group_id
                                 photo_id
