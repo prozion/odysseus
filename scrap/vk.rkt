@@ -27,7 +27,7 @@
 (define AT6 ($ access_token vk/postagg3_2))
 (define AT AT2)
 
-(define VK_API_VERSION "5.103")
+(define VK_API_VERSION "5.107")
 
 (provide (all-defined-out))
 
@@ -113,7 +113,7 @@
   (when display? (display display?) (flush-output))
   (let* (
         (fields (implode fields ","))
-        (request (format "https://api.vk.com/method/users.get?user_ids=~a&fields=~a&v=5.52&access_token=~a" user-id fields AT))
+        (request (format "https://api.vk.com/method/users.get?user_ids=~a&fields=~a&v=~a&access_token=~a" user-id fields VK_API_VERSION AT))
         (res (json->hash (get-url request))))
         ; (res (hash)))
     (if (@. res.error)
@@ -124,7 +124,7 @@
 (define (request-username id (glue " "))
   (when (status-output) (display "+") (flush-output))
   (let ((res (string->jsexpr
-                (get-url (format "https://api.vk.com/method/users.get?user_ids=~a&v=5.52&access_token=~a" id AT)))))
+                (get-url (format "https://api.vk.com/method/users.get?user_ids=~a&v=~a&access_token=~a" id VK_API_VERSION AT)))))
     (if (@. res.error)
       id
       (let ((u (car (@. res.response))))
@@ -218,7 +218,7 @@
 (define-catch (get-group-name groupid)
   (let* ((groupid (remove-vk-url-prefix groupid))
         (res (string->jsexpr
-                    (get-url (format "https://api.vk.com/method/groups.getById?group_id=~a&v=5.52&access_token=~a" groupid AT)))))
+                    (get-url (format "https://api.vk.com/method/groups.getById?group_id=~a&v=~a&access_token=~a" groupid VK_API_VERSION AT)))))
     (if (@. res.error)
       null
       (hash-ref (car (hash-ref res 'response)) 'name))))
@@ -262,9 +262,10 @@
 (define (vk/get-photoalbums group-id #:group? (group? #t))
   (let*
       ((res (string->jsexpr
-                  (get-url (format "https://api.vk.com/method/photos.getAlbums?owner_id=~a~a&need_system=1&v=5.52&access_token=~a"
+                  (get-url (format "https://api.vk.com/method/photos.getAlbums?owner_id=~a~a&need_system=1&v=~a&access_token=~a"
                                     (if group? "-" "")
                                     group-id
+                                    VK_API_VERSION
                                     AT))))
       (res (and ($ response res) ($ items ($ response res)))))
     res))
@@ -402,9 +403,10 @@
           #:success-display (success-display #f)
           #:break-if-error (break-if-error #t)
           #:do-when-error (do-when-error #f))
-  (let* ((reqstr (format "https://api.vk.com/method/wall.get?owner_id=~a~a&v=5.8&~a~a~a~a&access_token=~a"
+  (let* ((reqstr (format "https://api.vk.com/method/wall.get?owner_id=~a~a&v=~a&~a~a~a~a&access_token=~a"
                     (if group? "-" "")
                     id
+                    VK_API_VERSION
                     (if extended "&extended=1" "")
                     (format "&filter=~a" filtered-by)
                     (if offset (str "&offset=" offset) "")
