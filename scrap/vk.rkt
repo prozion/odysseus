@@ -426,26 +426,6 @@
               (flush-output))
         response))))
 
-(define-catch (get-img-urls item)
-  (let* ((copy_history ($ copy_history item))
-        (copy_history (and (not-empty? copy_history) (first copy_history)))
-        (attachments (or
-                        (and copy_history ($ attachments copy_history))
-                        ($ attachments item)))
-        (attachment (or (and attachments (first attachments)) (hash)))
-        )
-    ; (--- "photo" ($ photo attachment))
-    ; (--- "photo.photo_604" ($ photo.photo_604 attachment))
-    (hash
-      '1x (and attachments ($ photo.photo_75 attachment))
-      '2x (and attachments ($ photo.photo_130 attachment))
-      '3x (and attachments ($ photo.photo_604 attachment))
-      '4x (and attachments ($ photo.photo_807 attachment))
-      '5x (and attachments ($ photo.photo_1280 attachment))
-      'link_img (and attachments ($ link.image_big attachment))
-      'doc_img (and attachments ($ doc.url attachment))
-    )))
-
 (define-catch (get-attachments item)
   (let* ((copy_history ($ copy_history item))
         (copy_history (and (not-empty? copy_history) (first copy_history)))
@@ -453,6 +433,45 @@
                         (and copy_history ($ attachments copy_history))
                         ($ attachments item))))
     attachments))
+
+(define-catch (get-attachment-element attachments type)
+  (let* (
+        (elements (and attachments (filter (λ (x) (hash-ref* x type)) attachments)))
+        (element (and (not-empty? elements) (first elements)))
+        (sizes (and element ($ photo.sizes element)))
+        (urls (and sizes
+                      (for/hash
+                        ((size sizes))
+                        (values ($ width size) ($ url size))))))
+    (if urls urls (hash))))
+
+(define-catch (get-img-urls item)
+  (let* (
+        (attachments (get-attachments item))
+        ; attachment photo
+        (photo_urls (get-attachment-element attachments 'photo))
+        (photo_urls (hash
+                      '1x ($ 75 photo_urls)
+                      '2x ($ 130 photo_urls)
+                      '3x ($ 604 photo_urls)
+                      '4x ($ 807 photo_urls)
+                      '5x ($ 1280 photo_urls)))
+        ; attachment link
+        (link_urls (get-attachment-element attachments 'link))
+        (link_urls (hash
+                      '1x-link ($ 75 link_urls)
+                      '2x-link ($ 130 link_urls)
+                      '3x-link ($ 537 link_urls)
+                      '4x-link #f
+                      '5x-link ($ 1074 link_urls)))
+        ; attachment doc (TODO: upgrade)
+        (doc_urls (and attachments ($ doc.url attachments)))
+        (doc_urls (if doc_urls (hash 'doc doc_urls) (hash)))
+        )
+    ; (--- "photo" ($ photo attachment))
+    ; (--- "photo.photo_604" ($ photo.photo_604 attachment))
+      (hash-union photo_urls link_urls doc_urls)
+    ))
 
 (define-catch (get-video-img-urls item)
   (let* (
@@ -536,6 +555,7 @@
                                 photo_id
                                 VK_API_VERSION
                                 AT))
+              (_ (--- reqstr))
               (_ (when delay-time (sleep delay-time)))
               (res (string->jsexpr
                           (get-url reqstr)))

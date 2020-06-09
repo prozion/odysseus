@@ -499,3 +499,118 @@
                   (count . 0)
                   (user_reposted . 0)))
     (text . Найдена карта на Гвардейском! Обращаться по телефону 31200 ДК Восход)))
+
+;;; API version 5.107
+
+(define it_feed_post
+  #hasheq(
+    (attachments . (#hasheq(
+                      (photo . #hasheq(
+                                  (access_key . 7d7847c641c40f2722)
+                                  (album_id . -7)
+                                  (date . 1582299940)
+                                  (has_tags . #f)
+                                  (id . 457239344)
+                                  (owner_id . -129791859)
+                                  (post_id . 441)
+                                  (sizes . (#hasheq(
+                                              (height . 77)
+                                              (type . m)
+                                              (url . https://sun9-28.userapi.com/c857128/v857128217/ed922/xkOcjFr2SWg.jpg)
+                                              (width . 130))
+                                            #hasheq(
+                                              (height . 87)
+                                              (type . o)
+                                              (url . https://sun9-41.userapi.com/c857128/v857128217/ed927/0xcT5JY3JFU.jpg)
+                                              (width . 130))
+                                            #hasheq(
+                                              (height . 133)
+                                              (type . p)
+                                              (url . https://sun9-8.userapi.com/c857128/v857128217/ed928/vNAHfXbGTio.jpg)
+                                              (width . 200))
+                                            #hasheq(
+                                              (height . 213)
+                                              (type . q)
+                                              (url . https://sun9-31.userapi.com/c857128/v857128217/ed929/VBcGX3relBc.jpg)
+                                              (width . 320))
+                                            #hasheq(
+                                              (height . 340)
+                                              (type . r)
+                                              (url . https://sun9-72.userapi.com/c857128/v857128217/ed92a/1QKJ87F8g0Y.jpg)
+                                              (width . 510))
+                                            #hasheq(
+                                              (height . 44)
+                                              (type . s)
+                                              (url . https://sun9-6.userapi.com/c857128/v857128217/ed921/cHUGMD_6CAs.jpg)
+                                              (width . 75))
+                                            #hasheq(
+                                              (height . 1527)
+                                              (type . w)
+                                              (url . https://sun9-4.userapi.com/c857128/v857128217/ed926/hdbLCTmA5_I.jpg)
+                                              (width . 2560))
+                                            #hasheq(
+                                              (height . 360)
+                                              (type . x)
+                                              (url . https://sun9-41.userapi.com/c857128/v857128217/ed923/0lVRv5VzG-U.jpg)
+                                              (width . 604))
+                                            #hasheq(
+                                              (height . 481)
+                                              (type . y)
+                                              (url . https://sun9-25.userapi.com/c857128/v857128217/ed924/fKRlCjPPQZw.jpg)
+                                              (width . 807))
+                                            #hasheq(
+                                              (height . 763)
+                                              (type . z)
+                                              (url . https://sun9-69.userapi.com/c857128/v857128217/ed925/6DwLU8oZv9A.jpg)
+                                              (width . 1280))))
+                                  (text . )
+                                  (user_id . 100)))
+                      (type . photo))
+                    #hasheq(
+                      (link . #hasheq(
+                                (description . "Mixed Reality conference for professionals by professionals. Place for knowledge and experience exchange for industry leaders and innovators.")
+                                (is_favorite . #f)
+                                (photo . #hasheq(
+                                            (album_id . -26)
+                                            (date . 1582299940)
+                                            (has_tags . #f)
+                                            (id . 457294687)
+                                            (owner_id . 2000058603)
+                                            (sizes . (#hasheq(
+                                                        (height . 480)
+                                                        (type . k)
+                                                        (url . https://sun2-4.userapi.com/2nXoI1xeS0IvSBX1YMd726CUc1OQ2X1uMmOG3A/_p_8LiosZ0w.jpg)
+                                                        (width . 1074))
+                                                      #hasheq((height . 240) (type . l) (url . https://sun2-3.userapi.com/bOf35DOgTkbNZgSgAZ2iDOSm9T1tVPs_OQ0fwg/ZPiRGGmqEmM.jpg) (width . 537))
+                                                      #hasheq((height . 70) (type . m) (url . https://sun2-3.userapi.com/lLyFgzh6jUoAbKYNxXVZbej78N4uTE0T24OqjA/N-aW_wjuLB4.jpg) (width . 130))
+                                                      #hasheq((height . 140) (type . p) (url . https://sun2-4.userapi.com/iDBm6SQmyRb3W4NfZQPl4cvbjM98YyItR-fWZQ/hH0twvF7i7Q.jpg) (width . 260))
+                                                      #hasheq((height . 39) (type . s) (url . https://sun2-4.userapi.com/lJ46ytP6gVyUYFM2ePJUeml1uLCrL1YnWA2YYg/Ka-zALt1Kec.jpg) (width . 75))
+                                                      #hasheq((height . 80) (type . x) (url . https://sun2-4.userapi.com/Jkvek6-EOjd9C6NjauZlKm4F_0KoeFwy2jjYKQ/zoQ2YLqa2Z8.jpg) (width . 150))))
+                                            (text . )))
+                                (target . internal)
+                                (title . "MIXR 2020 - Mixed Reality Conference")
+                                (url . https://mixrconf.ru/)))
+                      (type . link))))
+    (comments . #hasheq(
+                  (can_post . 1)
+                  (count . 0)
+                  (groups_can_post . #t)))
+    (date . 1582299940)
+    (from_id . -129791859)
+    (id . 441)
+    (is_favorite . #f)
+    (likes . #hasheq(
+                (can_like . 1)
+                (can_publish . 1)
+                (count . 4)
+                (user_likes . 0)))
+    (marked_as_ads . 0)
+    (owner_id . -129791859)
+    (post_source . #hasheq(
+                      (type . vk)))
+    (post_type . post)
+    (reposts . #hasheq(
+                  (count . 1)
+                  (user_reposted . 0)))
+    (text . "Требуются волонтеры на самую крупную конференцию по виртуальной реальности в России MIXR Conference 2020! ...")
+    (views . #hasheq((count . 482)))))
