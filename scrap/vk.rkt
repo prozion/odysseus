@@ -555,7 +555,6 @@
                                 photo_id
                                 VK_API_VERSION
                                 AT))
-              (_ (--- reqstr))
               (_ (when delay-time (sleep delay-time)))
               (res (string->jsexpr
                           (get-url reqstr)))
