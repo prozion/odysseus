@@ -1,0 +1,616 @@
+#lang racket
+
+; https://vk.com/wall3230354_10554
+; Денис Ширшов id3230354
+(define post-with-images
+  #hasheq(
+    (count . 2458)
+    (items . (#hasheq(
+                (attachments . (#hasheq(
+                                  (photo . #hasheq(
+                                              (access_key . "2ce7d9b860e9cdbef0")
+                                              (album_id . -7)
+                                              (date . 1586002938)
+                                              (height . 1296)
+                                              (id . 457242399)
+                                              (owner_id . 3230354)
+                                              (photo_1280 . "https://sun9-34.userapi.com/c858532/v858532499/146d61/jXS922RII9I.jpg")
+                                              (photo_130 . "https://sun9-21.userapi.com/c858532/v858532499/146d5e/QJgyVwzG1Q0.jpg")
+                                              (photo_2560 . "https://sun9-67.userapi.com/c858532/v858532499/146d62/hEU4Os6KxCw.jpg")
+                                              (photo_604 . "https://sun9-7.userapi.com/c858532/v858532499/146d5f/Ld3woa9RYyQ.jpg")
+                                              (photo_75 . "https://sun9-26.userapi.com/c858532/v858532499/146d5d/BderQzZIHjQ.jpg")
+                                              (photo_807 . "https://sun9-25.userapi.com/c858532/v858532499/146d60/OGDXYko3pkY.jpg")
+                                              (text . "")
+                                              (width . 968)))
+                                  (type . "photo"))
+                                #hasheq(
+                                  (photo . #hasheq(
+                                              (access_key . "2a92c236db1d000f25")
+                                              (album_id . -7)
+                                              (date . 1586002946)
+                                              (height . 448)
+                                              (id . 457242401)
+                                              (owner_id . 3230354)
+                                              (photo_1280 . "https://sun1-97.userapi.com/c858532/v858532499/146d7e/xGVaUo4ePFw.jpg")
+                                              (photo_130 . "https://sun1-29.userapi.com/c858532/v858532499/146d7b/KXvPfwyCGFE.jpg")
+                                              (photo_2560 . "https://sun1-87.userapi.com/c858532/v858532499/146d7f/S9R8_aFdwms.jpg")
+                                              (photo_604 . "https://sun1-90.userapi.com/c858532/v858532499/146d7c/Uje6Yx_FaXY.jpg")
+                                              (photo_75 . "https://sun1-14.userapi.com/c858532/v858532499/146d7a/Z7l7lnO2WJw.jpg")
+                                              (photo_807 . "https://sun1-14.userapi.com/c858532/v858532499/146d7d/41wKEIvzio0.jpg")
+                                              (text . "")
+                                              (width . 1653)))
+                                  (type . "photo"))
+                                #hasheq(
+                                  (photo . #hasheq(
+                                              (access_key . "4dd1b3739b4008be80")
+                                              (album_id . -7)
+                                              (date . 1586002944)
+                                              (height . 1040)
+                                              (id . 457242400)
+                                              (owner_id . 3230354)
+                                              (photo_1280 . "https://sun1-83.userapi.com/c858532/v858532499/146d74/DV2KWDWJzj4.jpg")
+                                              (photo_130 . "https://sun1-89.userapi.com/c858532/v858532499/146d71/t_0FHBd62PU.jpg")
+                                              (photo_2560 . "https://sun1-25.userapi.com/c858532/v858532499/146d75/JfKDZaLA9uQ.jpg")
+                                              (photo_604 . "https://sun1-83.userapi.com/c858532/v858532499/146d72/3fETq1sUZCM.jpg")
+                                              (photo_75 . "https://sun1-98.userapi.com/c858532/v858532499/146d70/SmQcAVFKULU.jpg")
+                                              (photo_807 . "https://sun1-47.userapi.com/c858532/v858532499/146d73/nuQlW-QbdSo.jpg")
+                                              (text . "")
+                                              (width . 1386)))
+                                  (type . "photo"))))
+                (comments . #hasheq(
+                              (can_post . 1)
+                              (count . 0)
+                              (groups_can_post . #t)))
+                (date . 1586002968)
+                (from_id . 3230354)
+                (id . 10554)
+                (likes . #hasheq(
+                            (can_like . 1)
+                            (can_publish . 1)
+                            (count . 5)
+                            (user_likes . 0)))
+                (owner_id . 3230354)
+                (post_source . #hasheq(
+                                  (type . "vk")))
+                (post_type . "post")
+                (reposts . #hasheq(
+                              (count . 0)
+                              (user_reposted . 0)))
+                (text . "Со вчерашней пробежки")))))
+)
+
+; https://vk.com/wall292095022_11671
+; Ольга Николашина id292095022
+(define repost-with-video
+  #hasheq(
+    (count . 11082)
+    (items . (#hasheq(
+                (comments . #hasheq(
+                              (can_post . 0)
+                              (count . 0)
+                              (groups_can_post . #t)))
+                (copy_history . (#hasheq(
+                                  (attachments . (#hasheq(
+                                                    (type . "video")
+                                                    (video . #hasheq(
+                                                                (access_key . "14dbef2138407654a9")
+                                                                (can_add_to_faves . 1)
+                                                                (can_comment . 0)
+                                                                (can_like . 1)
+                                                                (can_repost . 1)
+                                                                (can_subscribe . 1)
+                                                                (comments . 0)
+                                                                (date . 1584548000)
+                                                                (description . "Обращение Олега Зубкова")
+                                                                (duration . 100)
+                                                                (first_frame_1280 . "https://sun9-72.userapi.com/c855416/v855416797/20c604/1ztBUW1BybI.jpg")
+                                                                (first_frame_130 . "https://sun9-69.userapi.com/c855416/v855416797/20c60b/vx2PipjIl78.jpg")
+                                                                (first_frame_160 . "https://sun9-64.userapi.com/c855416/v855416797/20c60a/ADpUuOo77gk.jpg")
+                                                                (first_frame_320 . "https://sun9-67.userapi.com/c855416/v855416797/20c605/O0Z2yiLU5S8.jpg")
+                                                                (first_frame_800 . "https://sun9-63.userapi.com/c855416/v855416797/20c603/c8AlinTA76c.jpg")
+                                                                (height . 1080)
+                                                                (id . 456245397)
+                                                                (owner_id . -85970374)
+                                                                (photo_1280 . "https://sun9-72.userapi.com/c206528/v206528797/ade19/qgfAsKL9GpU.jpg")
+                                                                (photo_130 . "https://sun9-62.userapi.com/c206528/v206528797/ade20/KRu9KoyVtvI.jpg")
+                                                                (photo_320 . "https://sun9-23.userapi.com/c206528/v206528797/ade1e/b_qbRncjWnc.jpg")
+                                                                (photo_800 . "https://sun9-30.userapi.com/c206528/v206528797/ade18/2z9layMGV7w.jpg")
+                                                                (repeat . 1)
+                                                                (title . "Обращение Олега Зубкова")
+                                                                (track_code . "video_538e46f24lp2RXFs0ek938pqZOzLOjvuKG9L8EFi3Us7jNH-p4rVeWlPG2TX7znZ_jVQ2f0I")
+                                                                (views . 32981)
+                                                                (width . 1920))))
+                                                  #hasheq(
+                                                    (link . #hasheq(
+                                                              (description . "Денежные средства можно перечислять на счёт ООО «Ялтинский зоопарк «Сказка» с пометкой «Благотворительность» на реквизиты, указанные в публ...")
+                                                              (image_src . "https://sun9-52.userapi.com/c855336/v855336561/2074fe/usQdgTrX4No.jpg")
+                                                              (target . "internal")
+                                                              (title . "Реквизиты для благотворительной помощи парку львов \"Тайган\" и Ялтинскому зоопарку \"Сказка\".")
+                                                              (url . "http://olegzubkov.blogspot.com/2019/12/blog-post_271.html")))
+                                                    (type . "link"))))
+                                  (date . 1584551940)
+                                  (from_id . -85970374)
+                                  (id . 185345)
+                                  (owner_id . -85970374)
+                                  (post_source . #hasheq(
+                                                    (type . "vk")))
+                                  (post_type . "post")
+                                  (text . (str "❗ОЛЕГ ЗУБКОВ СОЗДАТЕЛЬ САФАРИ ПАРКА \"ТАЙГАН\" И ЗООПАРКА\"СКАЗКА\" ОБРАТИЛСЯ ЗА ПОМОЩЬЮ КО ВСЕМ НЕРАВНОДУШНЫМ ЛЮДЯМ И ПРЕДПРИНИМАТЕЛЯМ, В СВЯЗИ С КРИТИЧНОСТЬЮ СИТУАЦИИ В КОТОРОЙ МОГУТ ОКАЗАТЬСЯ ЕГО ПИТОМЦЫ❗ \n\"Наши счета совершенно опустошились, сегодня заказал дополнительный транш и Москва еще помогает, что -то перечисляет с моих счетов. В Португалии полностью все арестовано, ничего не движется, тоже коронавирус. и никаких продвижек нет, поэтому будем выживать, парк готовится к серьезному выживанию, вряд ли сможем получать с материка мясо, в Крыму мяса нет в достаточном количестве для наших животных.По зерновым, по сену у нас все в порядке, с овощами и фруктами сейчас подбираем все склады, где только у кого что есть, пытаемся возить десятками тонн чтобы нам на период месяц-два хватило.Не знаю как и на сколько это все затянется и какие последствия могут быть."
+                                  "ПОЭТОМУ ОБРАЩАЮСЬ КО ВСЕМ ПРЕДПРИЯТИЯМ ОПТОВЫМ, ЕСЛИ ГДЕ-ТО ПРОСРОЧЕННАЯ МУКА ,КРУПА,ЯБЛОКИ НИЧЕГО НЕ ВЫБРАСЫВАЙТЕ, НЕ ВЕЗИТЕ НА СВАЛКУ, ВЕЗИТЕ В ПАРК \"ТАЙГАН\",В ЗООПАРК \"СКАЗКА\", МЫ ВСЕ ПРИМЕМ,У НАС ОГРОМНАЯ АРМИЯ ЖИВОТНЫХ!\" \n \nРеквизиты для благотворительной помощи парку львов \"Тайган\" и Ялтинскому зоопарку \"Сказка\" - http://olegzubkov.blogspot.com/2019/12/blog-post_271.html")))))
+                (date . 1584881286)
+                (from_id . 292095022)
+                (id . 11671)
+                (is_pinned . 1)
+                (likes . #hasheq(
+                            (can_like . 1)
+                            (can_publish . 1)
+                            (count . 3)
+                            (user_likes . 0)))
+                (owner_id . 292095022)
+                (post_source . #hasheq(
+                                (type . "vk")))
+                (post_type . "post")
+                (reposts . #hasheq(
+                              (count . 0)
+                              (user_reposted . 0)))
+                (text . "")))))
+)
+
+; https://vk.com/wall-6726778_1633368
+; Новая газета
+(define group-post-with-article-cover
+  #hasheq(
+    (count . 53587)
+    (items . (#hasheq(
+                (attachments . (#hasheq(
+                                  (link . #hasheq(
+                                            (description . "В Москве индивидуальных предпринимателей и юридических лиц будут штрафовать за нарушение дистанции в 1,5 м между работниками и посетителями. Об этом сообщается на сайте мэра столицы Сергея Собянина. «Из рекомендательного это требование становится обязательным. Это важно не только для...")
+                                            (image_big . "https://sun1-96.userapi.com/c856520/v856520653/147809/Dn629cjUVNA.jpg")
+                                            (image_src . "https://sun1-84.userapi.com/c856520/v856520653/147807/d1OqyDoNNH4.jpg")
+                                            (target . "internal")
+                                            (title . "В Москве юридические лица и ИП будут штрафовать за нарушение дистанции между работниками")
+                                            (url . "http://amp.gs/Kjnb")))
+                                  (type . "link"))))
+                (comments . #hasheq(
+                              (can_post . 1)
+                              (count . 8)))
+                (date . 1586030427)
+                (from_id . -6726778)
+                (id . 1633368)
+                (likes . #hasheq(
+                            (can_like . 1)
+                            (can_publish . 1)
+                            (count . 18)
+                            (user_likes . 0)))
+                (marked_as_ads . 0)
+                (owner_id . -6726778)
+                (post_source . #hasheq(
+                                  (type . "api")))
+                (post_type . "post")
+                (reposts . #hasheq(
+                              (count . 2)
+                              (user_reposted . 0)))
+                (text . "«Из рекомендательного это требование (соблюдать дистанцию — прим.) становится обязательным. Это важно не только для уменьшения скорости распространения инфекции, но и для самих предприятий, для здоровья их работников», — говорится в сообщении http://amp.gs/Kjnb"))))))
+
+; https://vk.com/wall-26284064_3057270
+; ТАСС
+(define group-post-with-animated-gif
+  #hasheq(
+    (count . 167797)
+    (items . (#hasheq(
+                (attachments . (#hasheq(
+                                  (doc . #hasheq(
+                                            (access_key . "25b603dd97717f8e17")
+                                            (date . 1586282442)
+                                            (ext . "gif")
+                                            (id . 545142003)
+                                            (owner_id . 135986758)
+                                            (photo_100 . "https://sun9-25.userapi.com/c856436/u135986758/d3/-3/s_85b068c309.jpg")
+                                            (photo_130 . "https://sun9-34.userapi.com/c856436/u135986758/d3/-3/m_85b068c309.jpg")
+                                            (size . 5282423)
+                                            (title . "754f98aa-e117-4162-b41c-62ffa2e18ca9.gif")
+                                            (type . 3)
+                                            (url . "https://vk.com/doc135986758_545142003?hash=375082e9700e4f9fc7&dl=GU2TMMRXG4YTKMQ:1586283542:b18acfbd90c288abbe&api=1&no_preview=1")))
+                                  (type . "doc"))))
+                (comments . #hasheq(
+                              (can_post . 1)
+                              (count . 1)))
+                (date . 1586282444)
+                (from_id . -26284064)
+                (id . 3057270)
+                (likes . #hasheq(
+                          (can_like . 1)
+                          (can_publish . 1)
+                          (count . 24)
+                          (user_likes . 0)))
+                (marked_as_ads . 0)
+                (owner_id . -26284064)
+                (post_source . #hasheq(
+                                  (type . "api")))
+                (post_type . "post")
+                (reposts . #hasheq(
+                              (count . 2)
+                              (user_reposted . 0)))
+                (text . "Загородный гольф-клуб Urubo в Санта-Крус-де-ла-Сьерра, который пришлось закрыть из-за вспышки коронавируса, сегодня заполонен дружелюбными капибарами. Десятки грызунов купаются под солнцем в лагуне пустынного курорта."))))))
+
+; vk.com/id29422374
+(define aleksandr_griboedov
+  #hasheq(
+    (bdate . 1.9)
+    (books . "Абнетт, Сабатини \"Одисея капитана Блада\", Стругацкие, Ницше, Гончаров, Киосаки, Трейси, Фромм")
+    (career . (#hasheq(
+                (city_id . 282)
+                (country_id . 3)
+                (group_id . 84606443))))
+    (city . #hasheq(
+              (id . 282)
+              (title . Минск)))
+    (common_count . 2)
+    (counters . #hasheq(
+                  (albums . 3)
+                  (audios . 0)
+                  (followers . 94)
+                  (friends . 1091)
+                  (mutual_friends . 2)
+                  (notes . 9)
+                  (online_friends . 94)
+                  (pages . 301)
+                  (photos . 279)
+                  (subscriptions . 53)
+                  (videos . 1641)))
+    (country . #hasheq(
+                  (id . 3)
+                  (title . Беларусь)))
+    (domain . al_griboedov)
+    (faculty . 83317)
+    (faculty_name . "Институт государственого управления")
+    (first_name . Александр)
+    (followers_count . 94)
+    (friend_status . 0)
+    (games . Жизнь, Toribash)
+    (graduation . 0)
+    (has_mobile . 1)
+    (has_photo . 1)
+    (home_phone . )
+    (home_town . Минск)
+    (id . 29422374)
+    (instagram . immortaltry_by)
+    (interests . "Футурология, увеличение продолжительности жизни")
+    (is_favorite . 0)
+    (is_friend . 0)
+    (is_hidden_from_feed . 0)
+    (last_name . Грибоедов)
+    (last_seen . #hasheq(
+                    (platform . 7)
+                    (time . 1587127429)))
+    (military . ())
+    (movies . "Пилы, Властелин колец, Зеленый слоник, Война в доме, Антихрист, Донни Дарко, Бешеные Псы, Бобер, Экзамен")
+    (music . "Иллюзив-спид-хэви-дес-дум-рэгги")
+    (nickname . )
+    (occupation . #hasheq(
+                    (id . 88431)
+                    (name . АУпПРБ)
+                    (type . university)))
+    (online . 0)
+    (personal . #hasheq(
+                  (alcohol . 0)
+                  (inspired_by . "Сердце Carmat")
+                  (life_main . 5)
+                  (people_main . 0)
+                  (religion . Трансгуманизм)
+                  (smoking . 1)))
+    (photo_max . https://sun9-56.userapi.com/c857020/v857020518/14a9e0/mawC_6kepgI.jpg?ava=1)
+    (quotes . )
+    (relation . 0)
+    (relatives . ())
+    (schools . ())
+    (screen_name . al_griboedov)
+    (sex . 2)
+    (site . https://vk.com/allforge)
+    (status . "Если правильно и хорошо откладывать смерть на небольшой срок, то неясно, почему будет менее правильно отложить ее надолго?")
+    (tv . "Моя ужасная история, За что мне такое тело, Пусть говорят")
+    (universities . (#hasheq(
+                      (chair . 109687)
+                      (chair_name . "Государственного регулирования экономики")
+                      (city . 282)
+                      (country . 3)
+                      (faculty . 83317)
+                      (faculty_name . "Институт государственого управления")
+                      (id . 88431)
+                      (name . "Академия управления при Президенте РБ"))))
+    (university . 88431)
+    (university_name . АУпПРБ)
+    (verified . 0)
+    (wall_default . all)))
+
+; vk.com/id168590834
+(define aleksandr_pavlovtsev
+  #hasheq(
+    (bdate . "31.1.1994")
+    (books . "")
+    (career . (#hasheq(
+                  (city_id . 139)
+                  (country_id . 1)
+                  (from . 2017)
+                  (group_id . 180215674)
+                  (position . "Front end developer")
+                  (until . 2019))))
+    (city . #hasheq(
+                (id . 139)
+                (title . "Таганрог")))
+    (common_count . 0)
+    (counters . #hasheq(
+                    (albums . 2)
+                    (audios . 0)
+                    (followers . 42)
+                    (friends . 217)
+                    (mutual_friends . 0)
+                    (notes . 0)
+                    (online_friends . 23)
+                    (pages . 368)
+                    (photos . 79)
+                    (subscriptions . 0)
+                    (user_photos . 4)
+                    (videos . 250)))
+    (country . #hasheq(
+                    (id . 1)
+                    (title . "Россия")))
+    (domain . "air_melon")
+    (education_form . "Очное отделение")
+    (education_status . "Выпускник (бакалавр)")
+    (faculty . 1659)
+    (faculty_name . "Институт компьютерных технологий и информационной безопасности")
+    (first_name . "Александр")
+    (followers_count . 42)
+    (friend_status . 0)
+    (games . "")
+    (graduation . 2018)
+    (has_mobile . 1)
+    (has_photo . 1)
+    (home_town . "Удачный")
+    (id . 168590834)
+    (interests . "")
+    (is_favorite . 0)
+    (is_friend . 0)
+    (is_hidden_from_feed . 0)
+    (last_name . "Павловцев")
+    (last_seen . #hasheq(
+                    (platform . 7)
+                    (time . 1588674790)))
+    (military . (#hasheq(
+                    (country_id . 1)
+                    (from . 2015)
+                    (unit . "137 ПДП")
+                    (unit_id . 10238)
+                    (until . 2016))))
+    (movies . "")
+    (music . "")
+    (nickname . "")
+    (occupation . #hasheq(
+                      (id . 833)
+                      (name . "ИТА ЮФУ (бывш. ТТИ ЮФУ)")
+                      (type . "university")))
+    (online . 0)
+    (personal . #hasheq(
+                    (alcohol . 0)
+                    (langs . ("English"))
+                    (life_main . 0)
+                    (people_main . 0)
+                    (smoking . 0)))
+    (photo_max . "https://sun9-11.userapi.com/c858032/v858032254/61237/lvUdEPAOBhs.jpg?ava=1")
+    (quotes . "")
+    (relation . 2)
+    (relation_partner . #hasheq(
+                            (first_name . "Татьяна")
+                            (id . 151072353)
+                            (last_name . "Пилкина")))
+    (relatives . ())
+    (schools . (#hasheq(
+                    (city . 1601)
+                    (country . 1)
+                    (id . "510592")
+                    (name . "Школа №24"))))
+    (screen_name . "air_melon")
+    (sex . 2)
+    (site . "")
+    (status . "")
+    (tv . "")
+    (universities . (#hasheq(
+                        (chair . 1223)
+                        (chair_name . " Кафедра систем автоматизированного проектирования")
+                        (city . 139)
+                        (country . 1)
+                        (education_form . "Очное отделение")
+                        (education_status . "Выпускник (бакалавр)")
+                        (faculty . 1659)
+                        (faculty_name . "Институт компьютерных технологий и информационной безопасности")
+                        (graduation . 2018)
+                        (id . 833)
+                        (name . "ИТА ЮФУ (бывш. ТТИ ЮФУ)"))
+                    #hasheq(
+                        (chair . 1875341)
+                        (chair_name . " Кафедра иностранных языков")
+                        (city . 139)
+                        (country . 1)
+                        (education_form . "Очное отделение")
+                        (education_status . "Выпускник (бакалавр)")
+                        (faculty . 1658)
+                        (faculty_name . "Институт управления в экономических, экологических и социальных системах")
+                        (graduation . 2019)
+                        (id . 833)
+                        (name . "ИТА ЮФУ (бывш. ТТИ ЮФУ)"))
+                    #hasheq(
+                        (chair . 1223)
+                        (chair_name . " Кафедра систем автоматизированного проектирования")
+                        (city . 139)
+                        (country . 1)
+                        (education_form . "Очное отделение")
+                        (education_status . "Студент (магистр)")
+                        (faculty . 1659)
+                        (faculty_name . "Институт компьютерных технологий и информационной безопасности")
+                        (graduation . 2020)
+                        (id . 833)
+                        (name . "ИТА ЮФУ (бывш. ТТИ ЮФУ)"))))
+    (university . 833)
+    (university_name . "ИТА ЮФУ (бывш. ТТИ ЮФУ)")
+    (verified . 0)
+    (wall_default . "all")))
+
+; https://vk.com/nasevere?w=wall-6126497_2963589
+(define nasevere_wall_post
+  #hasheq(
+    (attachments . (#hasheq(
+                      (photo . #hasheq(
+                                  (access_key . db288770b112ac4fc1)
+                                  (album_id . -8)
+                                  (date . 1587558744)
+                                  (has_tags . #f)
+                                  (height . 1080)
+                                  (id . 458512740)
+                                  (owner_id . -6126497)
+                                  (photo_1280 . https://sun1-24.userapi.com/vI3iHOlvRkuJSVc3zCFivOpK3YiOk4XOS933Aw/epgHjZ2SYJs.jpg)
+                                  (photo_130 . https://sun1-23.userapi.com/ZkPUFz6efDG3JyGSV9n5mro8lKwAWLjA3MAQoQ/uOi71x0t1yo.jpg)
+                                  (photo_604 . https://sun1-22.userapi.com/PNyW2ymJacxyNzqYz1NQ7SXa5AIvJbKhy9EmrA/KAPlK1NNqbE.jpg)
+                                  (photo_75 . https://sun1-89.userapi.com/RsiFiSwUZ92WhHwLKRq5ddB-SwjzsUiyfSn9pA/-cbgAcvb8Ro.jpg)
+                                  (photo_807 . https://sun1-86.userapi.com/lbB_IeK9-LSIifaC-pVcv1I-7FPZm_5kqj2fzA/oLPxSUls_KU.jpg)
+                                  (post_id . 2963589)
+                                  (text . )
+                                  (user_id . 204951213)
+                                  (width . 1080)))
+                      (type . photo))))
+    (comments . #hasheq(
+                  (can_post . 1)
+                  (count . 0)))
+    (date . 1587558744)
+    (from_id . 204951213)
+    (id . 2963589)
+    (likes . #hasheq(
+                (can_like . 1)
+                (can_publish . 0)
+                (count . 0)
+                (user_likes . 0)))
+    (marked_as_ads . 0)
+    (owner_id . -6126497)
+    (post_source . #hasheq(
+                      (platform . android)
+                      (type . api)))
+    (post_type . post)
+    (reposts . #hasheq(
+                  (count . 0)
+                  (user_reposted . 0)))
+    (text . Найдена карта на Гвардейском! Обращаться по телефону 31200 ДК Восход)))
+
+;;; API version 5.107
+
+(define it_feed_post
+  #hasheq(
+    (attachments . (#hasheq(
+                      (photo . #hasheq(
+                                  (access_key . 7d7847c641c40f2722)
+                                  (album_id . -7)
+                                  (date . 1582299940)
+                                  (has_tags . #f)
+                                  (id . 457239344)
+                                  (owner_id . -129791859)
+                                  (post_id . 441)
+                                  (sizes . (#hasheq(
+                                              (height . 77)
+                                              (type . m)
+                                              (url . https://sun9-28.userapi.com/c857128/v857128217/ed922/xkOcjFr2SWg.jpg)
+                                              (width . 130))
+                                            #hasheq(
+                                              (height . 87)
+                                              (type . o)
+                                              (url . https://sun9-41.userapi.com/c857128/v857128217/ed927/0xcT5JY3JFU.jpg)
+                                              (width . 130))
+                                            #hasheq(
+                                              (height . 133)
+                                              (type . p)
+                                              (url . https://sun9-8.userapi.com/c857128/v857128217/ed928/vNAHfXbGTio.jpg)
+                                              (width . 200))
+                                            #hasheq(
+                                              (height . 213)
+                                              (type . q)
+                                              (url . https://sun9-31.userapi.com/c857128/v857128217/ed929/VBcGX3relBc.jpg)
+                                              (width . 320))
+                                            #hasheq(
+                                              (height . 340)
+                                              (type . r)
+                                              (url . https://sun9-72.userapi.com/c857128/v857128217/ed92a/1QKJ87F8g0Y.jpg)
+                                              (width . 510))
+                                            #hasheq(
+                                              (height . 44)
+                                              (type . s)
+                                              (url . https://sun9-6.userapi.com/c857128/v857128217/ed921/cHUGMD_6CAs.jpg)
+                                              (width . 75))
+                                            #hasheq(
+                                              (height . 1527)
+                                              (type . w)
+                                              (url . https://sun9-4.userapi.com/c857128/v857128217/ed926/hdbLCTmA5_I.jpg)
+                                              (width . 2560))
+                                            #hasheq(
+                                              (height . 360)
+                                              (type . x)
+                                              (url . https://sun9-41.userapi.com/c857128/v857128217/ed923/0lVRv5VzG-U.jpg)
+                                              (width . 604))
+                                            #hasheq(
+                                              (height . 481)
+                                              (type . y)
+                                              (url . https://sun9-25.userapi.com/c857128/v857128217/ed924/fKRlCjPPQZw.jpg)
+                                              (width . 807))
+                                            #hasheq(
+                                              (height . 763)
+                                              (type . z)
+                                              (url . https://sun9-69.userapi.com/c857128/v857128217/ed925/6DwLU8oZv9A.jpg)
+                                              (width . 1280))))
+                                  (text . )
+                                  (user_id . 100)))
+                      (type . photo))
+                    #hasheq(
+                      (link . #hasheq(
+                                (description . "Mixed Reality conference for professionals by professionals. Place for knowledge and experience exchange for industry leaders and innovators.")
+                                (is_favorite . #f)
+                                (photo . #hasheq(
+                                            (album_id . -26)
+                                            (date . 1582299940)
+                                            (has_tags . #f)
+                                            (id . 457294687)
+                                            (owner_id . 2000058603)
+                                            (sizes . (#hasheq(
+                                                        (height . 480)
+                                                        (type . k)
+                                                        (url . https://sun2-4.userapi.com/2nXoI1xeS0IvSBX1YMd726CUc1OQ2X1uMmOG3A/_p_8LiosZ0w.jpg)
+                                                        (width . 1074))
+                                                      #hasheq((height . 240) (type . l) (url . https://sun2-3.userapi.com/bOf35DOgTkbNZgSgAZ2iDOSm9T1tVPs_OQ0fwg/ZPiRGGmqEmM.jpg) (width . 537))
+                                                      #hasheq((height . 70) (type . m) (url . https://sun2-3.userapi.com/lLyFgzh6jUoAbKYNxXVZbej78N4uTE0T24OqjA/N-aW_wjuLB4.jpg) (width . 130))
+                                                      #hasheq((height . 140) (type . p) (url . https://sun2-4.userapi.com/iDBm6SQmyRb3W4NfZQPl4cvbjM98YyItR-fWZQ/hH0twvF7i7Q.jpg) (width . 260))
+                                                      #hasheq((height . 39) (type . s) (url . https://sun2-4.userapi.com/lJ46ytP6gVyUYFM2ePJUeml1uLCrL1YnWA2YYg/Ka-zALt1Kec.jpg) (width . 75))
+                                                      #hasheq((height . 80) (type . x) (url . https://sun2-4.userapi.com/Jkvek6-EOjd9C6NjauZlKm4F_0KoeFwy2jjYKQ/zoQ2YLqa2Z8.jpg) (width . 150))))
+                                            (text . )))
+                                (target . internal)
+                                (title . "MIXR 2020 - Mixed Reality Conference")
+                                (url . https://mixrconf.ru/)))
+                      (type . link))))
+    (comments . #hasheq(
+                  (can_post . 1)
+                  (count . 0)
+                  (groups_can_post . #t)))
+    (date . 1582299940)
+    (from_id . -129791859)
+    (id . 441)
+    (is_favorite . #f)
+    (likes . #hasheq(
+                (can_like . 1)
+                (can_publish . 1)
+                (count . 4)
+                (user_likes . 0)))
+    (marked_as_ads . 0)
+    (owner_id . -129791859)
+    (post_source . #hasheq(
+                      (type . vk)))
+    (post_type . post)
+    (reposts . #hasheq(
+                  (count . 1)
+                  (user_reposted . 0)))
+    (text . "Требуются волонтеры на самую крупную конференцию по виртуальной реальности в России MIXR Conference 2020! ...")
+    (views . #hasheq((count . 482)))))
