@@ -1,0 +1,57 @@
+
+(define doublets
+  (@
+    'Aa '(Ba Ef Ci Ci Ra Woo)
+    'Ea '(Ss Sp Ef Qo)
+    'Ra '(Qo Sp Ci)
+    'Ci '(Ef Ba Aa Qo Sp)
+    'Du '(Po Ci Ea)
+    'Ae '(Du Sp Ra)
+    'Qo '(Ba Ci Ss Po Du)
+    'Po '(Ea Ae)
+    'Ef '(Sm Ln Qt Bu)
+    'Bu '(Ci Qo)
+    'Ln '(Ae)
+    'Qt '(Ss Qo Aa Ea Du Po Ln)
+    'Ss '(Zh Hh Wr Du Pz)
+    'Pz '(Kv T34 Ab T90)
+    'Kv '(Ss Ts Gz)
+    'Gz '(Vi Be Od)
+    'Be '(Du Ge Am Ns Ss Hh Zh Os)
+    'Os '(Mu Mo)
+    'Mu '(Ah Hh Du Ge)
+    'Ns '(Ya Sp)
+    'Sp '(Ru Ze Pg Eg Pu Vv)
+    'Vv '(Pu Du Be Am Dr)
+    'Am '(Du Ge Dr)
+    'Dr '(Ge)
+    'Pu '(Me Sh Su)
+    'Su '(Ru St Gz)
+    'St '(Ah Am Bo Ml)
+    'Ml '(Fr Ra)
+    'Fr '(Pa)
+    'Ge '(Be Dr Ah Am)
+    'Pa '(Aa Ef Ea Sp)))
+
+;(define doublets
+;  (@
+;    'a '(b c d e f)
+;    'b '(f k g j)
+;    'c '(d b g)
+;    'd '(b j)
+;    'e '(a g)
+;    'f '(h i d)
+;    'g '(b a f)
+;    'h '(k a i)
+;    'i '(j)
+;    'j '(i e f)
+;    'k '(b d i f)))
+
+(.svg
+  (radial-connections
+    #:data doublets
+    #:labels 1
+    #:link-opacity 0.3
+    #:dots 2
+    #:link-curveness 0.9
+))

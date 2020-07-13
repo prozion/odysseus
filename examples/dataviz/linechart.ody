@@ -1,0 +1,9 @@
+; build-svg -s linechart.ody test.svg
+
+(.svg
+  (linechart
+    #:title "Population by countries, 1950-2015"
+    #:datafile "../datafiles/population_10-200.csv"
+    #:y-axis '(0 10000000 50000000 100000000 150000000)
+    #:x-axis 2
+    #:colors '("#69bc10" "#f00" "#7a4500" "#10c3ff" "#9b0d91")))
