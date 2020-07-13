@@ -88,7 +88,7 @@
   (let* (
         (root (and root-id (&& root-id context)))
         (first-level-items (filter (λ (item) (equal? ($ _parent item) root-id)) context))
-        (first-level-items-sorted (sort-context-items first-level-items '((namespaces definitions) (classes properties instances))))
+        (first-level-items-sorted (sort-context-items first-level-items '((namespaces imports classes datatypes properties instances))))
         (result (for/fold
                   ((result (if root
                               (list root)
@@ -100,7 +100,9 @@
                       (else
                         (append
                           result
-                          (sort-context context fli-id))))))))
+                          (sort-context
+                            context
+                            fli-id))))))))
     result))
 
 (define-catch (context->mstring context)

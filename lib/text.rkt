@@ -50,7 +50,9 @@
     (list
       ; add line breaks
       (cons "\r\n" "<br>")
-      (cons "\n" "<br>"))))
+      (cons "\n" "<br>")
+      (cons "\"" "&quot;")
+    )))
 
 (define clean-htmlify (-> clean-text htmlify-text))
 

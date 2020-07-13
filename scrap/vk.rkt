@@ -25,7 +25,7 @@
 (define AT4 ($ access_token vk/postagg2_3))
 (define AT5 ($ access_token vk/postagg3_1))
 (define AT6 ($ access_token vk/postagg3_2))
-(define AT AT2)
+(define AT AT5)
 
 (define VK_API_VERSION "5.107")
 
@@ -109,11 +109,14 @@
 
 (define user-fields (append user-basic-fields-used user-optional-fields-used))
 
-(define-catch (get-user-info user-id #:fields (fields user-fields) #:status (status #f) #:access-token (access-token AT) #:display? (display? #f))
+(define-catch (get-user-info user-ids #:fields (fields user-fields) #:status (status #f) #:access-token (access-token AT) #:display? (display? #f))
   (when display? (display display?) (flush-output))
   (let* (
         (fields (implode fields ","))
-        (request (format "https://api.vk.com/method/users.get?user_ids=~a&fields=~a&v=~a&access_token=~a" user-id fields VK_API_VERSION AT))
+        (user-ids (cond
+                    ((list? user-ids) (implode user-ids ","))
+                    (else user-ids)))
+        (request (format "https://api.vk.com/method/users.get?user_ids=~a&fields=~a&v=~a&access_token=~a" user-ids fields VK_API_VERSION AT))
         (res (json->hash (get-url request))))
         ; (res (hash)))
     (if (@. res.error)
@@ -288,7 +291,7 @@
       (raw-event? vk-url)
       (raw-person? vk-url))))
 
-(define-catch (extract-pure-id vk-url)
+(define-catch (extract-pure-alias vk-url)
   (let* ((vk-url (->string vk-url))
         (vk-url (remove-vk-url-prefix vk-url)))
     (cond
@@ -357,7 +360,7 @@
           )))))
   ; Инициализация считывания. Получаем чистый id группы из URL группы и запрашиваем id участников, начиная с первой тысячи.
   ; Тем самым запускаем рекурсию (точнее итерацию), которая будет крутиться, пока не выгребет все айдишники:
-  (let* ((groupid (extract-pure-id groupid)))
+  (let* ((groupid (extract-pure-alias groupid)))
     (get-next-users groupid 0)))
 
 (define (vk/intersect-groups . groups)

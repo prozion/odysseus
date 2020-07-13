@@ -19,3 +19,6 @@ create index index_user_uid for (u:User) on (u.uid)
 
 // show db schema
 call db.schema.visualization
+
+// drop index
+drop index on:User(uid)

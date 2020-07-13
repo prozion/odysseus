@@ -203,6 +203,16 @@
 
 (define (a-z a b) (string<? (string-downcase (->string a)) (string-downcase (->string b))))
 (define (z-a a b) (string>? (string-downcase (->string a)) (string-downcase (->string b))))
+(define (A-Za-z a b)
+  (let* ((a-capital? (title-case? a))
+        (b-capital? (title-case? b)))
+    (cond
+      ((or
+        (and a-capital? b-capital?)
+        (and (not a-capital?) (not b-capital?)))
+          (string<? (string-downcase (->string a)) (string-downcase (->string b))))
+      ((and a-capital? (not b-capital?)) #t)
+      ((and (not a-capital?) b-capital?) #f))))
 
 (define-catch (take-one astr #:f (f car) #:delimeter (delimeter ","))
   (cond

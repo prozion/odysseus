@@ -93,7 +93,7 @@
 (define (default-sorter a b)
   (a-z ($ id a) ($ id b)))
 
-(define default-sort-f a-z)
+(define default-sort-f A-Za-z)
 (define default-sort-by 'id)
 
 (define (hash-id h)
