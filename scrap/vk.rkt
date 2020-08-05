@@ -25,9 +25,15 @@
 (define AT4 ($ access_token vk/postagg2_3))
 (define AT5 ($ access_token vk/postagg3_1))
 (define AT6 ($ access_token vk/postagg3_2))
-(define AT AT5)
+(define AT AT1)
 
 (define VK_API_VERSION "5.107")
+
+(define VK_ERROR_MESSAGES
+        (hash
+          'THE_PROFILE_IS_BLOCKED_OR_DELETED 18
+          'THE_PROFILE_IS_PRIVATE 30
+        ))
 
 (provide (all-defined-out))
 
@@ -405,6 +411,7 @@
           #:extended (extended #f)
           #:success-display (success-display #f)
           #:break-if-error (break-if-error #t)
+          #:on-closed-wall (on-closed-wall #f)
           #:do-when-error (do-when-error #f))
   (let* ((reqstr (format "https://api.vk.com/method/wall.get?owner_id=~a~a&v=~a&~a~a~a~a&access_token=~a"
                     (if group? "-" "")
@@ -418,8 +425,13 @@
         (res (string->jsexpr
                     (get-url reqstr)))
         (response ($ response res))
-        (err ($ error res)))
+        (err ($ error res))
+        (closed-wall? (and err (equal? ($ error_code err) ($ THE_PROFILE_IS_PRIVATE VK_ERROR_MESSAGES))))
+        (profile-deleted? (and err (equal? ($ error_code err) ($ THE_PROFILE_IS_BLOCKED_OR_DELETED VK_ERROR_MESSAGES)))))
     (cond
+      ((or closed-wall? profile-deleted?)
+        ; (--- do-when-error (do-when-error err))
+        (on-closed-wall id) (and do-when-error (do-when-error err)))
       ((and err break-if-error) (error err))
       ((and err do-when-error) (do-when-error err) #f)
       (err #f)

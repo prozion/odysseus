@@ -181,3 +181,12 @@
     `(or
         (hash-ref* ,item ',k)
         (hash-ref* ,item ,kplus))))
+
+(define-catch (without-special-keys item)
+  (let ((special-keys-re "^[+_].+|id|.+?-id$"))
+    (for/fold
+      ((res (hash)))
+      ((k (hash-keys item)))
+      (cond
+        ((re-matches? special-keys-re (->string k)) res)
+        (else (hash-insert res (cons k (hash-ref item k))))))))

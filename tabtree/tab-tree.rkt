@@ -162,6 +162,8 @@
         (add-inherities
           (fill-tree-iter tree-lines (hash) empty)))))
 
+(define parse-tabtree parse-tab-tree)
+
 (define-catch (parse-tab-mtree tree-file)
   (parameterize ((mtree #t))
     (let* (

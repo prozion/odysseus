@@ -513,6 +513,14 @@
 ;         (root-elements (filter (λ (item) (not ($ _parent item))) items)))
 ;     (apply append (map (curryr get-forward-tree-0 items) root-elements))))
 
+
+; TODO
+(define-catch (flatten-hashtree hashtree)
+  (for/fold
+    ((res empty))
+    ((k (hash-keys hashtree)))
+    (append res (list k) (flatten-hashtree (hash-ref hashtree k)))))
+
 (module+ test
 
   (require rackunit)
@@ -759,5 +767,23 @@
                   (hash
                     (hash 'id 'a 'value 10) (hash)
                     (hash 'id 'b 'value 20) (hash))))
+
+  (check-equal?
+    (flatten-hashtree (hash
+                        (hash 'id 'a) (hash
+                                        (hash 'id 'aa)
+                                        (hash
+                                          (hash 'id 'aaa 'v 1000)
+                                          (hash)
+                                          (hash 'id 'aab 'v 1020)
+                                          (hash))
+                                        (hash 'id 'ab)
+                                        (hash
+                                          (hash 'id 'aba 'v 30)
+                                          (hash)
+                                          (hash 'id 'abb 'v -8)
+                                          (hash)))
+                        (hash 'id 'b) (hash)))
+    '(#hash((id . a)) #hash((id . aa)) #hash((id . aab) (v . 1020)) #hash((id . aaa) (v . 1000)) #hash((id . ab)) #hash((id . aba) (v . 30)) #hash((id . abb) (v . -8)) #hash((id . b))))                    
 
 )

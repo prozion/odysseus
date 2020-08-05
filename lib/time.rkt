@@ -8,6 +8,7 @@
 (require "strings.rkt")
 (require "regexp.rkt")
 (require "debug.rkt")
+(require "io.rkt")
 
 (provide (all-defined-out))
 
@@ -556,6 +557,17 @@
           (else months-full))
         month-number)
       "?")))
+
+(define-catch (iso8601-time-string seconds)
+  (let ((d (seconds->date seconds)))
+    (format "~a-~a-~aT~a:~a:~aZ"
+            (date-year d)
+            (format-number "dd" (date-month d) #:filler "0")
+            (format-number "dd" (date-day d) #:filler "0")
+            (format-number "dd" (date-hour d) #:filler "0")
+            (format-number "dd" (date-minute d) #:filler "0")
+            (format-number "dd" (date-second d) #:filler "0")
+            )))
 
 (module+ test
 
