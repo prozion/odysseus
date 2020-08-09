@@ -431,7 +431,8 @@
     (cond
       ((or closed-wall? profile-deleted?)
         ; (--- do-when-error (do-when-error err))
-        (on-closed-wall id) (and do-when-error (do-when-error err)))
+        (and on-closed-wall (on-closed-wall id))
+        (and do-when-error (do-when-error err)))
       ((and err break-if-error) (error err))
       ((and err do-when-error) (do-when-error err) #f)
       (err #f)
@@ -442,18 +443,23 @@
         response))))
 
 (define-catch (get-attachments item)
-  (let* ((copy_history ($ copy_history item))
-        (copy_history (and (not-empty? copy_history) (first copy_history)))
-        (attachments (or
-                        (and copy_history ($ attachments copy_history))
-                        ($ attachments item))))
-    attachments))
+  ; (let* ((copy_history ($ copy_history item))
+  ;       (copy_history (and (not-empty? copy_history) (first copy_history)))
+  ;       (attachments (or
+  ;                       (and copy_history ($ attachments copy_history))
+  ;                       ($ attachments item))))
+    ; attachments))
+    ($ attachments item))
 
 (define-catch (get-attachment-element attachments type)
   (let* (
-        (elements (and attachments (filter (λ (x) (hash-ref* x type)) attachments)))
+        (elements (and attachments (filter-map (λ (x) (hash-ref* x type)) attachments)))
         (element (and (not-empty? elements) (first elements)))
-        (sizes (and element ($ photo.sizes element)))
+        (sizes (and
+                  element
+                  (cond
+                    ((equal*? type 'photo) ($ sizes element))
+                    (else ($ photo.sizes element)))))
         (urls (and sizes
                       (for/hash
                         ((size sizes))
@@ -468,7 +474,7 @@
         (photo_urls (hash
                       '1x ($ 75 photo_urls)
                       '2x ($ 130 photo_urls)
-                      '3x ($ 604 photo_urls)
+                      '3x (or ($ 604 photo_urls) ($ 605 photo_urls) ($ 509 photo_urls))
                       '4x ($ 807 photo_urls)
                       '5x ($ 1280 photo_urls)))
         ; attachment link
