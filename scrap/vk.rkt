@@ -25,7 +25,7 @@
 (define AT4 ($ access_token vk/postagg2_3))
 (define AT5 ($ access_token vk/postagg3_1))
 (define AT6 ($ access_token vk/postagg3_2))
-(define AT AT1)
+(define AT AT5)
 
 (define VK_API_VERSION "5.107")
 
@@ -163,7 +163,7 @@
 (define (vk/link id)
   (format "https://vk.com/id~a" id))
 
-(define (get-user-id user-name #:delay (delay-time #f))
+(define (get-user-id user-name #:delay (delay-time #f) #:display? (display? #f))
   (let* ((user-name (last (string-split user-name "/")))
         (plain-name? (re-matches? #px"^(id)(\\d+)$" user-name)))
     (if plain-name?
@@ -172,6 +172,9 @@
             n)
         (let* (
               (_ (when delay-time (sleep delay-time)))
+              (_ (when display?
+                      (display display?)
+                      (flush-output)))
               (res-user (string->jsexpr
                           (get-url (format "https://api.vk.com/method/users.get?user_ids=~a&v=~a&access_token=~a" user-name VK_API_VERSION AT))))
               (result-user (and ($ response res-user) (not-empty? ($ response res-user)) ($ id (first ($ response res-user))))))

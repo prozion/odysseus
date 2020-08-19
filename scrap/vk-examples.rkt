@@ -199,3 +199,5 @@
                 (reposts . #hasheq((count . 0) (user_reposted . 0)))
                 (text . "Друзья проводят такую штуку, может кому будет интересно и полезно")
                 (views . #hasheq((count . 183))))))))
+
+; https://vk.com/wall82597249_30619                

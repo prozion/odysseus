@@ -527,3 +527,13 @@
           (hash-union
             (hash k1 (hash-ref h1 k1))
             res))))))
+
+(define (all-hash-values h)
+  (apply
+    append
+    (map
+      (λ (x) (cond
+                ((list? x) x)
+                ((scalar? x) (list x))
+                (else empty)))
+      (hash-values h))))
