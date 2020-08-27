@@ -59,6 +59,8 @@
 
 (define (regular-expression-string? astr)
   (or
+    (string-contains? astr "\\")
+    (string-contains? astr ".")
     (string-contains? astr "+?")
     (string-contains? astr "*?")
     (string-contains? astr "]*")
