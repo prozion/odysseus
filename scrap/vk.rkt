@@ -25,7 +25,7 @@
 (define AT4 ($ access_token vk/postagg2_3))
 (define AT5 ($ access_token vk/postagg3_1))
 (define AT6 ($ access_token vk/postagg3_2))
-(define AT AT2)
+(define AT AT5)
 
 (define VK_API_VERSION "5.107")
 

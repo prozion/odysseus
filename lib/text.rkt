@@ -19,7 +19,7 @@
         ((regular-expression-string? w)
           (and
             (re-matches? w text)
-            (caar (get-matches w text))))
+            (caar (get-matches (->pre w) text))))
         (else
           (and
             (string-contains? (string-downcase text) (string-downcase w))
@@ -39,7 +39,8 @@
       (cons "🏃🏻‍" "")
       (cons #rx"[👉✅]" "&mdash; ")
       (cons #rx"[🚩🏛⏰⌚🏡📅🗣🔊]" "&ndash; ")
-      (cons #rx"[💫🚋🚗♥🎭🐾📝🎡💰🎸☀🌠📰🍒🌻🤩‼❗🏆💯🔥🗿🏃‍♂📖✍🏻👍🏻😊‍♀🔔🐟👍😎💥🎶🎄⛄🌈🍊❄️💚🎅🥂🎁🇷🇺🇧🇾🇺🇦🇰🇿✨🔮🍀📷💦😜😉😁🤞🥳🎉☃💪😃🎂🎊🍾🎈😩⚠✌🔶🆘🏁🚌📍🎬⚡⛳✏🍃🌳👋👌💣📌🎳🚧🇮🇳🇨🇳]" "")
+      (cons #rx"[🌞🤦]" "")
+      (cons #rx"[👫🌏🌀🌏🌿💫🚋🚗♥🎭🐾📝🎡💰🎸☀🌠📰🍒🌻🤩‼❗🏆💯🔥🗿🏃‍♂📖✍🏻👍🏻😊‍♀🔔🐟👍😎💥🎶🎄⛄🌈🍊❄️💚🎅🥂🎁🇷🇺🇧🇾🇺🇦🇰🇿✨🔮🍀📷💦😜😉😁🤞🥳🎉☃💪😃🎂🎊🍾🎈😩⚠✌🔶🆘🏁🚌📍🎬⚡⛳✏🍃🌳👋👌💣📌🎳🚧🇮🇳🇨🇳]" "")
       ; remove vk links
       (cons #rx"\\[.+?\\|" "")
       (cons #rx"\\]" "")

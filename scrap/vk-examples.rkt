@@ -201,4 +201,5 @@
                 (views . #hasheq((count . 183))))))))
 
 ; https://vk.com/wall82597249_30619
-; https://vk.com/wall-195222403_122            
+; https://vk.com/wall-195222403_122
+; https://vk.com/wall-40696819_3369      
