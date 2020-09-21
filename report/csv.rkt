@@ -44,6 +44,7 @@
 ;  data: (list (list ...) ...)
 (define-catch (write-csv-file headers data filename #:delimeter (delimeter ","))
   (let* ( (res-header (string-join (map ->string headers) delimeter))
+          (data (if (hash? data) (hash-values data) data))
           (res-body (string-join
                       (map
                         (λ (row)
@@ -52,6 +53,8 @@
                               (string-join (map ->string (hash-refs row headers "")) delimeter))
                             ((list? row)
                               (string-join (map ->string row) delimeter))
+                            ((cons? row)
+                              (format "~a,~a" (car row) (cdr row)))
                             (else
                               row)))
                         data)

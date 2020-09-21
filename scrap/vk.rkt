@@ -25,7 +25,7 @@
 (define AT4 ($ access_token vk/postagg2_3))
 (define AT5 ($ access_token vk/postagg3_1))
 (define AT6 ($ access_token vk/postagg3_2))
-(define AT AT5)
+(define AT AT1)
 
 (define VK_API_VERSION "5.107")
 
@@ -115,13 +115,14 @@
 
 (define user-fields (append user-basic-fields-used user-optional-fields-used))
 
-(define-catch (get-user-info user-ids #:fields (fields user-fields) #:status (status #f) #:access-token (access-token AT) #:display? (display? #f))
-  (when display? (display display?) (flush-output))
+(define-catch (get-user-info user-ids #:fields (fields user-fields) #:status (status #f) #:access-token (access-token AT) #:display? (display? #f) #:delay (delay-time #f))
   (let* (
         (fields (implode fields ","))
         (user-ids (cond
                     ((list? user-ids) (implode user-ids ","))
                     (else user-ids)))
+        (_ (when display? (display display?) (flush-output)))
+        (_ (when delay-time (sleep delay-time)))
         (request (format "https://api.vk.com/method/users.get?user_ids=~a&fields=~a&v=~a&access_token=~a" user-ids fields VK_API_VERSION AT))
         (res (json->hash (get-url request))))
         ; (res (hash)))
@@ -180,9 +181,15 @@
               (result-user (and ($ response res-user) (not-empty? ($ response res-user)) ($ id (first ($ response res-user))))))
           result-user))))
 
-(define-catch (get-friends-of-user user-id #:status (status #f) #:friends-limit (friends-limit #f))
-  (when status (display status) (flush-output))
-  (let ((res (string->jsexpr
+(define get-uid get-user-id)
+
+(define-catch (get-friends-of-user user-id #:delay (delay-time #f) #:display? (display? #f) #:friends-limit (friends-limit #f))
+  (let* (
+        (_ (when delay-time (sleep delay-time)))
+        (_ (when display?
+                (display display?)
+                (flush-output)))
+        (res (string->jsexpr
                     (get-url (format "https://api.vk.com/method/friends.get?user_id=~a&v=~a&access_token=~a" user-id VK_API_VERSION AT)))))
     (cond
       ((@. res.error)
@@ -237,7 +244,7 @@
 
 ; I don't define-catch here as it's better to process exceptions in the code upstream, when requesting id in a row among hundreds of urls
 (define (get-gid group-name #:cache (cache #f) #:delay (delay-time #f) #:display? (display? #f))
-  (define plain-name? (re-matches? #px"^(club|public)?(\\d+)$" group-name))
+  (define plain-name? (re-matches? #px"^(club|public|id)?(\\d+)$" group-name))
   ; (--- group-name plain-name?)
   (define (get-name-from-full-url group-url)
     (last (string-split group-url "/")))
@@ -245,7 +252,7 @@
     (or
       (and cache (hash-ref cache group-name #f))
       (if plain-name?
-          (let* ((n (get-matches #px"^(club|public)?(\\d+)$" group-name))
+          (let* ((n (get-matches #px"^(club|public|id)?(\\d+)$" group-name))
                 (n (third (first n))))
               n)
           (let* (
@@ -254,7 +261,7 @@
                         (display display?)
                         (flush-output)))
                 (res-group (string->jsexpr
-                            (get-url (format "https://api.vk.com/method/groups.getById?group_id=~a&v=~a&access_token=~a" group-name VK_API_VERSION AT))))
+                                  (get-url (format "https://api.vk.com/method/groups.getById?group_id=~a&v=~a&access_token=~a" group-name VK_API_VERSION AT))))
                 (result-group (and ($ response res-group) (not-empty? ($ response res-group)) ($ id (first ($ response res-group))))))
             result-group)))))
 
@@ -348,7 +355,7 @@
         ((@. res.error)
             ; если вдруг ошибка, а такое бывает, подаем сигнал на консоль:
             ; (display (format "error: ~a" (@. res.error)))
-            (display (format " x[club~a ~a] " groupid (length acc-result)))
+            (display (format " [error with ~a/~a] " groupid (length acc-result)))
             (flush-output)
             ; и возвращаем накопленный список id. Не пропадать же добру!
             acc-result)

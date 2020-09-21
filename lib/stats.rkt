@@ -46,9 +46,13 @@
       (cons i 1)
       (λ (v1 v2) (+ v1 v2)))))
 
+(define (frequency-hash seq)
+  (make-hash (frequency seq)))
+
 (module+ test
 
   (require rackunit)
+  (require "checks.rkt")
 
   (check-equal? (s/median 1 2 3 4 5) 3)
   (check-equal? (s/median 1 1 10 1 1) 1)
@@ -64,4 +68,7 @@
 
   (check-equal? (frequency '(1 2 3 1 1 3 2 7 4 9 10 45 3 8 44 4 5))
                 '((1 . 3) (2 . 2) (3 . 3) (7 . 1) (4 . 2) (9 . 1) (10 . 1) (45 . 1) (8 . 1) (44 . 1) (5 . 1)))
+
+  (check-hash-equal? (frequency-hash '(1 2 3 1 1 3 2 7 4 9 10 45 3 8 44 4 5))
+                #hash((1 . 3) (2 . 2) (3 . 3) (7 . 1) (4 . 2) (9 . 1) (10 . 1) (45 . 1) (8 . 1) (44 . 1) (5 . 1)))
 )

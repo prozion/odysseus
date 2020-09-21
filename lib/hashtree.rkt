@@ -513,6 +513,21 @@
 ;         (root-elements (filter (λ (item) (not ($ _parent item))) items)))
 ;     (apply append (map (curryr get-forward-tree-0 items) root-elements))))
 
+;; checks whether the considered hashtree is a hashtree, or just a single item of hashtree
+(define-catch (hashtree-item? hashtree)
+  (let* ((keys (hash-keys hashtree)))
+    (not (andmap hash? keys))))
+
+;; substitutes each item in hashtree with (f item)
+(define-catch (extend-hashtree hashtree f)
+  (cond
+    ((hash-empty? hashtree) (hash))
+    ((hashtree-item? hashtree) (f hashtree))
+    (else
+      (let* ((keys (hash-keys hashtree)))
+        (for/hash
+          ((key keys))
+          (values (extend-hashtree key f) (extend-hashtree (hash-ref hashtree key) f)))))))
 
 ; TODO
 (define-catch (flatten-hashtree hashtree)
@@ -784,6 +799,6 @@
                                           (hash 'id 'abb 'v -8)
                                           (hash)))
                         (hash 'id 'b) (hash)))
-    '(#hash((id . a)) #hash((id . aa)) #hash((id . aab) (v . 1020)) #hash((id . aaa) (v . 1000)) #hash((id . ab)) #hash((id . aba) (v . 30)) #hash((id . abb) (v . -8)) #hash((id . b))))                    
+    '(#hash((id . a)) #hash((id . aa)) #hash((id . aab) (v . 1020)) #hash((id . aaa) (v . 1000)) #hash((id . ab)) #hash((id . aba) (v . 30)) #hash((id . abb) (v . -8)) #hash((id . b))))
 
 )
