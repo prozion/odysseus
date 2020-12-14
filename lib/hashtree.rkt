@@ -801,4 +801,25 @@
                         (hash 'id 'b) (hash)))
     '(#hash((id . a)) #hash((id . aa)) #hash((id . aab) (v . 1020)) #hash((id . aaa) (v . 1000)) #hash((id . ab)) #hash((id . aba) (v . 30)) #hash((id . abb) (v . -8)) #hash((id . b))))
 
+  (check-hash-equal?
+                (extend-hashtree
+                  hash-tree-1
+                  (λ (item) (hash-union item (hash 'e 100))))
+                  (hash
+                    (hash 'id "category 1" 'e 100)
+                      (hash
+                        (hash 'id "a" 'value "1" 'e 100)
+                          (hash)
+                        (hash 'id "b" 'value "2" 'e 100)
+                          (hash
+                            (hash 'id "b1" 'value "10" 'e 100)
+                            (hash))
+                        (hash 'id "c" 'value "3" 'e 100)
+                          (hash))
+                    (hash 'id "category 2" 'status "inactive" 'e 100)
+                      (hash
+                        (hash 'id "d" 'value "-1" 'e 100)
+                          (hash) )
+                    ))
+
 )
