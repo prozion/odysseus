@@ -1,7 +1,7 @@
 #lang racket
 
 ; (provide (except-out (all-defined-out) c2))
-(provide tostring len str list-pretty-string implode interleave explode split nth indexof indexof? indexof*? regexp-indexof? count-element lshift shiftl lpop ltrim triml lpush pushl lpush-unique pushl-unique rshift shiftr rpop rtrim trimr rpush pushr rpush-unique pushr-unique slice merge merge-unique concat splice exclude exclude-all exclude* exclude-all* insert setn replace replace-all list-substitute uniques not-uniques minus difference unique-difference intersect intersect? equal-elements? equal-set? deep-equal-set? partition-full partition-all break-seq depth transpose cleanmap soft-merge replace-by-part remove-by-part append-unique by-index first-or-false)
+(provide tostring len str list-pretty-string implode interleave explode split nth indexof indexof? indexof*? regexp-indexof? count-element lshift shiftl lpop ltrim triml push lpush pushl lpush-unique pushl-unique rshift shiftr rpop rtrim trimr rpush pushr rpush-unique pushr-unique slice merge merge-unique concat splice exclude exclude-all exclude* exclude-all* insert setn replace replace-all list-substitute uniques not-uniques minus difference unique-difference intersect intersect? equal-elements? equal-set? deep-equal-set? partition-full partition-all break-seq depth transpose cleanmap merge soft-merge replace-by-part remove-by-part append-unique by-index first-or-false)
 
 (require compatibility/defmacro)
 (require "base.rkt")

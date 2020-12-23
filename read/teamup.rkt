@@ -1,7 +1,6 @@
 #lang racket
 
 (require "../main.rkt")
-(require "../../settings/APIs.rkt")
 (require net/url)
 (require net/head)
 (require json)

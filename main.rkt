@@ -26,9 +26,11 @@
   "strings.rkt"
   "symbols.rkt"
   "text.rkt"
+  "time.rkt"
   "tree.rkt"
   "type.rkt"
-  "units.rkt")
+  "units.rkt"
+  "whereami.rkt")
 
 (require (prefix-in d: "time.rkt"))
 
@@ -57,8 +59,9 @@
   "stats.rkt"
   "strings.rkt"
   "symbols.rkt"
-  "time.rkt"
   "text.rkt"
+  "time.rkt"
   "tree.rkt"
   "type.rkt"
-  "units.rkt"))
+  "units.rkt"
+  "whereami.rkt"))
