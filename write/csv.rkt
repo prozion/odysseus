@@ -42,7 +42,7 @@
     csv-items))
 
 ;  data: (list (list ...) ...)
-(define-catch (write-csv-file headers data filename #:delimeter (delimeter ","))
+(define-catch (get-csv headers data #:delimeter (delimeter ","))
   (let* ( (res-header (string-join (map ->string headers) delimeter))
           (data (if (hash? data) (hash-values data) data))
           (res-body (string-join
@@ -58,11 +58,13 @@
                             (else
                               row)))
                         data)
-                      "\n"))
-          (res (string-append res-header "\n" res-body)))
-    (write-file filename res)))
+                      "\n")))
+      (string-append res-header "\n" res-body)))
 
-(define (write-csv-file* #:columns columns #:data data #:csvfile filename #:delimeter (delimeter ","))
+(define-catch (write-csv-file headers data filename #:delimeter (delimeter ","))
+    (write-file filename (get-csv headers data #:delimeter delimeter)))
+
+(define-catch (get-csv* #:columns columns #:data data #:delimeter (delimeter ","))
   (let* ( (headers (map car columns))
           (res-header (implode headers delimeter))
           (res-body (implode
@@ -78,9 +80,11 @@
                                 row))
                             delimeter))
                         data)
-                      "\n"))
-          (res (str res-header "\n" res-body)))
-    (write-file filename res)))
+                      "\n")))
+    (str res-header "\n" res-body)))
+
+(define (write-csv-file* #:columns columns #:data data #:delimeter (delimeter ",") #:csvfile filename)
+    (write-file filename (get-csv* #:columns columns #:data data #:delimeter (delimeter ","))))
 
 (module+ test
 
