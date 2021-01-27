@@ -118,7 +118,7 @@
     (re-matches? "^\\s*$" astr)))
 
 ; make text more correct and beautiful
-(define (change-text dictionary)
+(define-catch (change-text dictionary)
   (λ (txt)
     (for/fold
       ((res (->string txt)))

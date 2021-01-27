@@ -50,3 +50,6 @@
 
 (define-macro (errorf frmt . args)
 	`(error (format ,frmt ,@args)))
+
+(define (print-with-delay p)
+  (if p (begin (sleep (first p)) (flush-output) (display (second p))) (void)))

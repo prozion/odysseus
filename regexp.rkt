@@ -57,13 +57,14 @@
     (else
       (string-replace astr (->pre re) repstr))))
 
-(define (regular-expression-string? astr)
+(define-catch (regular-expression-string? astr)
   (or
     (string-contains? astr "\\")
     (string-contains? astr ".")
     (string-contains? astr "+?")
     (string-contains? astr "*?")
     (string-contains? astr "]*")
+    (string-contains? astr "|")
     (string-contains? astr "]+")))
 
 (module+ test

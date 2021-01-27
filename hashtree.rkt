@@ -9,6 +9,7 @@
 (require "regexp.rkt")
 (require "strings.rkt")
 (require "optimize.rkt")
+(require "io.rkt")
 (require compatibility/defmacro)
 
 (provide (all-defined-out))
@@ -87,13 +88,22 @@
 (define-catch (hashtree->string
                   h
                   #:order-key (order-key #f)
-                  #:attributes (attributes #f)
+                  #:exclude-keys (exclude-keys #f)
                   #:exclude-lines? (exclude-lines? #f)
                   #:conversion-table (conversion-table #f))
   (define-catch (hashtree->string-iter h curlevel res-acc order-key)
     (cond
+      ((not (hash? h)) "")
       ((hash-empty? h) "")
-      (else
+      ; ((nested-hash? h)
+      ;   (for/fold
+      ;     ((res ""))
+      ;     (((node subtree) h))
+      ;     (string-append
+      ;       res
+      ;       (hashtree->string-iter node curlevel "" order-key)
+      ;       (hashtree->string-iter subtree curlevel "" order-key))))
+      ((hash? h)
         (let* ((ks (hash-keys h))
               (ks (if order-key
                       (sort ks (λ (a b) (let* ((aval (hash-ref a order-key 0))
@@ -112,7 +122,7 @@
               (id ($ id k))
               (other-keys (exclude (hash-keys k) 'id))
               (tabs (dupstr "\t" curlevel))
-              (new-line (format "~a~a ~a\n" tabs id (hash->string (hash-delete k 'id)  #:delimeter " " #:equal-sign ":" #:attributes attributes #:conversion-table conversion-table)))
+              (new-line (format "~a~a ~a\n" tabs id (hash->string (hash-delete k 'id)  #:delimeter " " #:equal-sign ":" #:conversion-table conversion-table #:exclude-keys exclude-keys)))
               (res (cond
                       ((and exclude-lines? (exclude-lines? k)) res-acc)
                       (else (string-append res-acc new-line))))
@@ -279,7 +289,6 @@
                         #:derived-attr-values derived-attr-values)))))))
 
 (define-catch (get-item-by-id-from-the-list plained-hash-tree id (id-attr 'id) #:one-of? (one-of? #t))
-  ; (--- "get-item-by-id-from-the-list:" ($ id plained-hash-tree) id)
   (let ((res
           (filter
             (λ (e)
@@ -300,6 +309,12 @@
 ; get element by id from the planarized hashtree
 (define ($$ id plained-hash-tree)
   (get-item-by-id-from-the-list plained-hash-tree id))
+
+(define ($$* id plained-hash-tree id-attr)
+  (get-item-by-id-from-the-list
+    plained-hash-tree
+    id
+    id-attr))
 
 ; hash -> list-of-lists
 ; gets  a list of all paths (sequential ids to the end-points)
@@ -322,6 +337,10 @@
 (define (get-root-item hashtree)
   (let ((keys (hash-keys hashtree)))
     (and (not-empty? keys) (car keys))))
+
+(define (get-root-items hashtree)
+  (let ((keys (hash-keys hashtree)))
+    (and (not-empty? keys) keys)))
 
 (define-catch (get-$1 path hashtree)
   (let* ((hash-item (cond ((> (length path) 1)
@@ -530,12 +549,36 @@
           ((key keys))
           (values (extend-hashtree key f) (extend-hashtree (hash-ref hashtree key) f)))))))
 
-; TODO
 (define-catch (flatten-hashtree hashtree)
   (for/fold
     ((res empty))
     ((k (hash-keys hashtree)))
     (append res (list k) (flatten-hashtree (hash-ref hashtree k)))))
+
+(define-catch (hash->hashtree h)
+  (cond
+    ((nested-hash? h) (for/hash
+                        (((k v) h))
+                        (cond
+                          ((nested-hash? v)
+                            (values
+                              (hash 'id k)
+                              (hash->hashtree v)))
+                          ((hash? v)
+                            (values
+                              (hash-union (hash 'id k) v)
+                              (hash)))
+                          (else
+                            (values
+                              (hash 'id k k v)
+                              (hash))))))
+    ((hash? h) (hash
+                  (hash-union h (hash 'id '_))
+                  (hash)))
+    (else
+          (hash
+            (hash 'id '_ '_ h)
+            (hash)))))
 
 (module+ test
 
@@ -822,5 +865,15 @@
                         (hash 'id "d" 'value "-1" 'e 100)
                           (hash) )
                     ))
+
+(define initial-hash (hash 'a (hash 'aa 10 'ab '(20 30 40)) 'b (hash 'ba (hash 'baa 300 'bab 30)) 'c 3))
+(define tabtree-hash (hash
+                        (hash 'id 'b 'aa 10 'ab '(20 30 40)) (hash)
+                        (hash 'id 'b) (hash
+                                        (hash 'id 'ba 'baa 300 'bab 30)
+                                        (hash))
+                        (hash 'id 'c 'c 3) (hash)))
+
+(check-hash-equal? (hash->hashtree initial-hash) tabtree-hash)
 
 )

@@ -390,36 +390,33 @@
 (define-catch (hash->string
                 h
                 #:delimeter (delimeter ", ")
+                #:list-delimeter (list-delimeter ",")
                 #:prefix (prefix "")
                 #:equal-sign (equal-sign "=")
-                #:attributes (attributes #f)
                 #:default-type (default-type 'plain)
+                #:exclude-keys (exclude-keys #f)
                 #:conversion-table (conversion-table #f))
   (let ((hl (hash-length h))
-        (ks (cond
-              (attributes (map (λ (x) (if (pair? x) (car x) x)) attributes))
-              (else (hash-keys h)))))
+        (ks (hash-keys h)))
     (for/fold
       ((s ""))
       ((k ks) (i hl))
       (let* (
-              (v-type (if-not attributes
-                        default-type
-                        (for/fold
-                          ((res default-type))
-                          ((a attributes))
-                          (cond
-                            ((and (pair? a) (equal? k (car a))) (cdr a))
-                            (else res)))))
               (v (hash-ref h k))
               (vp (cond
-                  ((equal? v-type 'string) (str "\"" v "\""))
-                  ((equal? v-type 'plain) (str (idfy v)))
-                  (else v)))
+                    ((list? v)
+                      (let ((v (cond
+                                  ((string? v) (map (λ (x) (format "\"~a\"" x)) v))
+                                  (else (map (λ (x) (str (idfy x))) v)))))
+                        (string-join v list-delimeter)))
+                    ((string? v) (str "\"" v "\""))
+                    (else (str (idfy v)))))
             (vp (if (and conversion-table (hash-ref conversion-table vp #f))
                       (hash-ref conversion-table vp)
                       vp)))
         (cond
+          ((and exclude-keys (procedure? exclude-keys) (exclude-keys k v)) s)
+          ((and exclude-keys (list? exclude-keys) (indexof? exclude-keys k)) s)
           ((< i (dec hl)) (format "~a~a~a~a~a~a" s prefix k equal-sign vp delimeter))
           (else (format "~a~a~a~a~a" s prefix k equal-sign vp)))))))
 
@@ -532,3 +529,17 @@
                 ((scalar? x) (list x))
                 (else empty)))
       (hash-values h))))
+
+(define (hash-mask h mask-keys)
+  (hash-filter
+    (λ (k v) (indexof? mask-keys k))
+    h))
+
+(define-catch (deep-hash-mask h mask-keys)
+  (for/fold
+    ((res (hash)))
+    (((k v) h))
+    (cond
+      ((not (indexof? mask-keys k)) res)
+      ((hash? v) (hash-union (hash k (deep-hash-mask v mask-keys)) res))
+      (else (hash-union (hash k v) res)))))

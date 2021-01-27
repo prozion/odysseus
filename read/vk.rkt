@@ -111,19 +111,18 @@
 
 (define user-fields (append user-basic-fields-used user-optional-fields-used))
 
-(define-catch (get-user-info user-ids #:fields (fields user-fields) #:status (status #f) #:access-token (access-token (_AT)) #:display? (display? #f) #:delay (delay-time #f))
+(define-catch (get-user-info user-ids #:fields (fields user-fields) #:status (status #f) #:access-token (access-token (_AT)) #:p (p #f))
   (let* (
         (fields (implode fields ","))
         (user-ids (cond
                     ((list? user-ids) (implode user-ids ","))
                     (else user-ids)))
-        (_ (when display? (display display?) (flush-output)))
-        (_ (when delay-time (sleep delay-time)))
+        (_ (print-with-delay p))
         (request (format "https://api.vk.com/method/users.get?user_ids=~a&fields=~a&v=~a&access_token=~a" user-ids fields VK_API_VERSION (_AT)))
         (res (json->hash (get-url request))))
         ; (res (hash)))
-    (if (@. res.error)
-        (hash 'error (@. res.error))
+    (if (vk-error? res)
+        (begin (--- (vk-error-msg res)) #f)
         (car (@. res.response)))))
 
 ;; user properties
@@ -160,11 +159,11 @@
 (define (vk/link id)
   (format "https://vk.com/id~a" id))
 
-(define (get-user-id user-name #:delay (delay-time #f) #:display? (display? #f))
-  (let* ((user-name (last (string-split user-name "/")))
-        (plain-name? (re-matches? #px"^(id)(\\d+)$" user-name)))
+(define (get-user-id uurl #:delay (delay-time #f) #:display? (display? #f))
+  (let* ((ualias (last (string-split uurl "/")))
+        (plain-name? (re-matches? #px"^(id)(\\d+)$" ualias)))
     (if plain-name?
-        (let* ((n (get-matches #px"^(id)(\\d+)$" user-name))
+        (let* ((n (get-matches #px"^(id)(\\d+)$" ualias))
               (n (third (first n))))
             n)
         (let* (
@@ -173,7 +172,7 @@
                       (display display?)
                       (flush-output)))
               (res-user (string->jsexpr
-                          (get-url (format "https://api.vk.com/method/users.get?user_ids=~a&v=~a&access_token=~a" user-name VK_API_VERSION (_AT)))))
+                          (get-url (format "https://api.vk.com/method/users.get?user_ids=~a&v=~a&access_token=~a" ualias VK_API_VERSION (_AT)))))
               (result-user (and ($ response res-user) (not-empty? ($ response res-user)) ($ id (first ($ response res-user))))))
           (->string result-user)))))
 
@@ -245,17 +244,26 @@
       null
       (hash-ref (car (hash-ref res 'response)) 'name))))
 
+(define-catch (get-group-members-count groupid)
+  (let* ((groupid (remove-vk-url-prefix groupid))
+        (res (string->jsexpr
+                    (get-url (format "https://api.vk.com/method/groups.getMembers?group_id=~a&v=~a&access_token=~a" groupid VK_API_VERSION (_AT))))))
+    (if (@. res.error)
+      #f
+      (@. res.response.count))))
+
 ; I don't define-catch here as it's better to process exceptions in the code upstream, when requesting id in a row among hundreds of urls
-(define (get-gid group-name #:cache (cache #f) #:delay (delay-time #f) #:display? (display? #f))
-  (define plain-name? (re-matches? #px"^(club|public|id)?(\\d+)$" group-name))
-  ; (--- group-name plain-name?)
+(define-catch (get-gid gurl #:cache (cache #f) #:delay (delay-time #f) #:display? (display? #f))
+  (define plain-name? (re-matches? #px"^(club|public|id)?(\\d+)$" gurl))
+  ; (--- gurl plain-name?)
   (define (get-name-from-full-url group-url)
     (last (string-split group-url "/")))
-  (let* ((group-name (get-name-from-full-url group-name)))
+  (let* ((galias (get-name-from-full-url gurl)))
     (or
-      (and cache (hash-ref cache group-name #f))
+      (and cache (hash-ref cache galias #f))
       (if plain-name?
-          (let* ((n (get-matches #px"^(club|public|id)?(\\d+)$" group-name))
+          (let* (
+                (n (get-matches #px"^(club|public|id)?(\\d+)$" galias))
                 (n (third (first n))))
               n)
           (let* (
@@ -264,7 +272,7 @@
                         (display display?)
                         (flush-output)))
                 (res-group (string->jsexpr
-                                  (get-url (format "https://api.vk.com/method/groups.getById?group_id=~a&v=~a&access_token=~a" group-name VK_API_VERSION (_AT)))))
+                                  (get-url (format "https://api.vk.com/method/groups.getById?group_id=~a&v=~a&access_token=~a" galias VK_API_VERSION (_AT)))))
                 (result-group (and ($ response res-group) (not-empty? ($ response res-group)) ($ id (first ($ response res-group))))))
             (->string result-group))))))
 
@@ -348,7 +356,7 @@
                       ; запрос формируем согласно документации https://vk.com/dev/groups.getMembers.
                       ; Этот адрес с подставленными значениями можно прямо вставить в адресную строку браузера и получить ответ в виде JSON
                       ; (e.g. {"response":{"count":377421,"items":[56,121,134,149,175,193,243,341,364,404]}} )
-                      "https://api.vk.com/method/groups.getMembers?group_id=~a&offset=~a&filter=friends,unsure&v=~a&access_token=~a"
+                      "https://api.vk.com/method/groups.getMembers?group_id=~a&offset=~a&v=~a&access_token=~a"
                       groupid
                       offset
                       VK_API_VERSION
@@ -381,6 +389,41 @@
   ; Тем самым запускаем рекурсию (точнее итерацию), которая будет крутиться, пока не выгребет все айдишники:
   (let* ((groupid (extract-pure-alias groupid)))
     (get-next-users groupid 0)))
+
+(define-catch (get-group-contacts groupid
+                            #:p (p #f))
+  ; (--- (format
+  ;         "https://api.vk.com/method/groups.getById?group_id=~a&filter=contacts&v=~a&access_token=~a"
+  ;         groupid
+  ;         VK_API_VERSION
+  ;         (_AT)))
+  (print-with-delay p)
+  (let ((res (string->jsexpr
+                (get-url
+                  (format
+                    "https://api.vk.com/method/groups.getById?group_id=~a&fields=contacts&v=~a&access_token=~a"
+                    groupid
+                    VK_API_VERSION
+                    (_AT)
+                    )))))
+    (cond
+      ((vk-error? res)
+          (display (format " [error with ~a] " groupid))
+          (flush-output)
+          #f)
+      (else
+        (let* ((first-group (first (@. res.response)))
+              (contact-blocks ($ contacts first-group))
+              (ids (if contact-blocks
+                      (map (λ (contact-block) ($ user_id contact-block)) contact-blocks)
+                      empty)))
+          ids)))))
+
+(define (vk-error? res)
+  (or
+    (@. res.error)
+    (@. res.error_code)
+    (@. res.error_message)))
 
 (define (vk/intersect-groups . groups)
   (when (status-output) (display "\nscanning groups: \n"))
@@ -487,9 +530,13 @@
         (photo_urls (hash
                       '1x ($ 75 photo_urls)
                       '2x ($ 130 photo_urls)
-                      '3x (or ($ 604 photo_urls) ($ 605 photo_urls) ($ 509 photo_urls))
+                      '3x (or ($ 604 photo_urls) ($ 605 photo_urls) ($ 509 photo_urls) ($ 510 photo_urls))
                       '4x ($ 807 photo_urls)
-                      '5x ($ 1280 photo_urls)))
+                      '5x ($ 1280 photo_urls)
+                      ; if no any pictures with specified widths, ok, you win, let's take the biggest one for a fallback
+                      'largest (and (not (hash-empty? photo_urls))
+                        (first (sort (hash-keys photo_urls) (λ (x y) (> x y)))))))
+
         ; attachment link
         (link_urls (get-attachment-element attachments 'link))
         (link_urls (hash
@@ -621,3 +668,6 @@
 ;       (err #f)
 ;       (else
 ;         response))))
+
+(define (vk-error-msg res)
+  (@. res.error.error_msg))

@@ -88,6 +88,11 @@
                       (else #f)))
             (hash-values x)))))
 
+(define (nested-hash? hh)
+  (and
+    (hash? hh)
+    (ormap (λ (v) (hash? v)) (hash-values hh))))        
+
 (define-catch (type x)
   (cond
     ((boolean? x) 'boolean)

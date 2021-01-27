@@ -3,6 +3,7 @@
 (require racket/file)
 (require "base.rkt")
 (require "type.rkt")
+(require "regexp.rkt")
 
 (provide (all-defined-out))
 
@@ -27,3 +28,17 @@
   (let* ((path-parts (string-split (->string path) "."))
         (extension (if (> (length path) 1) (last path-parts) "")))
     extension))
+
+(define-catch (absolute-path? astr)
+  (re-matches? "^(/|[A-Z]:)" astr))
+
+(module+ test
+
+  (require rackunit)
+
+  (check-true (absolute-path? "/var/tmp/something/"))
+  (check-true (absolute-path? "C:/User/Users/AppData"))
+  (check-true (absolute-path? "C:\\User\\Users\\AppData"))
+  (check-false (absolute-path? "sandbox/foobar"))
+  (check-false (absolute-path? "foobarbaz"))
+)

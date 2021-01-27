@@ -41,7 +41,8 @@
           (else res))))
     csv-items))
 
-;  data: (list (list ...) ...)
+; headers :: (List ColumnName)
+; data :: (List (Hash ColumnName Value)) | (List (List Value)) | (Value . Value)
 (define-catch (get-csv headers data #:delimeter (delimeter ","))
   (let* ( (res-header (string-join (map ->string headers) delimeter))
           (data (if (hash? data) (hash-values data) data))
@@ -63,28 +64,6 @@
 
 (define-catch (write-csv-file headers data filename #:delimeter (delimeter ","))
     (write-file filename (get-csv headers data #:delimeter delimeter)))
-
-(define-catch (get-csv* #:columns columns #:data data #:delimeter (delimeter ","))
-  (let* ( (headers (map car columns))
-          (res-header (implode headers delimeter))
-          (res-body (implode
-                      (map
-                        (λ (row)
-                          (implode
-                            (cond
-                              ((hash? row)
-                                (hash-refs row (map cdr columns) ""))
-                              ((list? row)
-                                row)
-                              (else
-                                row))
-                            delimeter))
-                        data)
-                      "\n")))
-    (str res-header "\n" res-body)))
-
-(define (write-csv-file* #:columns columns #:data data #:delimeter (delimeter ",") #:csvfile filename)
-    (write-file filename (get-csv* #:columns columns #:data data #:delimeter (delimeter ","))))
 
 (module+ test
 

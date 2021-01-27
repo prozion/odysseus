@@ -1,5 +1,6 @@
 #lang racket
 
+(require "optimize.rkt")
 (require racket/serialize)
 (require compatibility/defmacro)
 (require (for-syntax racket/match racket/syntax racket/format))
@@ -11,8 +12,10 @@
     `(define ,varname
                         (λ args
                           (let* (
-                                (varname-is-hash? (regexp-match #rx"^h-" ,varname-str))
-                                (cache-path (format "../~a/~a.txt" CACHE_DIR (string-replace ,varname-str "-" "_")))
+                                (varname-is-hash? (regexp-match #rx"^h-|^H" ,varname-str))
+                                (cache-path (cond
+                                              ((absolute-path? CACHE_DIR) (format "~a/~a.rktd" CACHE_DIR (string-replace ,varname-str "-" "_")))
+                                              (else (format "../~a/~a.rktd" CACHE_DIR (string-replace ,varname-str "-" "_")))))
                                 (cache-exists? (file-exists? cache-path))
                                 (value-to-add (match args
                                                   ((list (list x) _ ...) (list x))
@@ -34,7 +37,7 @@
                                       ((and value-to-add append? varname-is-hash?)
                                           (hash-union value-to-add (or old-value (hash))))
                                       ((and value-to-add append?)
-                                          (append
+                                          (opt/append-unique
                                             (or old-value empty)
                                             (if (list? value-to-add)
                                                 value-to-add
