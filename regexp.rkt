@@ -67,6 +67,18 @@
     (string-contains? astr "|")
     (string-contains? astr "]+")))
 
+(define (regexp-or . args)
+  (format "(~a)"
+    (for/fold
+      ((res (first args)))
+      ((arg (rest args)))
+      (string-append res "|" arg))))
+
+; regular expression string (rs)
+(define (rs . args)
+  (pregexp
+    (format "^~a$" (apply string-append args))))
+
 (module+ test
 
   (require rackunit)

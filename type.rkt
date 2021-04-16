@@ -17,17 +17,19 @@
   (not (non-negative-number? x)))
 
 (define (scalar? x)
-  (or (number? x) (string? x) (symbol? x)))
+  (or (number? x) (string? x) (symbol? x) (boolean? x)))
 
-; the same racket/base function already exists
-; (define (sequence? x)
-;   (or (list? x) (hash? x) (vector? x)))
+(define (true-sequence? x)
+  (or (list? x) (hash? x) (vector? x)))
 
 (define (not-empty-list? x)
   (and (list? x) (not (empty? x))))
 
 (define (one-element? seq)
   (and (list? seq) (= (length seq) 1)))
+
+(define (two-elements? seq)
+  (and (list? seq) (= (length seq) 2)))
 
 (define single-element-list? one-element?)
 
@@ -91,7 +93,7 @@
 (define (nested-hash? hh)
   (and
     (hash? hh)
-    (ormap (λ (v) (hash? v)) (hash-values hh))))        
+    (ormap (λ (v) (hash? v)) (hash-values hh))))
 
 (define-catch (type x)
   (cond
@@ -193,6 +195,26 @@
 (define (equal*? x y)
   (equal? (->string x) (->string y)))
 
+(define (symbol-symbol? s)
+  (and
+    (not (symbol? s))
+    (symbol? (eval s (make-base-namespace)))))
+
+(define (listify x)
+  (cond
+    ((list? x) x)
+    ((not x) empty)
+    (else (list x))))
+
+(define (scalarize x #:delimeter (delimeter " ") #:boolean-to-string (boolean-to-string #f))
+  (cond
+    ((list? x) (string-join (map scalarize x) delimeter))
+    ((hash? x) (for/fold ((res "")) (((k v) x)) (format "~a~a~a ~a" res (if (equal? res "") "" delimeter) (scalarize x) (scalarize v))))
+    ((boolean? x) (if boolean-to-string
+                      (format "~a" x)
+                      x))
+    (else (format "~a" x))))
+
 (module+ test
 
   (require rackunit)
@@ -206,12 +228,12 @@
   (check-equal? (scalar? (hash)) #f)
   (check-equal? (scalar? (hash 'a 1 'b 2)) #f)
 
-  (check-true (sequence? '()))
-  (check-true (sequence? '(1 2)))
-  (check-true (sequence? (hash 'a 10)))
-  (check-true (sequence? #(1 2 3)))
-  (check-false (sequence? 5))
-  (check-false (sequence? 'a))
+  (check-true (true-sequence? '()))
+  (check-true (true-sequence? '(1 2)))
+  (check-true (true-sequence? (hash 'a 10)))
+  (check-true (true-sequence? #(1 2 3)))
+  (check-false (true-sequence? 5))
+  (check-false (true-sequence? 'a))
 
   (check-true (not-empty-list? '(1)))
   (check-false (not-empty-list? '()))

@@ -10,16 +10,6 @@
 
 (provide (all-defined-out))
 
-(define debug
-  (lambda args (apply string-append
-    (map
-      (lambda (el)
-        (cond
-          ((number? el) (number->string el))
-          ((list? el) (list->string el)) ; list of chars to string
-          (else el)))
-      args))))
-
 ; (define (write-data-to-file filename v)
 ;   (write-to-file v filename #:exists 'replace))
 ;
@@ -29,7 +19,7 @@
   (display-to-file v filename #:exists 'replace))
 
 (define (append-file filename v)
-  (display-lines-to-file v filename #:exists 'append))
+  (display-to-file v filename #:exists 'append))
 
 (define (read-file filename)
   (file->string filename #:mode 'text))
@@ -76,11 +66,11 @@
       (load filepath))
     #f))
 
-; read data from file into the s-expression
-(define (read-data-from-file filepath namespace)
-  (if (file-exists? filepath)
-    (read (open-input-string (read-file filepath)))
-    #f))
+; read data from file into the s-expression (not used? uncomment once you meet a use of it!)
+; (define (read-data-from-file filepath namespace)
+;   (if (file-exists? filepath)
+;     (read (open-input-string (read-file filepath)))
+;     #f))
 
 ; serializes data and save it into the file
 (define (write-data-to-file data filepath)
@@ -91,31 +81,3 @@
   (if (file-exists? filepath)
     (deserialize (file->value filepath))
     #f))
-
-;;; shorthands
-(define-syntax (--- stx)
-  (syntax-case stx ()
-    ((_ parameters ...)
-      (with-syntax ((frmt #'(for/fold
-                              ((s "~n"))
-                              ((i (reverse (list parameters ...))))
-                              (string-append "~a " s))))
-        #'(if (debug-output)
-            (append-file (debug-output) (format frmt parameters ...))
-            (printf frmt parameters ...)
-            )))))
-
-(define (print-list lst)
-	(for ((i lst))
-    (if (debug-output)
-      (append-file (debug-output) i)
-	    (println i))))
-
-(define (---- obj)
-  (cond
-    ((list? obj) (print-list obj))
-    ((hash? obj) (print-list (for/list (((k v) obj)) (cons k v))))
-    (else obj)))
-
-(define-macro (terpri)
-	`(--- ""))

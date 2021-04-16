@@ -36,7 +36,7 @@
 (define (alist-expand base-list expander-list pos)
   (let ((pos-el (nth base-list pos)))
       (splice
-        (remove base-list pos)
+        (remove-by-part base-list pos)
         (map
           (λ (x) (pushr pos-el x))
           expander-list)
@@ -60,7 +60,7 @@
     (if (= i 0)
       (pushr clst pair)
       (insert
-        (remove clst i)
+        (remove-by-pos clst i)
         i
         (cons (car old-pair) (f (cdr old-pair) (cdr pair)))))))
 

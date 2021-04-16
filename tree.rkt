@@ -16,7 +16,7 @@
     ((res (list)))
     ((t tr))
     (cond
-      ((sequence? t) (pushr res (tree-filter f t)))
+      ((true-sequence? t) (pushr res (tree-filter f t)))
       ((f t) (pushr res t))
       (else res))))
 

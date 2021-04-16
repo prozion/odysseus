@@ -50,7 +50,7 @@
 ; http/1.1 spec: https://tools.ietf.org/html/rfc2616
 (define (post-url url headers body)
   (let ((body (if (bytes? body) body (string->bytes/utf-8 body))))
-    (port->bytes
+    (port->string
       (post-pure-port (string->url url) body headers))))
 
 ; (url-with-parameters auth-url client_id redirect_uri display scope response_type v state) ->

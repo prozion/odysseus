@@ -140,6 +140,9 @@
 
 (define vk/username request-username)
 
+(define (vkfy id)
+  (format "vk.com/~a" id))
+
 (define (repost? item)
   (true? ($ copy_history item)))
 
@@ -332,6 +335,7 @@
 (define (get-group-users
           groupid ; id группы (это цифры в url группы типа vk.com/club14881917, либо получаемые по алиасу группы через get-gid)
           #:offset (offset 0) ; смещение по выборке, если 0 - то приходит первая тысяча id, если 10000 - то id с позицией от 10001 до 11000 в общем списке участников
+          #:count (count 1000)
           #:delay (delay-time #f) ; задержка между последовательными обращениями к серверу ВКонтакте по API, нужна, чтобы не словить ошибку "Too many requests per second"
           #:display? (display? #f) ; отображать каждый запрос по API в консоли, и если да, то какие символы?
           )
@@ -356,9 +360,10 @@
                       ; запрос формируем согласно документации https://vk.com/dev/groups.getMembers.
                       ; Этот адрес с подставленными значениями можно прямо вставить в адресную строку браузера и получить ответ в виде JSON
                       ; (e.g. {"response":{"count":377421,"items":[56,121,134,149,175,193,243,341,364,404]}} )
-                      "https://api.vk.com/method/groups.getMembers?group_id=~a&offset=~a&v=~a&access_token=~a"
+                      "https://api.vk.com/method/groups.getMembers?group_id=~a&offset=~a&count=~a&v=~a&access_token=~a"
                       groupid
                       offset
+                      count
                       VK_API_VERSION
                       (_AT) ; ключ доступ пользователя. Как его получить см. комментарии в заголовке этого файла (в районе строки 13)
                       )))))
@@ -572,7 +577,7 @@
     )))
 
 (define-catch (get-img-url item #:image-size (image-size '2x))
-  (hash-ref (get-img-urls item) image-size))
+  (hash-ref (get-img-urls item) image-size #f))
 
 (define-catch (post-contains-img? item)
   (ormap

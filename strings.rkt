@@ -192,6 +192,9 @@
     (not astr)
     (equal? astr "")))
 
+(define (letter? astr)
+  (= (string-length astr) 1))
+
 (define-catch (sort-by-string list-of-something (order 'a-z))
   (case order
     ((a-z) (sort
@@ -200,6 +203,80 @@
                 (string<? (->string a) (->string b)))))
     ((z-a) (reverse (sort-by-string list-of-something 'a-z)))
     (else (error "unknown order parameter"))))
+
+(define-catch (string-first astr)
+  (and
+    (non-empty-string? astr)
+    (substring astr 0 1)))
+
+(define (string-rest astr)
+  (and
+    (non-empty-string? astr)
+    (not (letter? astr))
+    (substring astr 1)))
+
+(define cyr-letters
+  (let* ((cyr-letters "абвгдеёжзиклмнопрстуфхцчшщьыъэюя")
+        (cyr-capital-letters (string-upcase cyr-letters))
+        (cyr-letters (string-append cyr-capital-letters cyr-letters)))
+    (explode cyr-letters)))
+
+(define-catch (cyr? letter)
+  (and
+    (letter? letter)
+    (indexof? cyr-letters letter)))
+
+(define (а-яa-z a b)
+  (let* (
+        (a (string-downcase (->string a)))
+        (b (string-downcase (->string b)))
+        (a1 (string-first a))
+        (b1 (string-first b)))
+    (cond
+      ; cyrrilic goes before latin:
+      ((and (cyr? a1) (not (cyr? b1))) #t)
+      ((and (not (cyr? a1)) (cyr? b1)) #f)
+      ((and (cyr? a1) (cyr? b1))
+        (cond
+          ((string>? a b) #f)
+          ((string<? a b) #t)
+          (else
+            (а-яa-z (string-rest a) (string-rest b)))))
+      (else (string<? a b)))))
+
+(define string-car string-first)
+; (define-catch (string-car str)
+;   (cond
+;     ((empty-string? str) (error (format "строка ~a пуста" str)))
+;     (else (substring str 0 1))))
+
+(define string-cdr string-rest)
+; (define-catch (string-cdr str)
+;   (cond
+;     ((empty-string? str) (error (format "строка ~a пуста" str)))
+;     ((equal? (string-length str) 1) "")
+;     (else (substring str 1))))
+
+(define-catch (tabtree> a b)
+  (cond
+    ((empty-string? a) #f)
+    ((empty-string? b) #t)
+    (else
+      (let* ((letters (explode "_абвгдеёжзийклмнопрстуфхцчшщьыъэюяabcdefghijklmnopqrstuvwxyz0123456789"))
+            (a (string-downcase a))
+            (b (string-downcase b))
+            (a-first (string-car a))
+            (a-rest (string-cdr a))
+            (b-first (string-car b))
+            (b-rest (string-cdr b))
+            (a-pos (indexof letters a-first))
+            (b-pos (indexof letters b-first)))
+        (cond
+          ((equal? a-first b-first) (tabtree> a-rest b-rest))
+          (else (> a-pos b-pos)))))))
+
+(define (tabtree< a b)
+  (not (tabtree> a b)))
 
 (define (a-z a b) (string<? (string-downcase (->string a)) (string-downcase (->string b))))
 (define (z-a a b) (string>? (string-downcase (->string a)) (string-downcase (->string b))))
@@ -213,6 +290,9 @@
           (string<? (string-downcase (->string a)) (string-downcase (->string b))))
       ((and a-capital? (not b-capital?)) #t)
       ((and (not a-capital?) b-capital?) #f))))
+
+(define-catch (0-9 a b)
+  (< (->number a) (->number b)))
 
 (define-catch (take-one astr #:f (f car) #:delimeter (delimeter ","))
   (cond
@@ -252,38 +332,6 @@
     (if (> a_length b_length)
       (string-contains? a b)
       (string-contains? b a))))
-
-(define-catch (string-car str)
-  (cond
-    ((empty-string? str) (error (format "строка ~a пуста" str)))
-    (else (substring str 0 1))))
-
-(define-catch (string-cdr str)
-  (cond
-    ((empty-string? str) (error (format "строка ~a пуста" str)))
-    ((equal? (string-length str) 1) "")
-    (else (substring str 1))))
-
-(define-catch (cyr> a b)
-  (cond
-    ((empty-string? a) #f)
-    ((empty-string? b) #t)
-    (else
-      (let* ((letters (explode "_абвгдеёжзийклмнопрстуфхцчшщьыъэюяabscdefghijklmnoprstuvwxyz0123456789"))
-            (a (string-downcase a))
-            (b (string-downcase b))
-            (a-first (string-car a))
-            (a-rest (string-cdr a))
-            (b-first (string-car b))
-            (b-rest (string-cdr b))
-            (a-pos (indexof letters a-first))
-            (b-pos (indexof letters b-first)))
-        (cond
-          ((equal? a-first b-first) (cyr> a-rest b-rest))
-          (else (> a-pos b-pos)))))))
-
-(define (cyr< a b)
-  (not (cyr> a b)))
 
 (define (string-reverse astr)
   (cond (string? astr)
@@ -362,10 +410,11 @@
   (check-true (starts-with? "Hector" "H"))
   (check-false (starts-with? "Hector" "h"))
 
-  (check-true (cyr> "Питер" "Москва"))
-  (check-true (cyr> "Washington" "Питер"))
-  (check-true (cyr> "Самойлово" "Самара"))
-  (check-true (cyr> "Самойлово" "самара"))
-  (check-true (cyr> "Washington" "Boston"))
-  (check-false (cyr> "Boston" "Seattle"))
+  (check-true (tabtree> "Питер" "Москва"))
+  (check-true (tabtree> "Washington" "Питер"))
+  (check-true (tabtree> "Самойлово" "Самара"))
+  (check-true (tabtree> "Самойлово" "самара"))
+  (check-true (tabtree> "Washington" "Boston"))
+  (check-false (tabtree< "Washington" "Boston"))
+  (check-false (tabtree> "Boston" "Seattle"))
 )

@@ -7,12 +7,16 @@
 
 (provide (all-defined-out))
 
+(define (varname-is-hash? varname)
+  (regexp-match #rx"^h-|^H" (format "~a" varname)))
+
 (define-macro (persistent varname)
   (let ((varname-str (format "~a" varname)))
     `(define ,varname
                         (λ args
                           (let* (
-                                (varname-is-hash? (regexp-match #rx"^h-|^H" ,varname-str))
+                                (varname-is-hash? (varname-is-hash? ',varname))
+                                ; (_ (--- (printf (format "~a ~a" ',varname varname-is-hash?))))
                                 (cache-path (cond
                                               ((absolute-path? CACHE_DIR) (format "~a/~a.rktd" CACHE_DIR (string-replace ,varname-str "-" "_")))
                                               (else (format "../~a/~a.rktd" CACHE_DIR (string-replace ,varname-str "-" "_")))))
@@ -57,3 +61,15 @@
                             (when duplicate-saved-file? (write-data-to-file new-value (format "~a_" cache-path)))
                             (when value-changed? (write-data-to-file new-value cache-path))
                             new-value)))))
+
+(define-macro (read-or-evaluate persistent-name expr)
+  `(if (nil? (,persistent-name))
+      (let ((res ,expr))
+        (,persistent-name res)
+        res)
+      (,persistent-name)))
+
+(define-macro (purge-persistent persistent-name)
+  `(cond
+    ((varname-is-hash? ,persistent-name) (hash))
+    (else empty)))

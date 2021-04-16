@@ -9,6 +9,7 @@
 (require "alist.rkt")
 (require "debug.rkt")
 (require "io.rkt")
+(require "hash.rkt")
 
 (provide (all-defined-out))
 
@@ -96,32 +97,40 @@
 
 (define nt normalize-text)
 
-(define-catch (nt/text->distribution text)
-  (frequency-clist (explode (nt text))))
+(define-catch (letters-distribution text)
+  (let* ((letters (explode text)))
+    (for/fold
+      ((res (hash)))
+      ((letter letters))
+      (hash-union
+        (hash letter (+ 1 (hash-ref res letter 0)))
+        res))))
 
-(define-catch (nt/get-size distribution (res 0))
-  (cond
-    ((empty? distribution) res)
-    (else (+ (cdar distribution) (nt/get-size (cdr distribution))))))
+(define-catch (letters-distribution-size distribution)
+  (and (hash? distribution) (apply + (hash-values distribution))))
 
-(define-catch (nt/get-distance distribution1 distribution2 (distance 0))
-  (cond
-    ((empty? distribution1) (+ distance (nt/get-size distribution2)))
-    ((empty? distribution2) (+ distance (nt/get-size distribution1)))
-    (else
-      (let* ((char1 (caar distribution1))
-            (value1 (cdar distribution1))
-            (pair2 (assoc char1 distribution2))
-            (value2 (if pair2 (cdr pair2) 0))
-            (char_diff (abs (- value1 value2)))
-            (new_distribution1 (cdr distribution1))
-            (new_distribution2 (clist-remove distribution2 char1)))
-        (nt/get-distance new_distribution1 new_distribution2 (+ distance char_diff))))))
+(define-catch (get-text-distance text1 text2)
+  (let* (
+        (distribution1 (letters-distribution text1))
+        (distribution2 (letters-distribution text2))
+        (intersection-distance
+          (for/fold
+            ((res 0))
+            ((letter (intersect (hash-keys distribution1) (hash-keys distribution2))))
+            (+ res (abs (- (hash-ref distribution1 letter) (hash-ref distribution2 letter))))))
+        (1-distance
+          (for/fold
+            ((res 0))
+            ((letter (minus (hash-keys distribution1) (hash-keys distribution2))))
+            (+ res (hash-ref distribution1 letter))))
+        (2-distance
+          (for/fold
+            ((res 0))
+            ((letter (minus (hash-keys distribution2) (hash-keys distribution1))))
+            (+ res (hash-ref distribution2 letter)))))
+      (+ intersection-distance 1-distance 2-distance)))
 
-(define (get-text-difference text1 text2)
-  (nt/get-distance (nt/text->distribution text1) (nt/text->distribution text2)))
-
-(define-catch (similar-text? text1 text2)
+(define-catch (similar-text? text1 text2 #:tolerance (tolerance 0.3))
   (cond
     ; when sizes are obviously different, consider texts different
     ((< (text-size-difference text1 text2) 0.8) #f)
@@ -134,7 +143,15 @@
           ((equal? text1 text2) #t)
           ((< (text-size-difference text1 text2) 0.8) #f)
           (else
-            (let* ((distribution1 (frequency-clist (explode text1)))
-                  (distribution2 (frequency-clist (explode text2)))
-                  (distance (nt/get-distance distribution1 distribution2)))
-              (< distance (* 0.1 (max size1 size2))))))))))
+            (let* (
+                  (distance (get-text-distance (nt text1) (nt text2))))
+              (< distance (* tolerance (max size1 size2))))))))))
+
+(define-catch (any-in-text? txt expressions)
+  (and
+    txt
+    expressions
+    (ormap
+      (λ (expression)
+        (string-contains? txt expression))
+      expressions)))

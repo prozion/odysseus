@@ -1,8 +1,11 @@
 #lang racket
 
 (require "../main.rkt")
+(require compatibility/defmacro)
 
 (provide (all-defined-out))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; read ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define-catch (csv->list-rows csv-str #:delimeter (delimeter ","))
   (let* (
@@ -72,33 +75,59 @@
                       hashtree)))
     hashtree))
 
-(define-catch (list->csv-file filename lst #:delimeter (delimeter ",") #:headers (headers #t) #:quoted (quoted #t))
-  (let* ((content
-            (opt/implode
-              (map
-                (λ (s)
-                  (opt/implode
-                    (if quoted
-                      (map (λ (ss) (str "\"" (str/escape ss) "\"")) s)
-                      s)
-                    delimeter))
-                lst)
-              "\n")))
-  (write-file filename content)))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; write ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(define text->csv-text
+  (change-text
+    (list
+      (cons "#f" "")
+      (cons "\\" "")
+      ; (cons "\"" "'")
+      (cons "\"" "\"\"")
+    )))
 
-(define-catch (hash->csv-file filename h #:headers (headers #f) #:delimeter (delimeter ","))
-  (let* ((headers (if headers headers (hash-keys (car (hash-values h)))))
-        (llst (pushl
-                (hash-values
-                  (map-hash
-                    (λ (k v) (values k (hash->ordered-list v headers)))
-                    h))
-                headers)))
-    (list->csv-file
-      filename
-      llst
-      #:headers headers
-      #:delimeter delimeter)))
+(define-catch (transform-csv-fields csv-items transform-hash)
+  (map
+    (λ (item)
+      (for/fold
+        ((res item))
+        (((k v) transform-hash))
+        (cond
+          ((hash-ref res (->symbol k) #f)
+              (hash-union
+                (hash (->symbol k) (v (hash-ref* res k) res))
+                res))
+          (else res))))
+    csv-items))
 
-(define (join-csv csv-file-1 csv-file-2 result-csv-file)
-  #t)
+; headers :: (List ColumnName)
+; data :: (List (Hash ColumnName Value)) | (List (List Value)) | (Value . Value)
+(define-catch (get-csv headers data #:delimeter (delimeter ","))
+  (let* ( (res-header (string-join (map ->string headers) delimeter))
+          (data (if (hash? data) (hash-values data) data))
+          (res-body (string-join
+                      (map
+                        (λ (row)
+                          (cond
+                            ((hash? row)
+                              (string-join (map ->string (hash-refs row headers "")) delimeter))
+                            ((list? row)
+                              (string-join (map ->string row) delimeter))
+                            ((cons? row)
+                              (format "~a,~a" (car row) (cdr row)))
+                            (else
+                              row)))
+                        data)
+                      "\n")))
+      (string-append res-header "\n" res-body)))
+
+(define-catch (write-csv-file headers data filename #:delimeter (delimeter ","))
+    (write-file filename (get-csv headers data #:delimeter delimeter)))
+
+(module+ test
+  (require "../main.rkt")
+  (require rackunit)
+
+  (check-equal? (get-csv '(b a) (list (hash 'a 10 'b 20)))
+                "b,a\n20,10")
+
+)

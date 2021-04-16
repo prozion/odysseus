@@ -1,12 +1,16 @@
 #lang racket
 
 ; (provide (except-out (all-defined-out) c2))
-(provide tostring len str list-pretty-string implode interleave explode split nth indexof indexof? indexof*? regexp-indexof? count-element lshift shiftl lpop ltrim triml push lpush pushl lpush-unique pushl-unique rshift shiftr rpop rtrim trimr rpush pushr rpush-unique pushr-unique slice merge merge-unique concat splice exclude exclude-all exclude* exclude-all* insert setn replace replace-all list-substitute uniques not-uniques minus difference unique-difference intersect intersect? equal-elements? equal-set? deep-equal-set? partition-full partition-all break-seq depth transpose cleanmap merge soft-merge replace-by-part remove-by-part append-unique by-index first-or-false)
+(provide tostring len str list-pretty-string implode interleave explode split nth indexof indexof? indexof*? regexp-indexof? count-element lshift shiftl lpop ltrim triml push lpush pushl lpush-unique pushl-unique rshift shiftr rpop rtrim trimr rpush pushr rpush-unique pushr-unique slice merge merge-unique concat splice exclude exclude-all exclude* exclude-all* insert setn replace replace-all list-substitute uniques not-uniques minus difference unique-difference intersect intersect? equal-elements? equal-set? deep-equal-set? partition-full partition-all break-seq depth transpose cleanmap merge soft-merge replace-by-part remove-by-part remove-by-pos append-unique by-index first-or-false last? several? reverse partition-by-shift)
 
 (require compatibility/defmacro)
 (require "base.rkt")
 (require "controls.rkt")
 (require racket/set)
+(require (only-in
+            racket/base
+            (reverse std:reverse)))
+
 
 ;; algebra of operations with strings and lists (arrays)
 
@@ -25,6 +29,12 @@
   (if (string? seq)
     (string-length seq)
     (length seq))))
+
+(define (first-seq seq)
+  (cond
+    ((list? seq) (first seq))
+    ((string? seq) (first (explode seq)))
+    (else seq)))
 
 (define (tostring lst)
   (format "~a" lst))
@@ -99,6 +109,12 @@
 
 (define (split-by-lambda* seq f)
   (split-by-lambda-general seq f #:inclusive? #t))
+
+(define (reverse seq)
+  (cond
+    ((list? seq) (std:reverse seq))
+    ((string? seq) (implode (std:reverse (explode seq))))
+    (else seq)))
 
 (define (nth seq index)
   (let ((ll (len seq)))
@@ -182,7 +198,7 @@
     (lpop (explode seq))
     (car seq)))
 
-(define first lpop)
+; (define first lpop)
 
 (define (ltrim seq (count 1))
   (cond
@@ -313,19 +329,23 @@
     (implode (splice (explode seq) (explode subseq) pos))
     (merge (lshift seq (sub1 pos)) subseq (ltrim seq (sub1 pos)))))
 
-(define (remove seq pos1 (pos2 pos1) #:len (size 1))
+(define (remove-by-pos seq pos1 (pos2 pos1) #:len (size 1))
   (let ((ll (len seq)))
     (cond
       ((nil? seq) seq)
       ;((!= pos1 pos2) (merge (rtrim seq (- ll pos2)) (ltrim seq pos1)))
       ((not (in (- ll) ll pos1)) seq)
       ((not (in (- ll) ll pos2)) seq)
-      ((> size 1) (remove seq pos1 (+ pos1 (sub1 size))))
-      ((< pos1 0) (remove
-                    seq
-                    (+ ll pos1 1)
-                    (if (= pos2 pos1) (+ ll pos1 1) pos2)))
-      ((< pos2 0) (remove seq pos1 (+ ll pos2 1)))
+      ((> size 1) (remove-by-pos seq pos1 (+ pos1 (sub1 size))))
+      ((< pos1 0) (cond
+                    ((list? seq) (append (take seq (+ ll pos1)) (cdr (drop seq (+ ll pos1)))))
+                    ((string? seq) (implode (remove-by-pos (explode seq) pos1)))
+                    (else seq)))
+      ; (remove
+      ;               seq
+      ;               (+ ll pos1 1)
+      ;               (if (= pos2 pos1) (+ ll pos1 1) pos2)))
+      ((< pos2 0) (remove-by-pos seq pos1 (+ ll pos2 1)))
       (else
         (merge
           (lshift seq (sub1 pos1))
@@ -334,7 +354,7 @@
 (define (exclude seq el #:compare (compare equal?))
   (if (string? seq)
     (implode (exclude (explode seq) el #:compare compare))
-    (remove seq (indexof seq el compare))))
+    (remove-by-pos seq (indexof seq el compare))))
 
 (define (exclude-all seq el)
   (let ((index (indexof seq el)))
@@ -380,7 +400,7 @@
   (cond
     ((nil? seq) seq)
     ((> index (len seq)) seq)
-    (else (insert (remove seq index) index newel))))
+    (else (insert (remove-by-pos seq index) index newel))))
 
 (define (setns seq indexes newel)
   (cond
@@ -431,9 +451,9 @@
       ((nil? seq) acc)
       (else (not-uniques-iter
               (ltrim seq)
-              (if (znil? (indexof (ltrim seq) (first seq)))
+              (if (znil? (indexof (ltrim seq) (first-seq seq)))
                 acc
-                (rpush acc (first seq)))))))
+                (rpush acc (first-seq seq)))))))
   (not-uniques-iter seq null))
 
 (define (minus seq1 seq2 #:equal-f (equal-f #f))
@@ -629,7 +649,24 @@
           `(,element ,@(map (λ (x y) (x y)) incrementors last-indexes-values)))))))
 
 (define (first-or-false seq)
-  (and seq (not-empty? seq) (first seq)))
+  (and seq (not-empty? seq) (first-seq seq)))
+
+(define (last? el seq)
+  (equal? el (last seq)))
+
+(define (several? seq)
+  (and seq (list? seq) (> (length seq) 1)))
+
+(define (partition-by-shift lst (step 1))
+  (match lst
+    ((list a b _ ...) (cond
+                    ((< step 1) (error (format "step must be greater than 1, but actually is ~a" step)))
+                    ((> step (length lst)) (list (list a b)))
+                    (else
+                      (pushl (partition-by-shift (drop lst step) step) (list a b)))))
+    ((list a b) (list (list a b)))
+    ((list a) empty)
+    (else lst)))
 
 (module+ test
 
@@ -642,8 +679,8 @@
 
   (check-equal? (tostring '(1 2 3)) "(1 2 3)")
 
-  (check-equal? (reverse "Lestrigons") "snogirtseL")
-  (check-equal? (reverse '(1 2 3 4 5)) '(5 4 3 2 1))
+  ; (check-equal? (reverse "Lestrigons") "snogirtseL")
+  ; (check-equal? (reverse '(1 2 3 4 5)) '(5 4 3 2 1))
 
   (check-equal? (str "" "hello" " world!" "") "hello world!")
   (check-equal? (str "1" (unless #t "2") "3") "13")
@@ -736,7 +773,7 @@
   (check-equal? (lshift '(1 2 3 4 5 6 7 8 9) 2) '(1 2))
 
   (check-equal? (lpop '(1 2 3 4 5 6 7 8 9)) 1)
-  (check-equal? (first "Andromachus") "A")
+  (check-equal? (first-seq "Andromachus") "A")
 
   (check-equal? (ltrim "" 10) "")
   (check-equal? (ltrim "Oslo god morgen" 0) "Oslo god morgen")
@@ -763,7 +800,7 @@
   (check-equal? (rshift '(1 2 3 4 5 6 7 8 9) 2) '(8 9))
 
   (check-equal? (rpop '(1 2 3 4 5 6 7 8 9)) 9)
-  (check-equal? (last "Andromachus") "s")
+  ; (check-equal? (last "Andromachus") "s")
 
   (check-equal? (rtrim "" 10) "")
   (check-equal? (rtrim "Oslo god morgen" 0) "Oslo god morgen")
@@ -817,16 +854,16 @@
     "Tell me, O muse, of that ingenious hero")
   (check-equal? (splice '(1 2 3 4 5 6) '(100 200) 3) '(1 2 100 200 3 4 5 6))
 
-  (check-equal? (remove "Agamemnon" 4) "Agaemnon")
-  (check-equal? (remove "Agamemnon" 5 8) "Agamn")
-  (check-equal? (remove "Agamemnon" 5 #:len 3) "Agamon")
-  (check-equal? (remove "Clytemnestra" 4 -1) "Cly")
-  (check-equal? (remove "Oslo" 4) "Osl")
-  (check-equal? (remove "Agamemnon" -1) "Agamemno")
-  (check-equal? (remove '(1 2 3 4 5 6 7) 4) '(1 2 3 5 6 7))
-  (check-equal? (remove '(1) 1) '())
-  (check-equal? (remove '(1 2 3 4 5 6 7) 4 5) '(1 2 3 6 7))
-  (check-equal? (remove '(1 2 3 4 5 6 7) 4 #:len 3) '(1 2 3 7))
+  (check-equal? (remove-by-pos "Agamemnon" 4) "Agaemnon")
+  (check-equal? (remove-by-pos "Agamemnon" 5 8) "Agamn")
+  (check-equal? (remove-by-pos "Agamemnon" 5 #:len 3) "Agamon")
+  (check-equal? (remove-by-pos "Clytemnestra" 4 -1) "Cly")
+  (check-equal? (remove-by-pos "Oslo" 4) "Osl")
+  (check-equal? (remove-by-pos "Agamemnon" -1) "Agamemno")
+  (check-equal? (remove-by-pos '(1 2 3 4 5 6 7) 4) '(1 2 3 5 6 7))
+  (check-equal? (remove-by-pos '(1) 1) '())
+  (check-equal? (remove-by-pos '(1 2 3 4 5 6 7) 4 5) '(1 2 3 6 7))
+  (check-equal? (remove-by-pos '(1 2 3 4 5 6 7) 4 #:len 3) '(1 2 3 7))
 
   (check-equal? (exclude '(1 2 3 4 5 6 7) 3) '(1 2 4 5 6 7))
   (check-equal? (exclude* '(1 2 3 4 5 6 7) 3 2 1) '(4 5 6 7))
@@ -920,6 +957,9 @@
   (check-true (intersect? '(1 2 3 5) '(3 2 1 1 6)))
   (check-false (intersect? '(1 2 3 5) '(4 8 10)))
   (check-false (intersect? '(1 2 3 5) #f))
+  (check-false (intersect? '() '(3 2 1 1 6)))
+  (check-false (intersect? '(3 2 1 1 6) '()))
+  (check-false (intersect? '() '()))
 
   (check-equal? (difference '() '()) '())
   (check-equal? (difference '(1 2 3) '()) '(1 2 3))
@@ -1025,4 +1065,9 @@
   (check-equal? (by-index '(0 1 2 3) 0) '((0 0) (1 1) (2 2) (3 3)))
   (check-equal? (by-index '(0 1 2 3) (list 0 inc)) '((0 0) (1 1) (2 2) (3 3)))
   (check-equal? (by-index '(0 1 2 3) (list -10 (λ (i) (* i -2)))) '((0 -10) (1 20) (2 -40) (3 80)))
+
+  (check-equal? (partition-by-shift '(1 2 3 4 5 6 7) 1) '((1 2) (2 3) (3 4) (4 5) (5 6) (6 7)))
+  (check-equal? (partition-by-shift '(1 2 3 4 5 6 7) 3) '((1 2) (4 5)))
+  (check-exn (pregexp "step must be greater than 1,.*") (lambda () (partition-by-shift '(1 2 3 4 5 6 7) 0)))
+  (check-equal? (partition-by-shift '(1 2 3) 4) '((1 2)))
 )

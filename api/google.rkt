@@ -2,8 +2,7 @@
 
 (require net/url)
 (require "../main.rkt")
-(require "../scrap/csv.rkt")
-;(require "../lib/seqs.rkt" "../lib/http.rkt" "../lib/hash.rkt")
+(require "csv.rkt")
 (require json)
 
 (provide (all-defined-out))

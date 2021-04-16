@@ -175,9 +175,6 @@
       non-empty-string?
       (string-split (symbol->string sym) ""))))
 
-(define (listify a)
-  (if (list? a) a (list a)))
-
 (define (range+ start end)
   (cond
     ((< end start) empty)

@@ -561,9 +561,19 @@
                         (((k v) h))
                         (cond
                           ((nested-hash? v)
+                            (let* ((not-hash-values-h
+                                    (hash-filter
+                                      (λ (k v) (not (hash? v)))
+                                      v))
+                                  (hash-values-h
+                                          (hash-filter
+                                            (λ (k v) (hash? v))
+                                            v)))
                             (values
-                              (hash 'id k)
-                              (hash->hashtree v)))
+                              (hash-union
+                                (hash 'id k)
+                                not-hash-values-h)
+                              (hash->hashtree hash-values-h))))
                           ((hash? v)
                             (values
                               (hash-union (hash 'id k) v)
@@ -580,12 +590,49 @@
             (hash 'id '_ '_ h)
             (hash)))))
 
+(define roots (make-parameter empty))
+
+; (List-of Hash) -> HashTree
+(define-catch (reflist->hashtree alst #:refname (refname '_parent) #:root (root #f))
+  (define (ref h)
+    ($ _parent h))
+  (let* (
+        ; 'ref -> '_parent
+        (alst (if (equal? refname '_parent)
+                  alst
+                  (map
+                    (λ (h) (cond
+                              ((hash-ref* h refname #f)
+                                (hash-union (hash '_parent (hash-ref* h refname #f)) (hash-delete h refname)))
+                              (else (hash-delete h refname))))
+                    alst)))
+        (root-leaves (filter-map
+                        (λ (h) (cond
+                                  ((and (list? (ref h))
+                                        (indexof? (ref h) root))
+                                      (hash-union (hash '_parent root) h))
+                                  ((equal? (ref h) root)
+                                    h)
+                                  (else #f)))
+                        alst))
+        (root-already-processed? (indexof? (roots) root)))
+    (roots (uniques (pushr (roots) root)))
+    (cond
+      (root-already-processed? (hash))
+      ((or (not (list? alst)) (not (andmap hash? alst))) (errorf "~a is not a list of hashes" alst))
+      ((empty? root-leaves) (hash))
+      (else
+            (for/hash
+              ((leaf root-leaves))
+              (values leaf (reflist->hashtree alst #:root ($ id leaf))))))))
+
 (module+ test
 
   (require rackunit)
   (require "checks.rkt")
   (require "type.rkt")
   (require "debug.rkt")
+  (require "io.rkt")
 
 (define hash-tree-1 (hash
                       (hash 'id "category 1")
@@ -866,14 +913,46 @@
                           (hash) )
                     ))
 
-(define initial-hash (hash 'a (hash 'aa 10 'ab '(20 30 40)) 'b (hash 'ba (hash 'baa 300 'bab 30)) 'c 3))
+; a aa:10 ab:20,30,40
+;   ax k:8
+; b
+;   ba baa:300 bab:30
+; c c:3
+(define initial-hash (hash 'a (hash 'aa 10 'ab '(20 30 40) 'ax (hash 'k 8)) 'b (hash 'ba (hash 'baa 300 'bab 30)) 'c 3))
 (define tabtree-hash (hash
-                        (hash 'id 'b 'aa 10 'ab '(20 30 40)) (hash)
+                        (hash 'id 'a 'aa 10 'ab '(20 30 40)) (hash
+                                                                (hash 'id 'ax 'k 8)
+                                                                (hash))
                         (hash 'id 'b) (hash
                                         (hash 'id 'ba 'baa 300 'bab 30)
                                         (hash))
                         (hash 'id 'c 'c 3) (hash)))
 
 (check-hash-equal? (hash->hashtree initial-hash) tabtree-hash)
+
+(check-hash-equal? (reflist->hashtree
+                      #:refname 'ref
+                      (list
+                        (hash 'id 'a)
+                        (hash 'id 'b 'ref 'a)
+                        (hash 'id 'c 'ref 'a)
+                        (hash 'id 'd 'ref 'c)
+                        (hash 'id 'e 'ref 'b)
+                        (hash 'id 'f 'ref (list 'e 'a))
+                        (hash 'id 'g)))
+                    (hash
+                      (hash 'id 'a)
+                        (hash
+                          (hash 'id 'f '_parent 'a) (hash)
+                          (hash 'id 'b '_parent 'a)
+                            (hash
+                              (hash 'id 'e '_parent 'b)
+                                (hash
+                                  (hash 'id 'f '_parent 'e) (hash)))
+                          (hash 'id 'c '_parent 'a)
+                            (hash
+                              (hash 'id 'd '_parent 'c) (hash)))
+                      (hash 'id 'g) (hash)))
+
 
 )

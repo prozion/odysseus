@@ -1,7 +1,7 @@
 #lang racket
 
 (require compatibility/defmacro)
-(require "base.rkt" "seqs.rkt" "type.rkt" "regexp.rkt" "debug.rkt" "controls.rkt" "strings.rkt" (for-syntax "seqs.rkt" "type.rkt"))
+(require "base.rkt" "seqs.rkt" "type.rkt" "regexp.rkt" "debug.rkt" "controls.rkt" "strings.rkt" (for-syntax "seqs.rkt" "type.rkt" racket/list racket/string))
 
 (provide (all-defined-out))
 
@@ -15,13 +15,33 @@
     ; remove all pairs with nil-type keys:
     (clean (λ (x) (nil? (car x))) (hash->list (apply hash body))))))
 
-(define-macro ($ field element)
-  (let ((path (map string->symbol (split (->string field) "."))))
-    (if (one-element? path)
-      `(if (hash? ,element)
-          (hash-ref* ,element ',field #f)
-          #f)
-      `($ ,(string->symbol (implode (cdr path) ".")) ($ ,(car path) ,element)))))
+(define-catch (get-$ path hh)
+  (cond
+    ((empty? hh) empty)
+    ((empty? path) hh)
+    ((hash? hh) (get-$ (rest path) (hash-ref* hh (first path))))
+    ((and (list? hh) (one-element? hh)) (get-$ (rest path) (hash-ref* (first hh) (first path))))
+    ((list? hh)
+      (let ((res (cleanmap (map (λ (h) (get-$ path h)) hh))))
+        (if (one-element? res)
+          (first res)
+          res)))
+    (else #f)))
+
+(define-macro ($ dotted-path hh)
+  (let ((path (string-split (->string dotted-path) ".")))
+    `(get-$ ',path ,hh)))
+
+(define (get-$xml path hh)
+  (let* ((res (get-$ path hh))
+        (res (filter scalar? (flatten res)))
+        (res (if (one-element? res) (first res) res))
+        (res (if (empty? res) #f res)))
+    res))
+
+(define-macro ($xml dotted-path hh)
+  (let ((path (string-split (->string dotted-path) ".")))
+    `(get-$xml ',path ,hh)))
 
 (define-macro (hash-sym . body)
   (let ((nbody (map (λ(x) (if (symbol? x) (symbol->string x) x)) body)))
@@ -68,12 +88,12 @@
 
 ; '((foo 1 2 3 4) (bar 10 20 30)) -> #(foo:#(a:1 b:2 c:3) bar:#(a:10 b:20 c:30))
 (define (list->hash lst header #:key-index (key-index 1) #:columns-exclude (columns-exclude null))
-  (let* ((header (remove header key-index)))
+  (let* ((header (remove-by-pos header key-index)))
     (for/hash ((i lst))
       (values
         (nth i key-index)
         (hash-remove-keys
-          (apply hash (interleave header (remove i key-index)))
+          (apply hash (interleave header (remove-by-pos i key-index)))
           columns-exclude)))))
 
 (define (tree->hash lst)
@@ -279,11 +299,11 @@
 (define (hash-revert h)
   (apply hash (interleave (hash-values h) (hash-keys h))))
 
-(define (hash-insert h1 pair #:overwrite (overwrite #f))
+(define (hash-insert h1 pair #:fuse (overwrite #f))
   (cond
     ((null? pair) h1)
     ;((list-of-simple-cons? pair) (hash-insert (hash-insert h1 (car pair)) (cdr pair))) ; doesn't catch mixed lists of cons and lists
-    ((list-of-seqs? pair) (hash-insert (hash-insert h1 (car pair) #:overwrite overwrite) (cdr pair) #:overwrite overwrite)) ; each element of list is either cons or list
+    ((list-of-seqs? pair) (hash-insert (hash-insert h1 (car pair) #:fuse overwrite) (cdr pair) #:fuse overwrite)) ; each element of list is either cons or list
     ((not (pair? pair)) h1)
     ((not (hash? h1)) (make-hash (list pair)))
     ((hash-ref h1 (car pair) #f) (if overwrite
@@ -294,97 +314,179 @@
 
 ;; COMBINE
 ; add to resulting hash all key-val pairs from h1 and pairs from h2 with rest of the keys
-(define (hash-union #:overwrite (overwrite #f) . hs)
-  (case (length hs)
-    ((1) (car hs))
-    ((2) (let* (
-              (h1 (car hs))
-              (h2 (cadr hs))
-              (h1 (if (nil? h1) (hash) h1))
-              (h2 (if (nil? h2) (hash) h2)))
-          (for/fold
-            ((res h1))
-            (([k v] (in-hash h2)))
-            (let ((v0 (hash-ref res k #f)))
-              (cond
-                (overwrite
-                  (cond
-                    ((or (sequence? v0) (sequence? v)) (hash-set res k (sequence-fuse v0 v #:overwrite overwrite)))
-                    (else (hash-set res k v))))
-                ((hash-ref res k #f) res)
-                (else (hash-set res k v)))))))
-    (else (hash-union
-            #:overwrite overwrite
-            (car hs)
-            (keyword-apply hash-union '(#:overwrite) (list overwrite) (cdr hs))
-            ))))
-
-(define (hash-fuse . hs)
-  (keyword-apply hash-union '(#:overwrite) '(fuse) hs))
-
-(define (sequence-fuse seq1 seq2 #:overwrite (overwrite 'fuse))
+(define (hash-union #:fuse (fuse #f) . hs)
   (cond
-    ((and (hash? seq1) (hash? seq2))
-      (case overwrite
-        ((#f)
-          seq1)
-        ((fuse)
-          (for/fold
-            ((res seq1))
-            (((k v2) (in-hash seq2)))
-            (let ((v1 (hash-ref seq1 k #f)))
-              (cond
-                (v1
-                  (cond
-                    ((or (sequence? v1) (sequence? v2))
-                      (hash-set res k (sequence-fuse v1 v2 #:overwrite 'fuse)))
+    ((empty? hs) (hash))
+    ((one-element? hs) (first hs))
+    ((two-elements? hs)
+      (let* ((h1 (first hs))
+            (h1 (or (and h1 (hash? h1) h1) (hash)))
+            (h2 (second hs))
+            (h2 (or (and h2 (hash? h2) h2) (hash))))
+        (for/fold
+          ((res h2))
+          (((k1 v1) h1))
+          (let (
+                (v2 (hash-ref h2 k1 #f)))
+            (cond
+              (v2 (cond
+                    ((equal? fuse 'combine)
+                      (hash-set
+                        res
+                        k1
+                        (cond
+                          ((and (not v1) v2) v2)
+                          ((and (scalar? v1) (scalar? v2))
+                              (list v1 v2))
+                          ((and (scalar? v1) (list? v2))
+                              (pushr v2 v1))
+                          ((and (list? v1) (scalar? v2))
+                              (pushr v1 v2))
+                          ((and (list? v1) (list? v2))
+                              (append v1 v2))
+                          ((and (scalar? v1) (hash? v2))
+                              (list v1 v2))
+                          ((and (hash? v1) (scalar? v2))
+                              (list v1 v2))
+                          ((and (hash? v1) (hash? v2))
+                              (hash-union v1 v2 #:fuse 'combine))
+                          (else
+                            (error (format "mismatched value types for fusion: ~a and ~a (~a and ~a)" (type v1) (type v2) v1 v2))))))
+                    ((equal? fuse 'combine-different)
+                      (hash-set
+                        res
+                        k1
+                        (cond
+                          ((and (not v1) v2) v2)
+                          ((equal? v1 v2) v1)
+                          ((and (scalar? v1) (scalar? v2))
+                              (list v1 v2))
+                          ((and (scalar? v1) (list? v2))
+                              (pushr v2 v1))
+                          ((and (list? v1) (scalar? v2))
+                              (pushr v1 v2))
+                          ((and (list? v1) (list? v2))
+                              (append v1 v2))
+                          ((and (scalar? v1) (hash? v2))
+                              (list v1 v2))
+                          ((and (hash? v1) (scalar? v2))
+                              (list v1 v2))
+                          ((and (hash? v1) (hash? v2))
+                              (hash-union v1 v2 #:fuse 'combine-different))
+                          (else
+                            (error (format "mismatched value types for fusion: ~a and ~a (~a and ~a)" (type v1) (type v2) v1 v2))))))
                     (else
-                      res)))
-                (else
-                  (hash-set res k v2))))))
-        ((fuse-overwrite)
-          (for/fold
-            ((res seq1))
-            (((k v2) (in-hash seq2)))
-            (let ((v1 (hash-ref seq1 k #f)))
-              (cond
-                (v1
-                  (cond
-                    ((or (sequence? v1) (sequence? v2))
-                      (hash-set res k (sequence-fuse v1 v2 #:overwrite 'fuse-overwrite)))
-                    (else
-                      (hash-set res k v2))))
-                (else
-                  (hash-set res k v2))))))
-        ((#t hard)
-          seq2)))
-    ((and (list? seq1) (list? seq2)
-      (case overwrite
-        ((#f) seq1)
-        ((fuse fuse-overwrite) (append seq1 seq2))
-        ((#t) seq2))))
-    ((and (list? seq1) (scalar? seq2))
-      (case overwrite
-        ((#f) seq1)
-        ((fuse fuse-overwrite) (pushr seq1 seq2))
-        ((#t) seq2)))
-    ((and (scalar? seq1) (list? seq2))
-      (case overwrite
-        ((#f) seq1)
-        ((fuse fuse-overwrite) (pushl seq2 seq1))
-        ((#t) seq2)))
-    ; ((and (list? seq1) (hash? seq2))
-    ;   (if overwrite
-    ;     seq2
-    ;     seq1))
-    ; ((and (hash? seq1) (list? seq2))
-    ;   (if overwrite
-    ;     seq2
-    ;     seq1))
+                      (hash-set res k1 v1))))
+              (else
+                (hash-set res k1 v1)))))))
     (else
-      (case overwrite
-        ((#f fuse) seq1)
-        ((#t fuse-overwrite) seq2)))))
+        (hash-union #:fuse fuse (first hs) (apply hash-union (rest hs))))))
+
+; (define (hash-union #:fuse (overwrite #f) . hs)
+;   (case (length hs)
+;     ((1) (car hs))
+;     ((2) (let* (
+;               (h1 (car hs))
+;               (h2 (cadr hs))
+;               (h1 (if (nil? h1) (hash) h1))
+;               (h2 (if (nil? h2) (hash) h2)))
+;           (for/fold
+;             ((res h1))
+;             (([k v] (in-hash h2)))
+;             (let ((v0 (hash-ref res k #f)))
+;               (cond
+;                 (overwrite
+;                   (cond
+;                     ((equal? overwrite 'combine)
+;                       (let* ((v1 (hash-ref res k #f))
+;                             (v2 v))
+;                         (hash-set
+;                           res
+;                           k
+;                           (cond
+;                             ((and v1 (not v2)) v1)
+;                             ((and v2 (not v1)) v2)
+;                             ((and (not v1) (not v2)) #f)
+;                             (else
+;                               (append
+;                                 (if (list? v1) v1 (list v1))
+;                                 (if (list? v2) v2 (list v2))))))))
+;                     ((or (true-sequence? v0) (true-sequence? v)) (hash-set res k (sequence-fuse v0 v #:fuse overwrite)))
+;                     (else (hash-set res k v))))
+;                 ((hash-ref res k #f) res)
+;                 (else (hash-set res k v)))))))
+;     (else (hash-union
+;             #:fuse overwrite
+;             (car hs)
+;             (keyword-apply hash-union '(#:fuse) (list overwrite) (cdr hs))
+;             ))))
+
+; (define (hash-fuse . hs)
+;   (keyword-apply hash-union '(#:fuse) '(fuse) hs))
+
+; (define (sequence-fuse seq1 seq2 #:fuse (overwrite 'combine))
+;   (cond
+;     ((and (hash? seq1) (hash? seq2))
+;       (case overwrite
+;         ((#f)
+;           seq1)
+;         ((fuse)
+;           (for/fold
+;             ((res seq1))
+;             (((k v2) (in-hash seq2)))
+;             (let ((v1 (hash-ref seq1 k #f)))
+;               (cond
+;                 (v1
+;                   (cond
+;                     ((or (true-sequence? v1) (true-sequence? v2))
+;                       (hash-set res k (sequence-fuse v1 v2 #:fuse 'combine)))
+;                     (else
+;                       res)))
+;                 (else
+;                   (hash-set res k v2))))))
+;         ((fuse-overwrite)
+;           (for/fold
+;             ((res seq1))
+;             (((k v2) (in-hash seq2)))
+;             (let ((v1 (hash-ref seq1 k #f)))
+;               (cond
+;                 (v1
+;                   (cond
+;                     ((or (true-sequence? v1) (true-sequence? v2))
+;                       (hash-set res k (sequence-fuse v1 v2 #:fuse 'combine-overwrite)))
+;                     (else
+;                       (hash-set res k v2))))
+;                 (else
+;                   (hash-set res k v2))))))
+;         ((#t hard)
+;           seq2)))
+;     ((and (list? seq1) (list? seq2)
+;       (case overwrite
+;         ((#f) seq1)
+;         ((fuse fuse-overwrite) (append seq1 seq2))
+;         ((#t) seq2))))
+;     ((and (list? seq1) (scalar? seq2))
+;       (case overwrite
+;         ((#f) seq1)
+;         ((fuse fuse-overwrite) (pushr seq1 seq2))
+;         ((#t) seq2)))
+;     ((and (scalar? seq1) (list? seq2))
+;       (case overwrite
+;         ((#f) seq1)
+;         ((fuse fuse-overwrite) (pushl seq2 seq1))
+;         ((#t) seq2)))
+;     ; ((and (list? seq1) (hash? seq2))
+;     ;   (if overwrite
+;     ;     seq2
+;     ;     seq1))
+;     ; ((and (hash? seq1) (list? seq2))
+;     ;   (if overwrite
+;     ;     seq2
+;     ;     seq1))
+;     (else
+;       (case overwrite
+;         ((#f fuse) seq1)
+;         ((#t fuse-overwrite) seq2)))))
 
 ;; OUTPUT
 (define-catch (hash->string
@@ -543,3 +645,17 @@
       ((not (indexof? mask-keys k)) res)
       ((hash? v) (hash-union (hash k (deep-hash-mask v mask-keys)) res))
       (else (hash-union (hash k v) res)))))
+
+(define (break-list-to-hash lst)
+  (for/hash ((e lst)) (values e e)))
+
+; (let ((a 10)) (@0 a 'b 100)) -> (hash 'a 10 'b 'b 100 100)
+(define-macro (@0 . args)
+  `(for/hash ((key ',args) (val (list ,@args)))
+    (let ((key (if (symbol-symbol? key) (eval key (make-base-namespace)) key)))
+      (values key val))))
+
+(define (hashmap f h)
+  (for/hash
+    (((k v) h))
+    (f k v)))

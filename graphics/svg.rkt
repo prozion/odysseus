@@ -25,9 +25,8 @@
                       (filter (λ (x) (and (list? x) (equal? (car x) '@))) args)
                       (list '(@)))))
           ;(viewbox (hash-ref params 'viewbox #f))
-          (body (clean (λ (x) (or (equal? x 'xmlns) (equal? x 'xlink) (and (list? x) (equal? (car x) '@)) (equal? x 'styles) (equal? x 'scripts))) args))
-          (body (if (null? body) "" (car body))))
-    `(svg-f ,xmlns ,xlink ,params ,styles ,scripts ,body)))
+          (body (clean (λ (x) (or (equal? x 'xmlns) (equal? x 'xlink) (and (list? x) (equal? (car x) '@)) (equal? x 'styles) (equal? x 'scripts))) args)))
+    `(svg-f ,xmlns ,xlink ,params ,styles ,scripts ,@body)))
 
 (define (svg-f
           xmlns
@@ -151,7 +150,7 @@ SVG
 ))
 
   (check-equal?
-    (svg (@ 'xmlns #t))
+    (svg xmlns)
     (rtrim
     #<<svg
 <svg xmlns="http://www.w3.org/2000/svg"></svg>
@@ -159,7 +158,7 @@ svg
 ))
 
   (check-equal?
-    (svg (@ 'xmlns #t 'xlink #t))
+    (svg xmlns xlink)
     (rtrim
     #<<svg
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"></svg>
@@ -188,7 +187,7 @@ svg
   ;; more complex case
   (check-equal?
     (string-length
-      (svg (@ 'xmlns #t)
+      (svg xmlns
         (g)
         (g (@ 'id "group1")
           (rect x 10 y 10 width 100 height 150 fill "green")
