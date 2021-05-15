@@ -73,7 +73,7 @@
     (case ($ login.result body)
       (("NeedToken")
         (add-to-session (hash 'token (uri-encode ($ login.token body))))
-        (wiki-login lgname lgpassword #:token ($ token (session)) #:cookies cookies))
+        (wiki-login api-url lgname lgpassword #:token ($ token (session)) #:cookies cookies))
       (("Success")
         (add-to-session (hash
                           'cookies cookies
