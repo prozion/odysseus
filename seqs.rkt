@@ -1,7 +1,7 @@
 #lang racket
 
 ; (provide (except-out (all-defined-out) c2))
-(provide tostring len str list-pretty-string implode interleave explode split nth indexof indexof? indexof*? regexp-indexof? count-element lshift shiftl lpop ltrim triml push lpush pushl lpush-unique pushl-unique rshift shiftr rpop rtrim trimr rpush pushr rpush-unique pushr-unique slice merge merge-unique concat splice exclude exclude-all exclude* exclude-all* insert setn replace replace-all list-substitute uniques not-uniques minus difference unique-difference intersect intersect? equal-elements? equal-set? deep-equal-set? partition-full partition-all break-seq depth transpose cleanmap merge soft-merge replace-by-part remove-by-part remove-by-pos append-unique by-index first-or-false last? several? reverse partition-by-shift)
+(provide tostring len str list-pretty-string implode interleave explode split split-with nth indexof indexof? indexof*? regexp-indexof? count-element lshift shiftl lpop ltrim triml push lpush pushl lpush-unique pushl-unique rshift shiftr rpop rtrim trimr rpush pushr rpush-unique pushr-unique slice merge merge-unique concat splice exclude exclude-all exclude* exclude-all* insert setn replace replace-all list-substitute uniques not-uniques minus difference unique-difference intersect intersect? equal-elements? equal-set? deep-equal-set? partition-full partition-all break-seq depth transpose cleanmap merge soft-merge replace-by-part remove-by-part remove-by-pos append-unique by-index first-or-false last? several? reverse partition-by-shift)
 
 (require compatibility/defmacro)
 (require "base.rkt")
@@ -109,6 +109,12 @@
 
 (define (split-by-lambda* seq f)
   (split-by-lambda-general seq f #:inclusive? #t))
+
+(define (split-with f seq (true-part empty))
+  (cond
+    ((empty? seq) (list true-part seq))
+    ((f (first seq)) (split-with f (rest seq) (pushr true-part (first seq))))
+    (else (list true-part seq))))
 
 (define (reverse seq)
   (cond
@@ -720,6 +726,11 @@
   (check-equal? (split-by-lambda* '(1 2 3 11 4 5 13 6 7) (λ (x) (> x 10))) '((1 2 3) (11) (4 5) (13) (6 7)))
   (check-equal? (split-by-lambda '(1 2 3 11 12 13 4 5 13 6 18 7) (λ (x) (> x 10))) '((1 2 3) (4 5) (6) (7)))
   (check-equal? (split-by-lambda* '(1 2 3 11 12 13 4 5 13 6 18 7) (λ (x) (> x 10))) '((1 2 3) (11 12 13) (4 5) (13) (6) (18) (7)))
+
+  (check-equal? (split-with (λ (x) (< x 5)) '(1 2 3 4 5 6 7 8 9 1 2 3)) '((1 2 3 4) (5 6 7 8 9 1 2 3)))
+  (check-equal? (split-with (λ (x) (< x 5)) '(1 2 3)) '((1 2 3) ()))
+  (check-equal? (split-with (λ (x) (< x 5)) '(9 10 5)) '(() (9 10 5)))
+  (check-equal? (split-with (λ (x) (< x 5)) '()) '(() ()))
 
   (check-equal? (nth "" 10) "")
   (check-equal? (nth "Oslo god morgen" 0) null)

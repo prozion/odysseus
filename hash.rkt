@@ -78,7 +78,7 @@
 (define (hash->alist h)
   (map
     (λ (x) (list (car x) (cdr x)))
-    (hash->list h)))
+    (sort (hash->list h) a-z)))
 
 (define (hash->ordered-list h keys-order)
   (for/list
@@ -499,7 +499,7 @@
                 #:exclude-keys (exclude-keys #f)
                 #:conversion-table (conversion-table #f))
   (let ((hl (hash-length h))
-        (ks (hash-keys h)))
+        (ks (sort (hash-keys h) a-z)))
     (for/fold
       ((s ""))
       ((k ks) (i hl))
@@ -607,7 +607,7 @@
 (define (hash-minus h1 h2 #:e (e? equal?))
   (let* ((k1s (hash-keys h1))
         (k2s (hash-keys h2)))
-    (for/fold
+    (for*/fold
       ((res (hash)))
       ((k1 k1s) (k2 k2s))
       (cond

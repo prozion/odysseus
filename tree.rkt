@@ -43,15 +43,15 @@
           (map
             (λ (el)
               (if (hash? el)
-                (hash-union (hash '_path path) el)
+                (hash-union (hash '__path path) el)
                 el))
             htree))
         (else htree)))
-    ((plain-hash? htree) (list (hash-union htree (hash '_path path))))
+    ((plain-hash? htree) (list (hash-union htree (hash '__path path))))
     (else
       (for/fold
         ((res (list)))
-        ((key (hash-keys htree)))
+        ((key (sort (hash-keys htree) a-z)))
         (append
           res
           (hash-tree-flatten-with-paths (hash-ref htree key) (pushr path key)))))))
@@ -181,26 +181,26 @@
   (check-equal?
     (hash-tree-flatten-with-paths (hash 1 (hash 'a (list (hash 'aa 10) (hash 'ab 20)) 'b (hash 'bb 30))))
     (list
-      (hash 'aa 10 '_path (list 1 'a))
-      (hash 'ab 20 '_path (list 1 'a))
-      (hash 'bb 30 '_path (list 1 'b))))
+      (hash 'aa 10 '__path (list 1 'a))
+      (hash 'ab 20 '__path (list 1 'a))
+      (hash 'bb 30 '__path (list 1 'b))))
 
   (check-equal?
     (hash-tree-flatten-with-paths (hash 1 (hash 'a (list (hash 'aa 10) (hash 'ab 20)) 'b (hash 'bb 30)) 2 (hash 3 (hash 4 (hash 'c 70)))))
     (list
-      (hash 'aa 10 '_path (list 1 'a))
-      (hash 'ab 20 '_path (list 1 'a))
-      (hash 'bb 30 '_path (list 1 'b))
-      (hash 'c 70 '_path (list 2 3 4))))
+      (hash 'aa 10 '__path (list 1 'a))
+      (hash 'ab 20 '__path (list 1 'a))
+      (hash 'bb 30 '__path (list 1 'b))
+      (hash 'c 70 '__path (list 2 3 4))))
 
   (check-equal?
     (hash-tree-flatten-with-paths
       (hash 1 (list (hash 'a 10))
             2 (list (hash 'b 20) (hash 'c 30))))
     (list
-      (hash 'a 10 '_path (list 1))
-      (hash 'b 20 '_path (list 2))
-      (hash 'c 30 '_path (list 2))))
+      (hash 'a 10 '__path (list 1))
+      (hash 'b 20 '__path (list 2))
+      (hash 'c 30 '__path (list 2))))
 
   (check-equal? (format-list '(a b ~a d) '(c)) '(a b (c) d))
   (check-equal? (format-list '(a b ~a) 'c) '(a b c))

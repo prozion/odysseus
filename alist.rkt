@@ -117,7 +117,6 @@
 (module+ test
 
   (require rackunit)
-  (require "test.rkt")
   (require "debug.rkt")
 
   (check-equal? (firsts '((a 2) (b 10))) '(a b))

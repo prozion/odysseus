@@ -15,10 +15,10 @@
 (provide (all-defined-out))
 
 ; helper functions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(define key-name 'id)
+(define key-name '__id)
 (define alt-key-names '(alt-id))
-(define parent-key '_parent)
-(define label-key '_label)
+(define parent-key '__parent)
+(define label-key '__label)
 
 (define (key? k)
   (equal? k key-name))
@@ -118,11 +118,11 @@
               (v (hash-ref h k))
               (h-rest (hash-delete h k))
               (_ (when (not (hash? k)) (error "Any leaf must be a hash in the hashtree")))
-              (_ (when (not ($ id k)) (error "Any item in the hashtree must contain 'id' key")))
-              (id ($ id k))
-              (other-keys (exclude (hash-keys k) 'id))
+              (_ (when (not ($ __id k)) (error "Any item in the hashtree must contain '__id' key")))
+              (id ($ __id k))
+              (other-keys (exclude (hash-keys k) '__id))
               (tabs (dupstr "\t" curlevel))
-              (new-line (format "~a~a ~a\n" tabs id (hash->string (hash-delete k 'id)  #:delimeter " " #:equal-sign ":" #:conversion-table conversion-table #:exclude-keys exclude-keys)))
+              (new-line (format "~a~a ~a\n" tabs id (hash->string (hash-delete k '__id)  #:delimeter " " #:equal-sign ":" #:conversion-table conversion-table #:exclude-keys exclude-keys)))
               (res (cond
                       ((and exclude-lines? (exclude-lines? k)) res-acc)
                       (else (string-append res-acc new-line))))
@@ -139,7 +139,7 @@
 ; access and modification functions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; find key by known id,
 ; gets key only from the first level
-(define-catch (hash-tree-get-key-by-id hash-tree id (id-attr 'id))
+(define-catch (hash-tree-get-key-by-id hash-tree id (id-attr '__id))
   (let* ((res (filter (λ (e) (equal? (hash-ref e id-attr #f) id)) (hash-keys hash-tree)))
         (res (if (not-empty? res) (car res) #f)))
     res))
@@ -151,7 +151,7 @@
     (else (hash-tree-get-value (hash-ref hash-tree (car path)) (cdr path)))))
 
 ; get value by the id-path in the hashtree
-(define-catch (hash-tree-get-value-by-id-path hash-tree id-path (id-attr 'id))
+(define-catch (hash-tree-get-value-by-id-path hash-tree id-path (id-attr '__id))
   (cond
     ((empty? id-path) hash-tree)
     (else
@@ -169,13 +169,13 @@
     ((one-element? id-path)
       (let* (
               (matched-key-element (filter
-                                      (λ (x) (untype-equal? ($ id x) (car id-path)))
+                                      (λ (x) (untype-equal? ($ __id x) (car id-path)))
                                       (hash-keys hash-tree)))
               (matched-key-element (if (not-empty? matched-key-element) (car matched-key-element) #f)))
         matched-key-element))
     (else
       (let* ((next-id (first id-path))
-            (next-hash-tree (hash-filter (λ (k v) (untype-equal? ($ id k) next-id)) hash-tree))
+            (next-hash-tree (hash-filter (λ (k v) (untype-equal? ($ __id k) next-id)) hash-tree))
             (next-hash-tree (if (hash-empty? next-hash-tree) (error "wrong accessor path") (car (hash-values next-hash-tree)))))
         (hash-tree-get-element-by-id-path next-hash-tree (cdr id-path))))))
 
@@ -191,7 +191,7 @@
           hash-tree)))))
 
 ; set value by the id-path in the hashtree
-(define-catch (hash-tree-set-value-by-id-path hash-tree id-path value (id-attr 'id))
+(define-catch (hash-tree-set-value-by-id-path hash-tree id-path value (id-attr '__id))
   (cond
     ((empty? id-path) value)
     (else
@@ -207,7 +207,7 @@
 
 ; helper function for hash-tree-add-value-by-id-path*
 ; id-path - direct order (a1 a2 a3)
-(define-catch (find-non-existed-path-elements hash-tree id-path (id-attr 'id))
+(define-catch (find-non-existed-path-elements hash-tree id-path (id-attr '__id))
   (cond
     ((empty? id-path) empty)
     ; find mathced element to the first element of the id-path
@@ -223,7 +223,7 @@
 
 ; helper function for hash-tree-add-value-by-id-path*
 ; id-path (a1 a2 a3)
-(define-catch (add-id-path value id-path (id-attr 'id))
+(define-catch (add-id-path value id-path (id-attr '__id))
   (cond
     ((empty? id-path) value)
     (else
@@ -235,7 +235,7 @@
 
 ; adds value by the id-path in the hashtree, if id-path doesn't exist, creates this path
 ; id-path - (a1 a2 a3)
-(define-catch (hash-tree-add-value-by-id-path* hash-tree id-path value (id-attr 'id))
+(define-catch (hash-tree-add-value-by-id-path* hash-tree id-path value (id-attr '__id))
   (let ((end-path-element (hash-tree-get-value-by-id-path hash-tree id-path id-attr)))
     (if end-path-element
       ; if end element exist, just add value as usual:
@@ -288,7 +288,7 @@
                         #:derived-attrs derived-attrs
                         #:derived-attr-values derived-attr-values)))))))
 
-(define-catch (get-item-by-id-from-the-list plained-hash-tree id (id-attr 'id) #:one-of? (one-of? #t))
+(define-catch (get-item-by-id-from-the-list plained-hash-tree id (id-attr '__id) #:one-of? (one-of? #t))
   (let ((res
           (filter
             (λ (e)
@@ -301,7 +301,7 @@
       ((empty? res) #f)
       (else (car res)))))
 
-(define (@id id plained-hash-tree #:error (err #f) #:attr (attr 'id))
+(define (@id id plained-hash-tree #:error (err #f) #:attr (attr '__id))
   (let ((res (get-item-by-id-from-the-list plained-hash-tree id attr)))
     (when (and err (not res)) (error err))
     res))
@@ -332,7 +332,7 @@
             res))))))
 
 (define (hash-tree-remove-by-id h id)
-  (hash-delete-f h (λ (key) (equal? ($ id key) id))))
+  (hash-delete-f h (λ (key) (equal? ($ __id key) id))))
 
 (define (get-root-item hashtree)
   (let ((keys (hash-keys hashtree)))
@@ -359,7 +359,7 @@
       leaves
       (let ((res-lst
               (filter
-                (λ (x) (equal-ids? ($ id x) (last path)))
+                (λ (x) (equal-ids? ($ __id x) (last path)))
                 leaves)))
         (if (empty? res-lst) #f (car res-lst))))))
 
@@ -383,7 +383,7 @@
     (else
       (let* ((next-id (car path))
             (key (filter (λ (x)
-                            (equal-ids? ($ id x) next-id)) (hash-keys hashtree)))
+                            (equal-ids? ($ __id x) next-id)) (hash-keys hashtree)))
             (next-hash-tree (if (not-empty? key)
                                   (hash-ref* hashtree (car key))
                                   (hash))))
@@ -399,7 +399,7 @@
       (f-header-of-section section)
       (for/fold
         ((res2 ""))
-        ((item (get-$3 (pushr path-to-sections ($ id section)) hashtree)))
+        ((item (get-$3 (pushr path-to-sections ($ __id section)) hashtree)))
         (str
           res2
           (f-section-content item section))))))
@@ -441,7 +441,7 @@
 (define (get-level-under path tabtree level-down)
   (let* ((path (split (->string path) "."))
         (next-leaves (get-$3 path tabtree))
-        (next-ids (map (λ (x) ($ id x)) next-leaves))
+        (next-ids (map (λ (x) ($ __id x)) next-leaves))
         (next-paths (map (λ (x) (pushr path x)) next-ids)))
     (cond
       ((< level-down 1) tabtree)
@@ -461,7 +461,7 @@
           append
           (map
             (λ (x)
-              (get-$3 (pushr (list ,@path) ($ id x)) ,tabtree))
+              (get-$3 (pushr (list ,@path) ($ __id x)) ,tabtree))
               categories)))))
 
 ;;; manipulations with parts of the tree
@@ -489,7 +489,7 @@
               (hash-delete hash-tree final-hash-key)
               (hash final-hash-key (hash-union final-hash-subtree hash-tree-part)))
             (hash-union
-              (hash 'id last-key)
+              (hash '__id last-key)
               hash-tree-part))))
     (else
       (let* ((next-key (car id-path))
@@ -513,7 +513,7 @@
 
 (define-catch (make-hash-tree root-name list-of-hash)
   (hash
-    (hash 'id root-name)
+    (hash '__id root-name)
     (for/hash
       ((item list-of-hash))
       (values item (hash)))))
@@ -521,13 +521,13 @@
 ; get items that keep pointers to their children (rather than parents in the usual case)
 ; (define-catch (get-forward-tree hash-tree)
 ;   (define (get-forward-tree-0 root-item items)
-;     (let* ((children (filter (λ (item) (equal? ($ id root-item) ($ _parent item))) items))
-;           (children-ids (map (λ (item) ($ id item)) children)))
+;     (let* ((children (filter (λ (item) (equal? ($ __id root-item) ($ _parent item))) items))
+;           (children-ids (map (λ (item) ($ __id item)) children)))
 ;       (cond
 ;         ((not-empty? children) (pushl
 ;                                   (apply append (map (curryr get-forward-tree-0 items) children))
-;                                   (hash-set root-item '_children children-ids)))
-;         (else (list (hash-set root-item '_children empty))))))
+;                                   (hash-set root-item '__children children-ids)))
+;         (else (list (hash-set root-item '__children empty))))))
 ;   (let* (
 ;         (items (planarize hash-tree))
 ;         (root-elements (filter (λ (item) (not ($ _parent item))) items)))
@@ -550,10 +550,11 @@
           (values (extend-hashtree key f) (extend-hashtree (hash-ref hashtree key) f)))))))
 
 (define-catch (flatten-hashtree hashtree)
+  (define hash-a-z (λ (h1 h2) (a-z ($ __id h1) ($ __id h2))))
   (for/fold
     ((res empty))
-    ((k (hash-keys hashtree)))
-    (append res (list k) (flatten-hashtree (hash-ref hashtree k)))))
+    ((k (sort (hash-keys hashtree) hash-a-z)))
+    `(,@res ,k ,@(flatten-hashtree (hash-ref hashtree k)))))
 
 (define-catch (hash->hashtree h)
   (cond
@@ -571,46 +572,46 @@
                                             v)))
                             (values
                               (hash-union
-                                (hash 'id k)
+                                (hash '__id k)
                                 not-hash-values-h)
                               (hash->hashtree hash-values-h))))
                           ((hash? v)
                             (values
-                              (hash-union (hash 'id k) v)
+                              (hash-union (hash '__id k) v)
                               (hash)))
                           (else
                             (values
-                              (hash 'id k k v)
+                              (hash '__id k k v)
                               (hash))))))
     ((hash? h) (hash
-                  (hash-union h (hash 'id '_))
+                  (hash-union h (hash '__id '_))
                   (hash)))
     (else
           (hash
-            (hash 'id '_ '_ h)
+            (hash '__id '_ '_ h)
             (hash)))))
 
 (define roots (make-parameter empty))
 
 ; (List-of Hash) -> HashTree
-(define-catch (reflist->hashtree alst #:refname (refname '_parent) #:root (root #f))
+(define-catch (reflist->hashtree alst #:refname (refname '__parent) #:root (root #f))
   (define (ref h)
-    ($ _parent h))
+    ($ __parent h))
   (let* (
-        ; 'ref -> '_parent
-        (alst (if (equal? refname '_parent)
+        ; 'ref -> '__parent
+        (alst (if (equal? refname '__parent)
                   alst
                   (map
                     (λ (h) (cond
                               ((hash-ref* h refname #f)
-                                (hash-union (hash '_parent (hash-ref* h refname #f)) (hash-delete h refname)))
+                                (hash-union (hash '__parent (hash-ref* h refname #f)) (hash-delete h refname)))
                               (else (hash-delete h refname))))
                     alst)))
         (root-leaves (filter-map
                         (λ (h) (cond
                                   ((and (list? (ref h))
                                         (indexof? (ref h) root))
-                                      (hash-union (hash '_parent root) h))
+                                      (hash-union (hash '__parent root) h))
                                   ((equal? (ref h) root)
                                     h)
                                   (else #f)))
@@ -624,7 +625,7 @@
       (else
             (for/hash
               ((leaf root-leaves))
-              (values leaf (reflist->hashtree alst #:root ($ id leaf))))))))
+              (values leaf (reflist->hashtree alst #:root ($ __id leaf))))))))
 
 (module+ test
 
@@ -635,55 +636,55 @@
   (require "io.rkt")
 
 (define hash-tree-1 (hash
-                      (hash 'id "category 1")
+                      (hash '__id "category 1")
                         (hash
-                          (hash 'id "a" 'value "1")
+                          (hash '__id "a" 'value "1")
                             (hash)
-                          (hash 'id "b" 'value "2")
+                          (hash '__id "b" 'value "2")
                             (hash
-                              (hash 'id "b1" 'value "10")
+                              (hash '__id "b1" 'value "10")
                               (hash))
-                          (hash 'id "c" 'value "3")
+                          (hash '__id "c" 'value "3")
                             (hash))
-                      (hash 'id "category 2" 'status "inactive")
+                      (hash '__id "category 2" 'status "inactive")
                         (hash
-                          (hash 'id "d" 'value "-1")
+                          (hash '__id "d" 'value "-1")
                             (hash) )
                       ))
 
 (define hash-tree-2 (hash
-                      (hash 'id "root1")
+                      (hash '__id "root1")
                         (hash
-                          (hash 'id "a" 'value "1")
+                          (hash '__id "a" 'value "1")
                             (hash)
-                          (hash 'id "b" 'value "2")
+                          (hash '__id "b" 'value "2")
                             (hash
-                              (hash 'id "b1" 'value "10")
+                              (hash '__id "b1" 'value "10")
                               (hash)
-                              (hash 'id "b2" 'value "30")
+                              (hash '__id "b2" 'value "30")
                               (hash))
-                          (hash 'id "c" 'value "3")
+                          (hash '__id "c" 'value "3")
                             (hash))
-                      (hash 'id "root2" 'status "inactive")
+                      (hash '__id "root2" 'status "inactive")
                         (hash
-                          (hash 'id "d" 'value "-1")
+                          (hash '__id "d" 'value "-1")
                             (hash) )
                       ))
 
-  (check-true (category? (hash 'id "category 1")))
-  (check-true (category? (hash 'id "category 1" '_parent #f)))
-  (check-false (category? (hash 'id "category 1" 'foo "bar")))
-  (check-false (category? (hash 'id "c" 'value "3")))
+  (check-true (category? (hash '__id "category 1")))
+  (check-true (category? (hash '__id "category 1" '__parent #f)))
+  (check-false (category? (hash '__id "category 1" 'foo "bar")))
+  (check-false (category? (hash '__id "c" 'value "3")))
 
   (check-same-elements? (planarize hash-tree-1)
                         (list
-                          (hash 'id "category 1")
-                          (hash 'id "a" 'value "1")
-                          (hash 'id "b" 'value "2")
-                          (hash 'id "b1" 'value "10")
-                          (hash 'id "c" 'value "3")
-                          (hash 'id "category 2" 'status "inactive")
-                          (hash 'id "d" 'value "-1")))
+                          (hash '__id "category 1")
+                          (hash '__id "a" 'value "1")
+                          (hash '__id "b" 'value "2")
+                          (hash '__id "b1" 'value "10")
+                          (hash '__id "c" 'value "3")
+                          (hash '__id "category 2" 'status "inactive")
+                          (hash '__id "d" 'value "-1")))
 
 
   (check-equal? (hash-tree-get-value
@@ -697,9 +698,9 @@
                       #f)
 
   (check-equal? (hash-tree-get-value-by-id-path
-                        (hash (hash 'id 'x) (hash 'a1 10 'a2 20)
-                              (hash 'id 'y) (hash
-                                              (hash 'id 'z 'foo 0) 30
+                        (hash (hash '__id 'x) (hash 'a1 10 'a2 20)
+                              (hash '__id 'y) (hash
+                                              (hash '__id 'z 'foo 0) 30
                                               'b2 (hash 'b21 40 'b22 50)))
                         '(y z))
                       30)
@@ -709,7 +710,7 @@
 
   (check-hash-equal? (hash-tree-get-value-by-id-path hash-tree-1 '("category 1" "b"))
                       (hash
-                        (hash 'id "b1" 'value "10")
+                        (hash '__id "b1" 'value "10")
                         (hash)))
 
   (check-hash-equal? (hash-tree-get-value-by-id-path hash-tree-1 '("category 1" "a"))
@@ -723,41 +724,41 @@
 
   (check-hash-equal?
                     (hash-tree-set-value-by-id-path
-                        (hash (hash 'id 'x) (hash 'a1 10 'a2 20)
-                              (hash 'id 'y) (hash
-                                              (hash 'id 'z 'foo 0) 30
+                        (hash (hash '__id 'x) (hash 'a1 10 'a2 20)
+                              (hash '__id 'y) (hash
+                                              (hash '__id 'z 'foo 0) 30
                                               'b2 (hash 'b21 40 'b22 50)))
                         '(y z)
                         200)
-                    (hash (hash 'id 'x) (hash 'a1 10 'a2 20)
-                          (hash 'id 'y) (hash
-                                          (hash 'id 'z 'foo 0) 200
+                    (hash (hash '__id 'x) (hash 'a1 10 'a2 20)
+                          (hash '__id 'y) (hash
+                                          (hash '__id 'z 'foo 0) 200
                                           'b2 (hash 'b21 40 'b22 50))))
 
   (check-same-elements?
                 (get-leaves hash-tree-1)
                 (list
-                  (hash 'id "a" 'value "1")
-                  (hash 'id "b" 'value "2")
-                  (hash 'id "b1" 'value "10")
-                  (hash 'id "c" 'value "3")
-                  (hash 'id "category 2" 'status "inactive")
-                  (hash 'id "d" 'value "-1")))
+                  (hash '__id "a" 'value "1")
+                  (hash '__id "b" 'value "2")
+                  (hash '__id "b1" 'value "10")
+                  (hash '__id "c" 'value "3")
+                  (hash '__id "category 2" 'status "inactive")
+                  (hash '__id "d" 'value "-1")))
 
   (check-same-elements?
                 (get-leaves hash-tree-1 #:exclude '(status))
                 (list
-                  (hash 'id "a" 'value "1")
-                  (hash 'id "b" 'value "2")
-                  (hash 'id "b1" 'value "10")
-                  (hash 'id "c" 'value "3")
-                  (hash 'id "d" 'value "-1")))
+                  (hash '__id "a" 'value "1")
+                  (hash '__id "b" 'value "2")
+                  (hash '__id "b1" 'value "10")
+                  (hash '__id "c" 'value "3")
+                  (hash '__id "d" 'value "-1")))
 
   (check-hash-equal?
     (get-item-by-id-from-the-list
-      (list (hash 'id "a") (hash 'id "b" 'value "1") (hash 'id "c" 'value "2"))
+      (list (hash '__id "a") (hash '__id "b" 'value "1") (hash '__id "c" 'value "2"))
       "c")
-    (hash 'id "c" 'value "2"))
+    (hash '__id "c" 'value "2"))
 
   (check-same-elements?
     (get-paths hash-tree-1)
@@ -765,44 +766,44 @@
 
   (check-hash-equal? ($4 root1.b hash-tree-2)
                       (hash
-                        (hash 'id "b1" 'value "10")
+                        (hash '__id "b1" 'value "10")
                         (hash)
-                        (hash 'id "b2" 'value "30")
+                        (hash '__id "b2" 'value "30")
                         (hash)))
 
   (check-same-elements?
     ($3 root1 hash-tree-2)
     (list
-      (hash 'id "a" 'value "1")
-      (hash 'id "b" 'value "2")
-      (hash 'id "c" 'value "3")))
+      (hash '__id "a" 'value "1")
+      (hash '__id "b" 'value "2")
+      (hash '__id "c" 'value "3")))
   (check-same-elements?
     ($3 root1.b hash-tree-2)
     (list
-      (hash 'id "b1" 'value "10")
-      (hash 'id "b2" 'value "30")))
+      (hash '__id "b1" 'value "10")
+      (hash '__id "b2" 'value "30")))
 
-  (check-hash-equal? ($2 root1.b.b1 hash-tree-2) (hash 'id "b1" 'value "10"))
+  (check-hash-equal? ($2 root1.b.b1 hash-tree-2) (hash '__id "b1" 'value "10"))
 
   (check-equal? ($1 root1.b.b1.value hash-tree-2) "10")
 
-  (define planarized-hashtree (list (hash 'id 1 'value 10) (hash 'id 2 'value 5 '_parent 1) (hash 'id 3 'value "abc" '_parent 2)))
+  (define planarized-hashtree (list (hash '__id 1 'value 10) (hash '__id 2 'value 5 '__parent 1) (hash '__id 3 'value "abc" '__parent 2)))
 
-  (check-hash-equal? (@id 2 planarized-hashtree) (hash 'id 2 'value 5 '_parent 1))
+  (check-hash-equal? (@id 2 planarized-hashtree) (hash '__id 2 'value 5 '__parent 1))
   (check-equal? (@id 10 planarized-hashtree) #f)
 
   (check-hash-equal?
                 (hash-tree-remove hash-tree-1 (list "category 1" "b"))
                 (hash
-                  (hash 'id "category 1")
+                  (hash '__id "category 1")
                     (hash
-                      (hash 'id "a" 'value "1")
+                      (hash '__id "a" 'value "1")
                         (hash)
-                      (hash 'id "c" 'value "3")
+                      (hash '__id "c" 'value "3")
                         (hash))
-                  (hash 'id "category 2" 'status "inactive")
+                  (hash '__id "category 2" 'status "inactive")
                     (hash
-                      (hash 'id "d" 'value "-1")
+                      (hash '__id "d" 'value "-1")
                         (hash) )
                   ))
 
@@ -811,28 +812,28 @@
                   hash-tree-1
                   (list "category 1")
                   (hash
-                    (hash 'id "bb" 'value "10")
+                    (hash '__id "bb" 'value "10")
                       (hash
-                        (hash 'id "bb1" 'value "100")
+                        (hash '__id "bb1" 'value "100")
                         (hash))))
                 (hash
-                  (hash 'id "category 1")
+                  (hash '__id "category 1")
                     (hash
-                      (hash 'id "a" 'value "1")
+                      (hash '__id "a" 'value "1")
                         (hash)
-                      (hash 'id "bb" 'value "10")
+                      (hash '__id "bb" 'value "10")
                         (hash
-                          (hash 'id "bb1" 'value "100")
+                          (hash '__id "bb1" 'value "100")
                           (hash))
-                      (hash 'id "b" 'value "2")
+                      (hash '__id "b" 'value "2")
                         (hash
-                          (hash 'id "b1" 'value "10")
+                          (hash '__id "b1" 'value "10")
                           (hash))
-                      (hash 'id "c" 'value "3")
+                      (hash '__id "c" 'value "3")
                         (hash))
-                  (hash 'id "category 2" 'status "inactive")
+                  (hash '__id "category 2" 'status "inactive")
                     (hash
-                      (hash 'id "d" 'value "-1")
+                      (hash '__id "d" 'value "-1")
                         (hash))))
 
   (check-hash-equal?
@@ -840,76 +841,83 @@
                   hash-tree-1
                   (list "category 2" "d")
                   (hash
-                    (hash 'id "e" 'value "14")
+                    (hash '__id "e" 'value "14")
                       (hash
-                        (hash 'id "ee" 'value "325")
+                        (hash '__id "ee" 'value "325")
                           (hash))))
                 (hash
-                  (hash 'id "category 1")
+                  (hash '__id "category 1")
                     (hash
-                      (hash 'id "a" 'value "1")
+                      (hash '__id "a" 'value "1")
                         (hash)
-                      (hash 'id "b" 'value "2")
+                      (hash '__id "b" 'value "2")
                         (hash
-                          (hash 'id "b1" 'value "10")
+                          (hash '__id "b1" 'value "10")
                             (hash))
-                      (hash 'id "c" 'value "3")
+                      (hash '__id "c" 'value "3")
                         (hash))
-                  (hash 'id "category 2" 'status "inactive")
+                  (hash '__id "category 2" 'status "inactive")
                     (hash
-                      (hash 'id "d" 'value "-1")
+                      (hash '__id "d" 'value "-1")
                         (hash
-                          (hash 'id "e" 'value "14")
+                          (hash '__id "e" 'value "14")
                             (hash
-                              (hash 'id "ee" 'value "325")
+                              (hash '__id "ee" 'value "325")
                                 (hash))))))
 
   (check-hash-equal?
                 (make-hash-tree 'root (list
-                                        (hash 'id 'a 'value 10)
-                                        (hash 'id 'b 'value 20)))
+                                        (hash '__id 'a 'value 10)
+                                        (hash '__id 'b 'value 20)))
                 (hash
-                  (hash 'id 'root)
+                  (hash '__id 'root)
                   (hash
-                    (hash 'id 'a 'value 10) (hash)
-                    (hash 'id 'b 'value 20) (hash))))
+                    (hash '__id 'a 'value 10) (hash)
+                    (hash '__id 'b 'value 20) (hash))))
 
   (check-equal?
     (flatten-hashtree (hash
-                        (hash 'id 'a) (hash
-                                        (hash 'id 'aa)
+                        (hash '__id 'a) (hash
+                                        (hash '__id 'aa)
                                         (hash
-                                          (hash 'id 'aaa 'v 1000)
+                                          (hash '__id 'aab 'v 1020)
                                           (hash)
-                                          (hash 'id 'aab 'v 1020)
+                                          (hash '__id 'aaa 'v 1000)
                                           (hash))
-                                        (hash 'id 'ab)
+                                        (hash '__id 'ab)
                                         (hash
-                                          (hash 'id 'aba 'v 30)
+                                          (hash '__id 'aba 'v 30)
                                           (hash)
-                                          (hash 'id 'abb 'v -8)
+                                          (hash '__id 'abb 'v -8)
                                           (hash)))
-                        (hash 'id 'b) (hash)))
-    '(#hash((id . a)) #hash((id . aa)) #hash((id . aab) (v . 1020)) #hash((id . aaa) (v . 1000)) #hash((id . ab)) #hash((id . aba) (v . 30)) #hash((id . abb) (v . -8)) #hash((id . b))))
+                        (hash '__id 'b) (hash)))
+    '(#hash((__id . a))
+      #hash((__id . aa))
+      #hash((__id . aaa) (v . 1000))
+      #hash((__id . aab) (v . 1020))
+      #hash((__id . ab))
+      #hash((__id . aba) (v . 30))
+      #hash((__id . abb) (v . -8))
+      #hash((__id . b))))
 
   (check-hash-equal?
                 (extend-hashtree
                   hash-tree-1
                   (λ (item) (hash-union item (hash 'e 100))))
                   (hash
-                    (hash 'id "category 1" 'e 100)
+                    (hash '__id "category 1" 'e 100)
                       (hash
-                        (hash 'id "a" 'value "1" 'e 100)
+                        (hash '__id "a" 'value "1" 'e 100)
                           (hash)
-                        (hash 'id "b" 'value "2" 'e 100)
+                        (hash '__id "b" 'value "2" 'e 100)
                           (hash
-                            (hash 'id "b1" 'value "10" 'e 100)
+                            (hash '__id "b1" 'value "10" 'e 100)
                             (hash))
-                        (hash 'id "c" 'value "3" 'e 100)
+                        (hash '__id "c" 'value "3" 'e 100)
                           (hash))
-                    (hash 'id "category 2" 'status "inactive" 'e 100)
+                    (hash '__id "category 2" 'status "inactive" 'e 100)
                       (hash
-                        (hash 'id "d" 'value "-1" 'e 100)
+                        (hash '__id "d" 'value "-1" 'e 100)
                           (hash) )
                     ))
 
@@ -920,39 +928,39 @@
 ; c c:3
 (define initial-hash (hash 'a (hash 'aa 10 'ab '(20 30 40) 'ax (hash 'k 8)) 'b (hash 'ba (hash 'baa 300 'bab 30)) 'c 3))
 (define tabtree-hash (hash
-                        (hash 'id 'a 'aa 10 'ab '(20 30 40)) (hash
-                                                                (hash 'id 'ax 'k 8)
+                        (hash '__id 'a 'aa 10 'ab '(20 30 40)) (hash
+                                                                (hash '__id 'ax 'k 8)
                                                                 (hash))
-                        (hash 'id 'b) (hash
-                                        (hash 'id 'ba 'baa 300 'bab 30)
+                        (hash '__id 'b) (hash
+                                        (hash '__id 'ba 'baa 300 'bab 30)
                                         (hash))
-                        (hash 'id 'c 'c 3) (hash)))
+                        (hash '__id 'c 'c 3) (hash)))
 
 (check-hash-equal? (hash->hashtree initial-hash) tabtree-hash)
 
 (check-hash-equal? (reflist->hashtree
                       #:refname 'ref
                       (list
-                        (hash 'id 'a)
-                        (hash 'id 'b 'ref 'a)
-                        (hash 'id 'c 'ref 'a)
-                        (hash 'id 'd 'ref 'c)
-                        (hash 'id 'e 'ref 'b)
-                        (hash 'id 'f 'ref (list 'e 'a))
-                        (hash 'id 'g)))
+                        (hash '__id 'a)
+                        (hash '__id 'b 'ref 'a)
+                        (hash '__id 'c 'ref 'a)
+                        (hash '__id 'd 'ref 'c)
+                        (hash '__id 'e 'ref 'b)
+                        (hash '__id 'f 'ref (list 'e 'a))
+                        (hash '__id 'g)))
                     (hash
-                      (hash 'id 'a)
+                      (hash '__id 'a)
                         (hash
-                          (hash 'id 'f '_parent 'a) (hash)
-                          (hash 'id 'b '_parent 'a)
+                          (hash '__id 'f '__parent 'a) (hash)
+                          (hash '__id 'b '__parent 'a)
                             (hash
-                              (hash 'id 'e '_parent 'b)
+                              (hash '__id 'e '__parent 'b)
                                 (hash
-                                  (hash 'id 'f '_parent 'e) (hash)))
-                          (hash 'id 'c '_parent 'a)
+                                  (hash '__id 'f '__parent 'e) (hash)))
+                          (hash '__id 'c '__parent 'a)
                             (hash
-                              (hash 'id 'd '_parent 'c) (hash)))
-                      (hash 'id 'g) (hash)))
+                              (hash '__id 'd '__parent 'c) (hash)))
+                      (hash '__id 'g) (hash)))
 
 
 )

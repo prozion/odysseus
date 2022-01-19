@@ -5,6 +5,8 @@
 (require json)
 (require compatibility/defmacro)
 
+(provide (all-defined-out))
+
 (define status-output (make-parameter #f))
 (define friends-limit (make-parameter #f))
 
@@ -26,8 +28,6 @@
         ))
 
 (define _AT (make-parameter ""))
-
-(provide (all-defined-out))
 
 (define (set-access-token at)
   (_AT at)
@@ -176,7 +176,7 @@
                       (flush-output)))
               (res-user (string->jsexpr
                           (get-url (format "https://api.vk.com/method/users.get?user_ids=~a&v=~a&access_token=~a" ualias VK_API_VERSION (_AT)))))
-              (result-user (and ($ response res-user) (not-empty? ($ response res-user)) ($ id (first ($ response res-user))))))
+              (result-user (and ($ response res-user) (not-empty? ($ response res-user)) ($ __id (first ($ response res-user))))))
           (->string result-user)))))
 
 (define get-uid get-user-id)
@@ -276,7 +276,7 @@
                         (flush-output)))
                 (res-group (string->jsexpr
                                   (get-url (format "https://api.vk.com/method/groups.getById?group_id=~a&v=~a&access_token=~a" galias VK_API_VERSION (_AT)))))
-                (result-group (and ($ response res-group) (not-empty? ($ response res-group)) ($ id (first ($ response res-group))))))
+                (result-group (and ($ response res-group) (not-empty? ($ response res-group)) ($ __id (first ($ response res-group))))))
             (->string result-group))))))
 
 (define get-group-id get-gid)
@@ -310,7 +310,7 @@
 (define raw-group? (raw-community? 'club))
 (define raw-public? (raw-community? 'public))
 (define raw-event? (raw-community? 'event))
-(define raw-person? (raw-community? 'id))
+(define raw-person? (raw-community? '__id))
 
 (define-catch (pure-id? vk-url)
   (let* ((vk-url (->string vk-url))
@@ -510,7 +510,9 @@
   ;                       (and copy_history ($ attachments copy_history))
   ;                       ($ attachments item))))
     ; attachments))
-    ($ attachments item))
+    (cond
+      ((repost? item) ($ copy_history.attachments item))
+      (else ($ attachments item))))
 
 (define-catch (get-attachment-element attachments type)
   (let* (
@@ -676,3 +678,8 @@
 
 (define (vk-error-msg res)
   (@. res.error.error_msg))
+
+(define-catch (get-post-text item)
+  (cond
+    ((repost? item) ($ copy_history.text item))
+    (else ($ text item))))

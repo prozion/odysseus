@@ -37,7 +37,7 @@
 (define-catch (csv-file->hash filename #:delimeter (delimeter ",") #:headers (headers #t) #:key-index (key-index 1))
   (csv->hash (read-file filename) #:delimeter delimeter #:headers headers #:key-index key-index))
 
-(define-catch (csv-file->hashtree filename #:delimeter (delimeter ",") #:headers (headers #t) #:key-index (key-index 1) #:root (root "root") #:id (id 'id))
+(define-catch (csv-file->hashtree filename #:delimeter (delimeter ",") #:headers (headers #t) #:key-index (key-index 1) #:root (root "root") #:id (id '__id))
   (let* (
           (content (csv-file->list-rows filename #:delimeter delimeter))
           (h (if (not headers)
@@ -54,16 +54,16 @@
                           ((k h) (v line))
                           (values k v))
                         (list id)
-                        (list 'id))))
+                        (list '__id))))
           ; remove lines with empty ids
           (hashtree (filter
                       (λ (h) (and
-                                (hash-ref h 'id #f)
-                                (not-equal? (hash-ref h 'id) "")))
+                                (hash-ref h '__id #f)
+                                (not-equal? (hash-ref h '__id) "")))
                       hashtree))
           ; make id look like id
           (hashtree (map
-                      (λ (h) (hash-union (hash 'id (->symbol (hash-ref h 'id) #:transform-function idfy)) h))
+                      (λ (h) (hash-union (hash '__id (->symbol (hash-ref h '__id) #:transform-function idfy)) h))
                       hashtree))
           ; make true hashtree in its form
           (hashtree (for/hash
@@ -71,7 +71,7 @@
                       (values h (hash))))
           ; append root over the resulted hashtree
           (hashtree (hash
-                      (hash 'id root)
+                      (hash '__id root)
                       hashtree)))
     hashtree))
 
@@ -113,7 +113,7 @@
                             ((list? row)
                               (string-join (map ->string row) delimeter))
                             ((cons? row)
-                              (format "~a,~a" (car row) (cdr row)))
+                              (format "~a~a~a" (car row) delimeter (cdr row)))
                             (else
                               row)))
                         data)
