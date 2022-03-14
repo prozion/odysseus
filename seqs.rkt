@@ -757,6 +757,7 @@
   (check-equal? (indexof '(11 -22 30 80 -5) -5 (λ (x y) (equal? x 30))) 3)
 
   (check-false (indexof? 'a 'd))
+  (check-true (indexof? '(a b c d e f) 'a))
   (check-true (indexof? '(a b c d e f) 'd))
   (check-true (indexof? '(1 (10 1) 2) '(10 1)))
   (check-false (indexof? '(1 2 3 4 5) 6))
