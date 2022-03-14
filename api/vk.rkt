@@ -276,7 +276,7 @@
                         (flush-output)))
                 (res-group (string->jsexpr
                                   (get-url (format "https://api.vk.com/method/groups.getById?group_id=~a&v=~a&access_token=~a" galias VK_API_VERSION (_AT)))))
-                (result-group (and ($ response res-group) (not-empty? ($ response res-group)) ($ __id (first ($ response res-group))))))
+                (result-group (and ($ response res-group) (not-empty? ($ response res-group)) ($ id (first ($ response res-group))))))
             (->string result-group))))))
 
 (define get-group-id get-gid)
@@ -564,7 +564,7 @@
 (define-catch (get-video-img-urls item)
   (let* (
         (attachments (get-attachments item))
-        (attachment (or (and attachments (first attachments)) (hash)))
+        (attachment (or (and attachments (not-empty? attachments) (first attachments)) (hash)))
         )
     (hash
       '2x (and attachments ($ video.photo_130 attachment))
