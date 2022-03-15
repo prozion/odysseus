@@ -14,18 +14,21 @@
 (provide (all-defined-out))
 
 (define-catch (match-words? text words)
-  (ormap
-    (λ (w)
-      (cond
-        ((regular-expression-string? w)
-          (and
-            (re-matches? w text)
-            (caar (get-matches (->pre w) text))))
-        (else
-          (and
-            (string-contains? (string-downcase text) (string-downcase w))
-            w))))
-    words))
+  (and
+    words
+    (ormap
+      (λ (w)
+        (let ((w (string-downcase w)))
+          (cond
+            ((regular-expression-string? w)
+              (and
+                (re-matches? w text)
+                (caar (get-matches (->pre w) text))))
+            (else
+              (and
+                (string-contains? (string-downcase text) w)
+                w)))))
+      words)))
 
 (define clean-text
   (change-text
