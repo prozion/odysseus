@@ -1,4 +1,4 @@
-(ns odysseus.text
+(ns org.clojars.prozion.odysseus.text
   (:require
             [clojure.string :as s]
             ))

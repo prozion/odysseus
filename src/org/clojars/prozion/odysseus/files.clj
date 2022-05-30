@@ -1,4 +1,4 @@
-(ns odysseus.files
+(ns org.clojars.prozion.odysseus.files
   (:require
             [clojure.string :as s]
             [odysseus.utils :refer :all]

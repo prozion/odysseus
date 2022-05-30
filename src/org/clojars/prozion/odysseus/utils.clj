@@ -1,4 +1,4 @@
-(ns odysseus.utils
+(ns org.clojars.prozion.odysseus.utils
   (:require [clojure.set :as set]
             [clojure.string :as s]
             ))

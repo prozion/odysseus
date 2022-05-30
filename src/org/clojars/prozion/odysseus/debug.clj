@@ -1,4 +1,4 @@
-(ns odysseus.debug)
+(ns org.clojars.prozion.odysseus.debug)
 
 (def --- println)
 

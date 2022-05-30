@@ -1,4 +1,4 @@
-(ns odysseus.io
+(ns org.clojars.prozion.odysseus.io
   (:require
             [clojure.java.io :as io]
             )
