@@ -26,3 +26,6 @@
   (map
     #(.delete %)
     (.listFiles (java.io.File. directory-path))))
+
+(defn file-exists? [filepath]
+  (.exists (java.io.File. filepath)))

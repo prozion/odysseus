@@ -25,3 +25,8 @@
 
 (defn ->str [txt]
   (if txt (str txt) ""))
+
+(defn dupstr [s n]
+  (clojure.string/join
+    ""
+    (map (fn [_] s) (range n))))

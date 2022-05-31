@@ -21,6 +21,13 @@
     (not (empty? coll))
     (.contains coll el)))
 
+(defn ->number [x]
+  (let [sx (str x)
+        float? (re-seq #"\." sx)]
+    (cond
+      float? (Double. sx)
+      :else (Integer. sx))))
+
 (defn ->int [x]
   (Integer. (str x)))
 
@@ -34,7 +41,10 @@
   (into (empty m) (map f m)))
 
 (defn filter-map [f m]
-  (into (empty m) (map f (filter f m))))
+  (into (empty m) (filter f m)))
+
+(def map-hash map-map)
+(def filter-hash filter-map)
 
 (defn minus [coll1 coll2]
   (into (empty coll1) (set/difference (set coll1) (set coll2))))
