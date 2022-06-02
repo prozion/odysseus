@@ -1,6 +1,7 @@
 (ns org.clojars.prozion.odysseus.utils
   (:require [clojure.set :as set]
             [clojure.string :as s]
+            [org.clojars.prozion.odysseus.debug :refer :all]
             ))
 
 (defn truthy? [val]
@@ -37,6 +38,12 @@
       (Integer. only-digits))
     (catch Throwable e nil)))
 
+(defn minus [coll1 coll2]
+  (into (empty coll1) (set/difference (set coll1) (set coll2))))
+
+(defn symbol-split [sym]
+  (map symbol (clojure.string/split (str sym) #"\.")))
+
 (defn map-map [f m]
   (into (empty m) (map f m)))
 
@@ -46,11 +53,37 @@
 (def map-hash map-map)
 (def filter-hash filter-map)
 
-(defn minus [coll1 coll2]
-  (into (empty coll1) (set/difference (set coll1) (set coll2))))
+; (defn ormap [f & args]
+;   (cond
+;     (empty? (first args)) false
+;     (not (coll? (first args)))
+;       (if (f (first args))
+;           true
+;           (ormap f (rest args)))
+;     (not (apply f (map first args))) (apply ormap f (map rest args))
+;     :else true))
 
-(defn symbol-split [sym]
-  (map symbol (clojure.string/split (str sym) #"\.")))
+; suggested by Sergey Trofimov:
+; (defn ormap
+;   [f & colls]
+;   (->> (apply map f colls)
+;        (reduce (fn [_ x] (when x (reduced x))) nil)))
+
+; suggested by Sergey Trofimov, v2:
+(defn ormap
+  [f & colls]
+  (some truthy? (apply map f colls)))
+
+; or even so:
+; (defn ormap
+;   ([f c]
+;    (some identity (map f c)))
+;   ([f c1 c2]
+;    (some identity (map f c1 c2)))
+;   ([f c1 c2 c3]
+;    (some identity (map f c1 c2 c3)))
+;   ([f c1 c2 c3 & colls]
+;    (some identity (apply map f c1 c2 c3 colls))))
 
 (defn unique-concat [seq1 seq2]
   ; (into (empty seq1) (set/union (set seq1) (set seq2))))
