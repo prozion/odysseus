@@ -38,8 +38,12 @@
       (Integer. only-digits))
     (catch Throwable e nil)))
 
-(defn minus [coll1 coll2]
-  (into (empty coll1) (set/difference (set coll1) (set coll2))))
+(defn minus [coll & colls]
+  (reduce
+    (fn [acc next-coll]
+      (into (empty coll) (set/difference (set acc) (set next-coll))))
+    coll
+    colls))
 
 (defn symbol-split [sym]
   (map symbol (clojure.string/split (str sym) #"\.")))
