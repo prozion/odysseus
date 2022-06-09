@@ -1,6 +1,7 @@
 (ns org.clojars.prozion.odysseus.io
   (:require
             [clojure.java.io :as io]
+            [org.clojars.prozion.odysseus.debug :refer :all]
             )
   (:use [clojure.java.io]))
 
@@ -19,8 +20,11 @@
     (doall (line-seq f))))
 
 (defn write-to-file [filepath content]
-  (with-open [wrtr (writer filepath)]
-    (.write wrtr content)))
+  (with-open [w (writer filepath)]
+    (.write w content)))
+
+(defn create-directory [dirpath]
+  (.mkdir (java.io.File. dirpath)))
 
 (defn clean-directory [directory-path]
   (map
@@ -29,3 +33,16 @@
 
 (defn file-exists? [filepath]
   (.exists (java.io.File. filepath)))
+
+(defn copy-from-url [url file]
+  (with-open [in (io/input-stream url)
+              out (io/output-stream file)]
+    (io/copy in out)))
+
+(defn list-files [dirpath]
+  (map
+    #(.getName %)
+    (.listFiles (java.io.File. dirpath))))
+
+(defn get-cwd []
+  (-> (java.io.File. ".") .getAbsolutePath))

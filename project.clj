@@ -1,4 +1,4 @@
-(defproject org.clojars.prozion/odysseus "0.1.3"
+(defproject org.clojars.prozion/odysseus "0.1.4"
   :description "Clojure descendant of Racket odysseus library - common lisp functions to help in the work"
   :url "https://github.com/prozion/odysseus"
   :license {:name "MIT License"
@@ -23,6 +23,7 @@
                   ["deploy"]]
   :repl-options {
     ; :init-ns org.clojars.prozion.tabtree.rdf
-    :init-ns org.clojars.prozion.odysseus.utils
+    ; :init-ns org.clojars.prozion.odysseus.utils
+    :init-ns org.clojars.prozion.odysseus.io
   }
 )
