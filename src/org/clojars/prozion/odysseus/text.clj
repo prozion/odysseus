@@ -20,6 +20,9 @@
 (defn boldify [txt]
   (and txt (format "<b>%s</b>" txt)))
 
+(defn titlefy [txt]
+  (str (s/upper-case (subs txt 0 1)) (subs txt 1)))
+
 (defn colons [txt]
   (and txt (str txt ": ")))
 

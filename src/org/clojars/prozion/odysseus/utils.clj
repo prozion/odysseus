@@ -57,6 +57,12 @@
 (def map-hash map-map)
 (def filter-hash filter-map)
 
+(defn remove-hash [f m]
+  (filter-hash #(-> % f not) m))
+
+(defn revert-hash [m]
+  (zipmap (vals m) (keys m)))
+
 ; (defn ormap [f & args]
 ;   (cond
 ;     (empty? (first args)) false
@@ -99,3 +105,16 @@
 
 (defn sort-by-order [seq given-order-v]
   (->> given-order-v (filter #(index-of? seq %)) (#(concat % (minus seq given-order-v)))))
+
+(defn only-or-first [v]
+  (if (coll? v)
+    (first v)
+    v))
+
+(defn rotate [coll & [n]]
+  (let [n (or n 1)]
+    ; (concat (drop n coll) (take n coll))))
+    (cond
+      (< n 1) coll
+      (= n 1) `(~@(rest coll) ~(first coll))
+      :else (rotate (rotate coll 1) (- n 1)))))
