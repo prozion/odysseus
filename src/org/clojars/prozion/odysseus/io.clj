@@ -15,6 +15,9 @@
       (print ~@body)
       (flush)))
 
+(defn read-file [filepath]
+  (slurp filepath))
+
 (defn read-file-by-lines [filepath]
   (with-open [f (io/reader filepath)]
     (doall (line-seq f))))
