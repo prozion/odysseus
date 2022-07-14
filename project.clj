@@ -1,14 +1,10 @@
-(defproject org.clojars.prozion/odysseus "0.1.6"
+(defproject org.clojars.prozion/odysseus "0.1.7"
   :description "Clojure descendant of Racket odysseus library - common lisp functions to help in the work"
   :url "https://github.com/prozion/odysseus"
   :license {:name "MIT License"
             :url  "https://github.com/aws/mit-0"}
   :dependencies [
-                [org.apache.jena/jena-arq "3.2.0"]
-                [org.apache.jena/jena-iri "3.2.0"]
-                [org.apache.jena/jena-tdb "3.2.0"]
-                [org.slf4j/slf4j-api "1.7.5"]
-                [org.slf4j/slf4j-simple "1.6.4"]
+                [org.clojure/data.csv "1.0.1"]
                 ]
   :plugins [
             ; [lein-ancient "0.6.15"]
@@ -24,6 +20,6 @@
   :repl-options {
     ; :init-ns org.clojars.prozion.tabtree.rdf
     ; :init-ns org.clojars.prozion.odysseus.utils
-    :init-ns org.clojars.prozion.odysseus.io
+    :init-ns org.clojars.prozion.odysseus.stat
   }
 )

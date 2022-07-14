@@ -38,7 +38,40 @@
     (is (truthy? (d= "1836" "1836")))
 
     ; check shortcuts
-    (is (truthy? (d< "183x" "1831")))
+    (is (truthy? (d> "183x" "1831")))
     (is (truthy? (d< "183x" "1836")))
-    (is (truthy? (d> "19xx" "185x")))
-    ))
+    (is (truthy? (d> "19xx" "185x"))))
+
+  (testing "date parsing"
+    (is (= (parse-date "28.08.1979") {:day "28" :month "08" :year "1979"}))
+    (is (= (parse-date "08.1979") {:day nil :month "08" :year "1979"}))
+    (is (= (parse-date "1979") {:day nil :month nil :year "1979"}))
+    (is (= (parse-date "10.20") {:day "10" :month "20" :year nil}))
+    (is (= (parse-date "10.12") {:day "10" :month "12" :year nil}))
+    (is (= (parse-date "28.08.xxxx") {:day "28" :month "08" :year "xxxx"})))
+
+  (testing "date validation"
+    (is (truthy? (date? "19.4")))
+    (is (truthy? (valid-date? "31.01.1970")))
+    (is (truthy? (valid-date? "29.02.2000")))
+    (is (truthy? (valid-date? "29.02.1996")))
+    (is (falsy? (valid-date? "29.02.1997")))
+    (is (falsy? (valid-date? "35.03.1997")))
+    (is (falsy? (valid-date? "01.65.1997")))
+    (is (falsy? (valid-date? "10.13.1997")))
+    (is (falsy? (valid-date? "31.13.1997")))
+    (is (falsy? (valid-date? "31.04.2018"))))
+
+  (testing "check date between"
+    (is (truthy? (date-between? ["01.10.1989" "10.11.1991"] "10.06.1990")))
+    (is (truthy? (date-between? ["01.10.1989" "10.11.1991"] "25.12.1990")))
+    (is (falsy? (date-between? ["01.10.1989" "10.11.1991"] "17.07.1987")))
+    (is (falsy? (date-between? ["01.01.1979" "19.01.1979"] "01.04.1979"))))
+
+  (testing "detect Zodiac sign"
+    (is (= (get-zodiac-sign "28.08.1979") :Virgo))
+    (is (= (get-zodiac-sign "21.01.1979") :Aquarius))
+    (is (= (get-zodiac-sign "11.10.2001") :Libra))
+    (is (= (get-zodiac-sign "25.4.1995") :Taurus))
+    (is (= (get-zodiac-sign "01.04") :Aries)))
+)

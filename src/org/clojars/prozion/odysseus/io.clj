@@ -2,6 +2,7 @@
   (:require
             [clojure.java.io :as io]
             [org.clojars.prozion.odysseus.debug :refer :all]
+            [clojure.data.csv :as csv]
             )
   (:use [clojure.java.io]))
 
@@ -49,3 +50,9 @@
 
 (defn get-cwd []
   (-> (java.io.File. ".") .getAbsolutePath))
+
+(defn read-tsv [filepath]
+  (with-open [reader (io/reader filepath)]
+    (rest
+      (doall
+        (csv/read-csv reader :separator \tab)))))

@@ -33,3 +33,6 @@
   (clojure.string/join
     ""
     (map (fn [_] s) (range n))))
+
+(defn url? [s]
+  (re-seq #"^https?://" (str s)))

@@ -19,4 +19,6 @@
   ([message]
     (throw (Exception. message))))
 
+(def error soft-exit)
+
 (def exit soft-exit)

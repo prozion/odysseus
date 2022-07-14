@@ -118,3 +118,36 @@
       (< n 1) coll
       (= n 1) `(~@(rest coll) ~(first coll))
       :else (rotate (rotate coll 1) (- n 1)))))
+
+(defn orf [& args]
+  "OR to use in the places where function required (such as in `map`, `filter` etc.)"
+  (cond
+    (empty? args) false
+    (first args) (first args)
+    :else (apply orf (rest args))))
+
+(defn andf [& args]
+  "AND to use in the places where function required (such as in `map`, `filter` etc.)"
+  (cond
+    (empty? args) true
+    (empty? (rest args)) (first args)
+    (not (first args)) false
+    :else (apply andf (rest args))))
+
+(defn not-empty? [v]
+  (not (empty? v)))
+
+(defn choose-not-empty [& args]
+  (cond
+    (empty? args) nil
+    (not-empty? (first args)) (first args)
+    :else (apply choose-not-empty (rest args))))
+
+(defn include-to-coll [pred & pairs]
+  (cond
+    (empty? pairs) []
+    :else
+      (let [[pred-value result-value] (first pairs)]
+        (if (pred pred-value)
+          (concat [result-value] (apply include-to-coll pred (rest pairs)))
+          (concat [] (apply include-to-coll pred (rest pairs)))))))
