@@ -1,4 +1,4 @@
-(defproject org.clojars.prozion/odysseus "0.1.7"
+(defproject org.clojars.prozion/odysseus "0.1.8"
   :description "Clojure descendant of Racket odysseus library - common lisp functions to help in the work"
   :url "https://github.com/prozion/odysseus"
   :license {:name "MIT License"
