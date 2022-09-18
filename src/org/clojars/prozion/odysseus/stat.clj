@@ -1,9 +1,10 @@
 (ns org.clojars.prozion.odysseus.stat
   (:require [clojure.set :as set]
             [clojure.string :as s]
+            [org.clojars.prozion.odysseus.comb :as comb]
             [org.clojars.prozion.odysseus.debug :refer :all]
             ))
-
+;; momemts
 (defn average [v]
   (/ (apply + v) (count v)))
 
@@ -15,6 +16,8 @@
     (if (even? n)
       (average [(nth sorted-v i1) (nth sorted-v i2)])
       (nth sorted-v i2))))
+
+; other statistics
 
 (defn confidence-interval [v]
   (let [n (count v)

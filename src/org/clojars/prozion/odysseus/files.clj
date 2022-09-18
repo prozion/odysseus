@@ -1,7 +1,7 @@
 (ns org.clojars.prozion.odysseus.files
   (:require
             [clojure.string :as s]
-            [odysseus.utils :refer :all]
+            [org.clojars.prozion.odysseus.utils :refer :all]
             ))
 
 (defn get-file-extension [path]

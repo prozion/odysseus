@@ -16,6 +16,11 @@
     (and (falsy? a) (truthy? b))
     false))
 
+(defn ** [a x]
+  (cond
+    (= x 0) 1
+    :else (* a (** a (- x 1)))))
+
 (defn index-of? [coll el]
   (and
     coll
@@ -33,10 +38,11 @@
   (Integer. (str x)))
 
 (defn ->integer [astr]
-  (try
-    (let [only-digits (s/join "" (filter #(re-seq #"[0-9]" (str %)) astr))]
-      (Integer. only-digits))
-    (catch Throwable e nil)))
+  (let [astr (str astr)]
+    (try
+      (let [only-digits (s/join "" (filter #(re-seq #"[0-9]" (str %)) astr))]
+        (Integer. only-digits))
+      (catch Throwable e nil))))
 
 (defn minus [coll & colls]
   (reduce
@@ -137,6 +143,9 @@
 (defn not-empty? [v]
   (not (empty? v)))
 
+(defn one-element? [coll]
+  (= (count coll) 1))
+
 (defn choose-not-empty [& args]
   (cond
     (empty? args) nil
@@ -151,3 +160,9 @@
         (if (pred pred-value)
           (concat [result-value] (apply include-to-coll pred (rest pairs)))
           (concat [] (apply include-to-coll pred (rest pairs)))))))
+
+(defn insert [coll index el]
+  (into (empty coll) (concat (take index coll) [el] (drop index coll))))
+
+(defn disj-coll [coll el]
+  (into (empty coll) (disj (set coll) el)))

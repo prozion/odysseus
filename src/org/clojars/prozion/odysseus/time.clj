@@ -146,3 +146,14 @@
       (date-between? Scorpio datestr) :Scorpio
       (date-between? Sagittarius datestr) :Sagittarius
       :else nil)))
+
+(defn hm+ [& args]
+  (cond
+    (empty? args) [0 0]
+    (= (count args) 2) [(first args) (second args)]
+    :else
+    (let [[h1 m1 h2 m2] (take 4 args)]
+      (apply hm+
+        (+ h1 h2 (quot (+ m1 m2) 60))
+        (rem (+ m1 m2) 60)
+        (drop 4 args)))))

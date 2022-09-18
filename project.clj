@@ -20,6 +20,6 @@
   :repl-options {
     ; :init-ns org.clojars.prozion.tabtree.rdf
     ; :init-ns org.clojars.prozion.odysseus.utils
-    :init-ns org.clojars.prozion.odysseus.stat
+    :init-ns odysseus.repl
   }
 )
