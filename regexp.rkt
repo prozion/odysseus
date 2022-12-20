@@ -33,14 +33,12 @@
       ((res (list)))
       ((match-position (regexp-match-positions* re astr)))
       ; BUG: gives an error, when parsing timeline.tree
-      (begin
-        ; (println (format "~a ~a ~a ~a" re astr match-position (regexp-match-positions* re astr)))
-        (pushr
-          res
-          (regexp-match
-            re
-            astr
-            (car match-position)))))) )
+      (let*
+          ((next-match (regexp-match re astr (car match-position))))
+          ; (_ (display (format "re: ~a\nastr: ~a\n(regexp-match ...): ~a\nmatch-position: ~a\n\n" re astr next-match match-position))))
+        (if next-match
+          (pushr res next-match)
+          res)))))
 
 (define (get-first-group-match re astr)
   (let* ((res (get-matches re astr)))
@@ -78,6 +76,16 @@
 (define (rs . args)
   (pregexp
     (format "^~a$" (apply string-append args))))
+
+(define (re->string re)
+  (object-name re))
+
+(define (re-format frmt . args)
+  (let* ((any-pregexps? (ormap pregexp? args))
+        (any-regexps? (ormap regexp? args))
+        (f (if any-pregexps? pregexp regexp))
+        (->str (λ (x) (if (string? x) x (re->string x)))))
+    (f (apply format frmt (map ->str args)))))
 
 (module+ test
 
@@ -131,4 +139,8 @@
   (check-equal? (re-substitute "some (text)" "\\(.*?\\)" "[]") "some []")
   (check-equal? (re-substitute "some (text)" (list "o" "e") (list "a" "i")) "sami (tixt)")
   (check-equal? (re-substitute "some (text)" (list "s.*(?=\\s)" "e") (list "any" "i")) "any (tixt)")
+
+  (check-equal? (re-format "~a ~a,~a" "foo" "bar" "baz") #rx"foo bar,baz")
+  (check-equal? (re-format "~a ~a,~a" "foo" #rx"bar" "baz") #rx"foo bar,baz")
+  (check-equal? (re-format "~a ~a,~a" "foo" #rx"bar" #px"baz") #px"foo bar,baz")
 )

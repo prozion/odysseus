@@ -204,6 +204,7 @@
   (cond
     ((list? x) x)
     ((not x) empty)
+    ((scalar? x) (list x))
     (else (list x))))
 
 (define (scalarize x #:delimeter (delimeter " ") #:boolean-to-string (boolean-to-string #f))

@@ -274,86 +274,86 @@
         10 'a))
 
 ; hash-union
-  (check-hash-equal?
-    (hash-union (hash 'a 10 'b 20) (hash 'c 30 'a 100 'd 2))
-    (hash 'a 10 'b 20 'c 30 'd 2))
-
-  (check-hash-equal?
-    (hash-union #:fuse 'combine (hash 'a 10 'b 20) (hash 'c 30 'a 100 'd 2))
-    (hash 'a '(10 100) 'b 20 'c 30 'd 2))
-
-  (check-hash-equal?
-    (hash-union #:fuse 'combine (hash 'a 10 'b 20) (hash 'a 10 'b 20))
-    (hash 'a '(10 10) 'b '(20 20)))
-
-  (check-hash-equal?
-    (hash-union #:fuse 'combine-different (hash 'a 10 'b 20) (hash 'a 10 'b 20))
-    (hash 'a 10 'b 20))
-
-  (check-hash-equal?
-    (hash-union #:fuse 'combine-different (hash 'a 10 'b 20 'c '(1 2) 'd '(5 6)) (hash 'a 20 'b 20 'c '(1 2 3) 'd '(5 6)))
-    (hash 'a '(10 20) 'b 20 'c '(1 2 1 2 3) 'd '(5 6)))
-
-  (check-hash-equal?
-    (hash-union (hash 'a 10 'b 20) (hash) (hash 'c 30 'a 100 'd 2) (hash 'f 7 'p 18 'c 40 'b 80))
-    (hash 'a 10 'b 20 'c 30 'd 2 'f 7 'p 18))
-
-  (check-hash-equal?
-    (hash-union (hash 'a 10 'b 20) (hash 'c 30 'a 100 'd 2) (hash 'f 7 'p 18 'c 40 'b 80))
-    (hash 'a 10 'b 20 'c 30 'd 2 'f 7 'p 18))
-
-  (let ((e1 (hash-union (hash 'a (hash 'aa 10 'ab 20) 'b 20) (hash 'c 30 'a (hash 'aa 300 'ac 400) 'd 2)))
-        (e2 (hash 'a (hash 'aa 10 'ab 20) 'b 20 'c 30 'd 2)))
-      (check-hash-equal? e1 e2))
-
-  (let ((e1 (hash-union #:fuse 'combine (hash 'a (hash 'aa 10 'ab 20) 'b 20) (hash 'c 30 'a (hash 'aa 300 'ac 400) 'd 2)))
-        (e2 (hash 'a (hash 'aa (list 10 300) 'ab 20 'ac 400) 'b 20 'c 30 'd 2)))
-      (check-hash-equal? e1 e2))
-
-  (let ((e3 (hash-union
-              #:fuse 'combine
-              (hash
-                'a (hash
-                      'aa 10
-                      'ab (hash
-                            'aba -8
-                            'abb -12))
-                'b 20
-                'e '(1 2 3))
-              (hash
-                'a (hash
-                      'aa 300
-                      'ab (hash
-                            'aba 1000
-                            'abc -16)
-                      'ac 400)
-                'b (hash
-                      'ba 33) ; hash will not supersede a number
-                'c 30
-                'd 2
-                'e '(3 4 5))))
-        (e4 (hash
-                'a (hash
-                      'aa (list 10 300)
-                      'ab (hash
-                            'aba (list -8 1000)
-                            'abb -12
-                            'abc -16)
-                      'ac 400)
-                'b (list 20 (hash 'ba 33))
-                'c 30
-                'd 2
-                'e '(1 2 3 3 4 5))))
-      (check-hash-equal? e3 e4))
-
-
-  (check-hash-equal?
-    (hash-union null (hash 'c 30 'a 100 'd 2))
-    (hash 'a 100 'c 30 'd 2))
-
-  (check-hash-equal?
-    (hash-union (hash 'a 1 2 3 'c 'd) null)
-    (hash 'a 1 2 3 'c 'd))
+  ; (check-hash-equal?
+  ;   (hash-union (hash 'a 10 'b 20) (hash 'c 30 'a 100 'd 2))
+  ;   (hash 'a 10 'b 20 'c 30 'd 2))
+  ;
+  ; (check-hash-equal?
+  ;   (hash-union #:fuse 'combine (hash 'a 10 'b 20) (hash 'c 30 'a 100 'd 2))
+  ;   (hash 'a '(10 100) 'b 20 'c 30 'd 2))
+  ;
+  ; (check-hash-equal?
+  ;   (hash-union #:fuse 'combine (hash 'a 10 'b 20) (hash 'a 10 'b 20))
+  ;   (hash 'a '(10 10) 'b '(20 20)))
+  ;
+  ; (check-hash-equal?
+  ;   (hash-union #:fuse 'combine-different (hash 'a 10 'b 20) (hash 'a 10 'b 20))
+  ;   (hash 'a 10 'b 20))
+  ;
+  ; (check-hash-equal?
+  ;   (hash-union #:fuse 'combine-different (hash 'a 10 'b 20 'c '(1 2) 'd '(5 6)) (hash 'a 20 'b 20 'c '(1 2 3) 'd '(5 6)))
+  ;   (hash 'a '(10 20) 'b 20 'c '(1 2 1 2 3) 'd '(5 6)))
+  ;
+  ; (check-hash-equal?
+  ;   (hash-union (hash 'a 10 'b 20) (hash) (hash 'c 30 'a 100 'd 2) (hash 'f 7 'p 18 'c 40 'b 80))
+  ;   (hash 'a 10 'b 20 'c 30 'd 2 'f 7 'p 18))
+  ;
+  ; (check-hash-equal?
+  ;   (hash-union (hash 'a 10 'b 20) (hash 'c 30 'a 100 'd 2) (hash 'f 7 'p 18 'c 40 'b 80))
+  ;   (hash 'a 10 'b 20 'c 30 'd 2 'f 7 'p 18))
+  ;
+  ; (let ((e1 (hash-union (hash 'a (hash 'aa 10 'ab 20) 'b 20) (hash 'c 30 'a (hash 'aa 300 'ac 400) 'd 2)))
+  ;       (e2 (hash 'a (hash 'aa 10 'ab 20) 'b 20 'c 30 'd 2)))
+  ;     (check-hash-equal? e1 e2))
+  ;
+  ; (let ((e1 (hash-union #:fuse 'combine (hash 'a (hash 'aa 10 'ab 20) 'b 20) (hash 'c 30 'a (hash 'aa 300 'ac 400) 'd 2)))
+  ;       (e2 (hash 'a (hash 'aa (list 10 300) 'ab 20 'ac 400) 'b 20 'c 30 'd 2)))
+  ;     (check-hash-equal? e1 e2))
+  ;
+  ; (let ((e3 (hash-union
+  ;             #:fuse 'combine
+  ;             (hash
+  ;               'a (hash
+  ;                     'aa 10
+  ;                     'ab (hash
+  ;                           'aba -8
+  ;                           'abb -12))
+  ;               'b 20
+  ;               'e '(1 2 3))
+  ;             (hash
+  ;               'a (hash
+  ;                     'aa 300
+  ;                     'ab (hash
+  ;                           'aba 1000
+  ;                           'abc -16)
+  ;                     'ac 400)
+  ;               'b (hash
+  ;                     'ba 33) ; hash will not supersede a number
+  ;               'c 30
+  ;               'd 2
+  ;               'e '(3 4 5))))
+  ;       (e4 (hash
+  ;               'a (hash
+  ;                     'aa (list 10 300)
+  ;                     'ab (hash
+  ;                           'aba (list -8 1000)
+  ;                           'abb -12
+  ;                           'abc -16)
+  ;                     'ac 400)
+  ;               'b (list 20 (hash 'ba 33))
+  ;               'c 30
+  ;               'd 2
+  ;               'e '(1 2 3 3 4 5))))
+  ;     (check-hash-equal? e3 e4))
+  ;
+  ;
+  ; (check-hash-equal?
+  ;   (hash-union null (hash 'c 30 'a 100 'd 2))
+  ;   (hash 'a 100 'c 30 'd 2))
+  ;
+  ; (check-hash-equal?
+  ;   (hash-union (hash 'a 1 2 3 'c 'd) null)
+  ;   (hash 'a 1 2 3 'c 'd))
 
   (define h1 (hasher-by-names 'a 'b 'c))
 

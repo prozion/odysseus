@@ -1,9 +1,16 @@
 #lang racket
 
+(require (only-in
+            racket/hash
+            (hash-union hash-union-std)))
 (require compatibility/defmacro)
 (require "base.rkt" "seqs.rkt" "type.rkt" "regexp.rkt" "debug.rkt" "controls.rkt" "strings.rkt" (for-syntax "seqs.rkt" "type.rkt" racket/list racket/string))
 
 (provide (all-defined-out))
+
+; make overwrite behavior of 'hash-union' just like 'merge' in Clojure:
+(define (hash-union #:combine (combine-f (λ (v1 v2) v2)) . hs)
+  (apply hash-union-std #:combine combine-f hs))
 
 ;; INIT
 (define (@ . body)
@@ -202,6 +209,8 @@
 (define (map-hash f h)
   (for/hash (((k v) (in-hash h))) (f k v)))
 
+(define hash-map map-hash)
+
 (define (deep-map-hash f h)
   (for/hash (((k v) (in-hash h)))
     (if (hash? v)
@@ -267,7 +276,7 @@
     ((and
         (hash? val1)
         (hash? val2))
-          (hash-union val1 val2))
+          (hash-union val1 val2 #:combine (λ (v1 v2) v1)))
     ((and
         (list? val1)
         (list? val2))
@@ -314,73 +323,74 @@
 
 ;; COMBINE
 ; add to resulting hash all key-val pairs from h1 and pairs from h2 with rest of the keys
-(define (hash-union #:fuse (fuse #f) . hs)
-  (cond
-    ((empty? hs) (hash))
-    ((one-element? hs) (first hs))
-    ((two-elements? hs)
-      (let* ((h1 (first hs))
-            (h1 (or (and h1 (hash? h1) h1) (hash)))
-            (h2 (second hs))
-            (h2 (or (and h2 (hash? h2) h2) (hash))))
-        (for/fold
-          ((res h2))
-          (((k1 v1) h1))
-          (let (
-                (v2 (hash-ref h2 k1 #f)))
-            (cond
-              (v2 (cond
-                    ((equal? fuse 'combine)
-                      (hash-set
-                        res
-                        k1
-                        (cond
-                          ((and (not v1) v2) v2)
-                          ((and (scalar? v1) (scalar? v2))
-                              (list v1 v2))
-                          ((and (scalar? v1) (list? v2))
-                              (pushr v2 v1))
-                          ((and (list? v1) (scalar? v2))
-                              (pushr v1 v2))
-                          ((and (list? v1) (list? v2))
-                              (append v1 v2))
-                          ((and (scalar? v1) (hash? v2))
-                              (list v1 v2))
-                          ((and (hash? v1) (scalar? v2))
-                              (list v1 v2))
-                          ((and (hash? v1) (hash? v2))
-                              (hash-union v1 v2 #:fuse 'combine))
-                          (else
-                            (error (format "mismatched value types for fusion: ~a and ~a (~a and ~a)" (type v1) (type v2) v1 v2))))))
-                    ((equal? fuse 'combine-different)
-                      (hash-set
-                        res
-                        k1
-                        (cond
-                          ((and (not v1) v2) v2)
-                          ((equal? v1 v2) v1)
-                          ((and (scalar? v1) (scalar? v2))
-                              (list v1 v2))
-                          ((and (scalar? v1) (list? v2))
-                              (pushr v2 v1))
-                          ((and (list? v1) (scalar? v2))
-                              (pushr v1 v2))
-                          ((and (list? v1) (list? v2))
-                              (append v1 v2))
-                          ((and (scalar? v1) (hash? v2))
-                              (list v1 v2))
-                          ((and (hash? v1) (scalar? v2))
-                              (list v1 v2))
-                          ((and (hash? v1) (hash? v2))
-                              (hash-union v1 v2 #:fuse 'combine-different))
-                          (else
-                            (error (format "mismatched value types for fusion: ~a and ~a (~a and ~a)" (type v1) (type v2) v1 v2))))))
-                    (else
-                      (hash-set res k1 v1))))
-              (else
-                (hash-set res k1 v1)))))))
-    (else
-        (hash-union #:fuse fuse (first hs) (apply hash-union (rest hs))))))
+;;;; !!! This was the last working example of hash-union ->
+; (define (hash-union #:fuse (fuse #f) . hs)
+;   (cond
+;     ((empty? hs) (hash))
+;     ((one-element? hs) (first hs))
+;     ((two-elements? hs)
+;       (let* ((h1 (first hs))
+;             (h1 (or (and h1 (hash? h1) h1) (hash)))
+;             (h2 (second hs))
+;             (h2 (or (and h2 (hash? h2) h2) (hash))))
+;         (for/fold
+;           ((res h2))
+;           (((k1 v1) h1))
+;           (let (
+;                 (v2 (hash-ref h2 k1 #f)))
+;             (cond
+;               (v2 (cond
+;                     ((equal? fuse 'combine)
+;                       (hash-set
+;                         res
+;                         k1
+;                         (cond
+;                           ((and (not v1) v2) v2)
+;                           ((and (scalar? v1) (scalar? v2))
+;                               (list v1 v2))
+;                           ((and (scalar? v1) (list? v2))
+;                               (pushr v2 v1))
+;                           ((and (list? v1) (scalar? v2))
+;                               (pushr v1 v2))
+;                           ((and (list? v1) (list? v2))
+;                               (append v1 v2))
+;                           ((and (scalar? v1) (hash? v2))
+;                               (list v1 v2))
+;                           ((and (hash? v1) (scalar? v2))
+;                               (list v1 v2))
+;                           ((and (hash? v1) (hash? v2))
+;                               (hash-union v1 v2 #:fuse 'combine))
+;                           (else
+;                             (error (format "mismatched value types for fusion: ~a and ~a (~a and ~a)" (type v1) (type v2) v1 v2))))))
+;                     ((equal? fuse 'combine-different)
+;                       (hash-set
+;                         res
+;                         k1
+;                         (cond
+;                           ((and (not v1) v2) v2)
+;                           ((equal? v1 v2) v1)
+;                           ((and (scalar? v1) (scalar? v2))
+;                               (list v1 v2))
+;                           ((and (scalar? v1) (list? v2))
+;                               (pushr v2 v1))
+;                           ((and (list? v1) (scalar? v2))
+;                               (pushr v1 v2))
+;                           ((and (list? v1) (list? v2))
+;                               (append v1 v2))
+;                           ((and (scalar? v1) (hash? v2))
+;                               (list v1 v2))
+;                           ((and (hash? v1) (scalar? v2))
+;                               (list v1 v2))
+;                           ((and (hash? v1) (hash? v2))
+;                               (hash-union v1 v2 #:fuse 'combine-different))
+;                           (else
+;                             (error (format "mismatched value types for fusion: ~a and ~a (~a and ~a)" (type v1) (type v2) v1 v2))))))
+;                     (else
+;                       (hash-set res k1 v1))))
+;               (else
+;                 (hash-set res k1 v1)))))))
+;     (else
+;         (hash-union #:fuse fuse (first hs) (apply hash-union (rest hs))))))
 
 ; (define (hash-union #:fuse (overwrite #f) . hs)
 ;   (case (length hs)
@@ -570,7 +580,7 @@
               (exist-with-same-key-value? (not (nil? with-same-key-value)))
               (with-same-key-value (if exist-with-same-key-value? (car with-same-key-value) #f))
               (joined-hash (if with-same-key-value
-                              (apply hash-union (list with-same-key-value cur-hash))
+                              (apply hash-union #:combine (λ (v1 v2) v1) (list with-same-key-value cur-hash))
                               cur-hash))
               (res (if exist-with-same-key-value?
                     (list-substitute res with-same-key-value joined-hash)
@@ -659,3 +669,9 @@
   (for/hash
     (((k v) h))
     (f k v)))
+
+(define-catch (decart-hash ls1 ls2)
+  (let* ((ls1 (listify ls1)))
+    (for/hash
+      ((l1 ls1))
+      (values l1 ls2))))

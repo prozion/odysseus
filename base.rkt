@@ -202,6 +202,9 @@
 (define (no-empty lst)
   (filter-not empty? lst))
 
+(define (inverse f)
+  (λ args (not (apply f args))))
+
 (module+ test
 
   ; alist - harrison in Hurrycap castle
@@ -377,4 +380,5 @@
   (check-equal? (dup 5 10) '(5 5 5 5 5 5 5 5 5 5))
 
   (check-equal? (but-last '(1 2 3)) '(1 2))
+  (check-equal? (but-last '(1)) '())
 )

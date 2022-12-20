@@ -2,7 +2,7 @@
 
 (require compatibility/defmacro)
 (require racket/stxparam)
-(require racket/syntax (for-syntax racket/syntax))
+(require racket/syntax (for-syntax racket/syntax racket/list))
 (require "base.rkt")
 
 (provide (except-out (all-defined-out) while-fun))
@@ -40,6 +40,38 @@
     ((empty? (cdr fs)) (car fs))
     (else
       ((car fs) (apply -->> (cdr fs))))))
+
+(define-macro (-> var . fs)
+  (define (->rec var . fs)
+    (cond
+      ((empty? fs) var)
+      (else
+        (let* ((f (car fs))
+              (new-expression
+                (cond
+                  ((list? f)
+                    (append
+                      (list (car f) var)
+                      (cdr f)))
+                  (else
+                    (list f var)))))
+          (apply ->rec (cons new-expression (cdr fs)))))))
+  (apply ->rec (cons var fs)))
+
+(define-macro (->> var . fs)
+  (define (->>rec var . fs)
+    (cond
+      ((empty? fs) var)
+      (else
+        (let* ((f (car fs))
+              (new-expression
+                (cond
+                  ((list? f)
+                    (append f (list var)))
+                  (else
+                    (list f var)))))
+          (apply ->>rec (cons new-expression (cdr fs)))))))
+  (apply ->>rec (cons var fs)))
 
 ; (gen (random 100) 10) -> '(1 34 50 7 80 62 58 91 10 8)
 (define-macro (gen f size)
@@ -182,6 +214,11 @@
   (check-= (-->> sin sqrt 4) (sin 2) 1e-6)
   (check-equal? (-->> (λ (x) (filter odd? x)) (λ (x) (map (curry * 3) x)) (λ (x) (append '(-1 -2 -3) x)) '(1 2 3 4 5))
                 '(-3 -9 3 9 15))
+
+  (check-equal? (-> 100) 100)
+  (check-equal?
+    (-> "foo-bar" (string-replace "-" "/") string-upcase (string-split "/"))
+    '("FOO" "BAR"))
 
   (check-equal? (gen 1 5) '(1 1 1 1 1))
 
