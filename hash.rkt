@@ -12,6 +12,10 @@
 (define (hash-union #:combine (combine-f (λ (v1 v2) v2)) . hs)
   (apply hash-union-std #:combine combine-f hs))
 
+; a behaviour, widely used in the old odysseus files is conservative (c) - after merging it will keep the former value, not latter.
+(define (hash-union-c . hs)
+  (apply hash-union-std #:combine (λ (v1 v2) v1) hs))
+
 ;; INIT
 (define (@ . body)
   ;(apply hash body))
@@ -276,7 +280,7 @@
     ((and
         (hash? val1)
         (hash? val2))
-          (hash-union val1 val2 #:combine (λ (v1 v2) v1)))
+          (hash-union-c val1 val2))
     ((and
         (list? val1)
         (list? val2))
@@ -580,7 +584,7 @@
               (exist-with-same-key-value? (not (nil? with-same-key-value)))
               (with-same-key-value (if exist-with-same-key-value? (car with-same-key-value) #f))
               (joined-hash (if with-same-key-value
-                              (apply hash-union #:combine (λ (v1 v2) v1) (list with-same-key-value cur-hash))
+                              (apply hash-union-c (list with-same-key-value cur-hash))
                               cur-hash))
               (res (if exist-with-same-key-value?
                     (list-substitute res with-same-key-value joined-hash)

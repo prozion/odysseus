@@ -186,8 +186,7 @@
     (else
       (let* ((next-key (car path))
             (next-value (hash-ref hash-tree next-key)))
-        (hash-union
-          #:combine (λ (v1 v2) v1)
+        (hash-union-c
           (hash next-key (hash-tree-set-value next-value (cdr path) value))
           hash-tree)))))
 
@@ -202,8 +201,7 @@
         (cond
           ((empty? key) hash-tree)
           (else
-            (hash-union
-              #:combine (λ (v1 v2) v1)
+            (hash-union-c
               (hash (car key) (hash-tree-set-value-by-id-path (hash-ref hash-tree (car key)) (cdr id-path) value id-attr))
               hash-tree)))))))
 
@@ -606,14 +604,14 @@
                   (map
                     (λ (h) (cond
                               ((hash-ref* h refname #f)
-                                (hash-union #:combine (λ (v1 v2) v1) (hash '__parent (hash-ref* h refname #f)) (hash-delete h refname)))
+                                (hash-union-c (hash '__parent (hash-ref* h refname #f)) (hash-delete h refname)))
                               (else (hash-delete h refname))))
                     alst)))
         (root-leaves (filter-map
                         (λ (h) (cond
                                   ((and (list? (ref h))
                                         (indexof? (ref h) root))
-                                      (hash-union #:combine (λ (v1 v2) v1) (hash '__parent root) h))
+                                      (hash-union-c (hash '__parent root) h))
                                   ((equal? (ref h) root)
                                     h)
                                   (else #f)))

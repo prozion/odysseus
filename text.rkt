@@ -105,7 +105,7 @@
     (for/fold
       ((res (hash)))
       ((letter letters))
-      (hash-union
+      (hash-union-c
         (hash letter (+ 1 (hash-ref res letter 0)))
         res))))
 
@@ -144,10 +144,8 @@
             (size2 (string-length text2)))
         (cond
           ((equal? text1 text2) #t)
-          ((< (text-size-difference text1 text2) 0.8) #f)
           (else
-            (let* (
-                  (distance (get-text-distance (nt text1) (nt text2))))
+            (let* ((distance (get-text-distance (nt text1) (nt text2))))
               (< distance (* tolerance (max size1 size2))))))))))
 
 (define-catch (any-in-text? txt expressions)
