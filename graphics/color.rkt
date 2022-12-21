@@ -1,14 +1,11 @@
 #lang racket
 
-(require "../lib/seqs.rkt")
-(require "../lib/math.rkt")
-(require "../lib/base.rkt")
-(require "../lib/debug.rkt")
-(require "../lib/controls.rkt")
+(require "../seqs.rkt")
+(require "../math.rkt")
+(require "../base.rkt")
+(require "../debug.rkt")
+(require "../controls.rkt")
 (require racket/format)
-
-;(require dshirshov/utils)
-;(require dshirshov/seqs)
 
 ;(provide (rgb->hsv rgb->hsl hsv->rgb hsl->rgb))
 (provide (all-defined-out))
