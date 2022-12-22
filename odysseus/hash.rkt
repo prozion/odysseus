@@ -4,7 +4,7 @@
             racket/hash
             (hash-union hash-union-std)))
 (require compatibility/defmacro)
-(require "base.rkt" "list.rkt" "type.rkt" "regexp.rkt" "debug.rkt" "controls.rkt" "strings.rkt" (for-syntax "list.rkt" "type.rkt" racket/list racket/string))
+(require "base.rkt" "list.rkt" "type.rkt" "regexp.rkt" "debug.rkt" "controls.rkt" "string.rkt" (for-syntax "list.rkt" "type.rkt" racket/list racket/string))
 
 (provide (all-defined-out))
 
@@ -16,7 +16,6 @@
 (define (hash-union-c . hs)
   (apply hash-union-std #:combine (λ (v1 v2) v1) hs))
 
-;; INIT
 (define (@ . body)
   ;(apply hash body))
   ;(apply hash (clean nil? body)))
@@ -43,32 +42,6 @@
   (let ((path (string-split (->string dotted-path) ".")))
     `(get-$ ',path ,hh)))
 
-(define (get-$xml path hh)
-  (let* ((res (get-$ path hh))
-        (res (filter scalar? (flatten res)))
-        (res (if (one-element? res) (first res) res))
-        (res (if (empty? res) #f res)))
-    res))
-
-(define-macro ($xml dotted-path hh)
-  (let ((path (string-split (->string dotted-path) ".")))
-    `(get-$xml ',path ,hh)))
-
-(define (hash-key? h key)
-  (true? (hash-ref h key #f)))
-
-(define has-key? hash-key?)
-
-(define (hashes? alst)
-  (andmap hash? alst))
-
-(define (not-hashes? alst) (not (hashes? alst)))
-
-(define (hasher-by-names . body)
-  (λ
-    args
-    (for/hash ((k body) (v args)) (values k v))))
-
 ; the same of hash-ref but no matter of type, matches if string projection values of hash key and compared key are equal
 (define-catch (hash-ref* h key (default-value #f))
   (hash-ref
@@ -78,43 +51,9 @@
     (->string key)
     default-value))
 
-;; REDUCE
-(define (hash-length h)
-  (length (hash-keys h)))
-
-(define (hash->ordered-list h keys-order)
-  (for/list
-    (((k v) (in-hash h))
-    (i keys-order))
-    (hash-ref h i #f)))
-
-; '((foo 1 2 3 4) (bar 10 20 30)) -> #(foo:#(a:1 b:2 c:3) bar:#(a:10 b:20 c:30))
-(define (list->hash lst header #:key-index (key-index 1) #:columns-exclude (columns-exclude null))
-  (let* ((header (remove-by-pos header key-index)))
-    (for/hash ((i lst))
-      (values
-        (nth i key-index)
-        (hash-remove-keys
-          (apply hash (interleave header (remove-by-pos i key-index)))
-          columns-exclude)))))
-
-(define (tree->hash lst)
-  (let ((by-pairs (partition-full lst 2)))
-    (for/fold
-      ((res (hash)))
-      ((pair by-pairs))
-      (let ((key (first pair))
-            (value (second pair)))
-        (cond
-          ((or (scalar? value) (plain-list? value))
-            (hash-union res (apply hash pair)))
-          (else
-            (hash-union res (hash key (tree->hash value)))))))))
-
-;; ACCESS
 ; (@. h.a.b.c)
 (define-macro (@. path)
-  (let* ((parts (map string->symbol (split (symbol->string path) ".")))
+  (let* ((parts (map string->symbol (string-split (symbol->string path) ".")))
         (h (car parts))
         (rest (map (λ (x) `(quote ,x)) (cdr parts))))
     (cond
@@ -133,14 +72,6 @@
                 #f)))))
   (hash-path-r h (reverse rest)))
 
-(define (hash-pair h key (default #f))
-  (for/fold
-    ((res default))
-    (((k v) h))
-    (if (equal? k key)
-        (cons k v)
-        res)))
-
 (define (hash-refs h keys (missed #f))
   (define (hash-refs-iter h keys res)
     (cond
@@ -148,7 +79,7 @@
       (else (hash-refs-iter
               h
               (cdr keys)
-              (rpush
+              (pushr
                 res
                 (let ((next-key (car keys)))
                 (if (scalar? next-key)
@@ -156,26 +87,16 @@
                     (next-key h))))))))
   (hash-refs-iter h keys empty))
 
-(define (hash-take h n)
-  (let ((hl (hash-length h)))
-    (cond
-      ((>= n hl) h)
-      (else (for/hash
-              ( ((k v) (in-hash h))
-                (i (in-range hl))
-                #:break (= i n))
-              (values k v))))))
-
-;; FILTER
-(define (@clean . body)
-  (make-hash
-    ;; remove all pairs with nil-type values:
-    (clean (λ (x) (nil? (cdr x))) (hash->list (apply @ body)))))
-
 (define (hash-map f h)
   (for/hash
     (((k v) h))
     (f k v)))
+
+(define (hash-map-deep f h)
+  (for/hash (((k v) (in-hash h)))
+    (if (hash? v)
+      (values k (hash-map-deep f v))
+      (f k v))))
 
 (define (hash-filter lambdakv h)
   (for/fold
@@ -190,58 +111,10 @@
 
 (define hash-filter-not hash-clean)
 
-(define (hash-regex-filter reg h)
-  (make-hash
-    (filter
-      (λ (x)
-        (let* (
-                (key (car x))
-                (key (cond
-                      ((symbol? key) (symbol->string key))
-                      ((string? key) key)
-                      (else #f))))
-          (if key
-                (regexp-match reg key)
-                #f)))
-      (hash->list h))))
-
-;; MAP
-(define (hash-map f h)
-  (for/hash (((k v) (in-hash h))) (f k v)))
-
-(define hash-map hash-map)
-
-(define (hash-map-deep f h)
-  (for/hash (((k v) (in-hash h)))
-    (if (hash? v)
-      (values k (hash-map-deep f v))
-      (f k v))))
-
-;; MODIFY
 (define (hash-delete h k)
   (cond
     ((immutable? h) (hash-remove h k))
     (else (hash-delete (make-immutable-hash (hash->list h)) k))))
-
-(define (hash-delete-f h f)
-  (cond
-    ((immutable? h) (let ((ks (filter f (hash-keys h))))
-                      (for/fold
-                        ((res-h h))
-                        ((k ks))
-                        (hash-remove res-h k))))
-    (else (hash-delete-f (make-immutable-hash (hash->list h)) f))))
-
-(define (hash-delete-all h keys)
-  (cond
-    ((empty? keys) h)
-    (else (hash-delete-all (hash-delete h (car keys)) (cdr keys)))))
-
-; (h- h 'name 'state)
-(define (h- h . keys)
-  (cond
-    ((empty? keys) h)
-    (else (apply h- (hash-delete h (car keys)) (cdr keys)))))
 
 (define (hash-substitute h1 arg)
   ;(printf "arg: ~a~n(car arg): ~a~nresulted hash: ~a~n" arg (car arg) (hash-delete h1 (car arg)))
@@ -261,96 +134,25 @@
         (hash-substitute (hash-substitute h1 (car arg)) (cdr arg))))
     (else h1)))
 
-(define (hash-group-by h field)
-  (for/fold
-    ((s (hash)))
-    (((k v) h))
-    (hash-insert-fuse
-      s
-      (cons
-        (hash-ref v field)
-        (hash k v)))))
-
 (define (hash-revert h)
   (apply hash (interleave (hash-values h) (hash-keys h))))
 
-(define (hash-insert h k v)
-  (hash-set h k v))
+(define hash-insert hash-set)
 
-;; OUTPUT
-(define-catch (hash->string
-                h
-                #:delimeter (delimeter ", ")
-                #:list-delimeter (list-delimeter ",")
-                #:prefix (prefix "")
-                #:equal-sign (equal-sign "=")
-                #:default-type (default-type 'plain)
-                #:exclude-keys (exclude-keys #f)
-                #:conversion-table (conversion-table #f))
-  (let ((hl (hash-length h))
-        (ks (sort (hash-keys h) a-z)))
-    (for/fold
-      ((s ""))
-      ((k ks) (i hl))
-      (let* (
-              (v (hash-ref h k))
-              (vp (cond
-                    ((list? v)
-                      (let ((v (cond
-                                  ((string? v) (map (λ (x) (format "\"~a\"" x)) v))
-                                  (else (map (λ (x) (str (idfy x))) v)))))
-                        (string-join v list-delimeter)))
-                    ((string? v) (str "\"" v "\""))
-                    (else (str (idfy v)))))
-            (vp (if (and conversion-table (hash-ref conversion-table vp #f))
-                      (hash-ref conversion-table vp)
-                      vp)))
-        (cond
-          ((and exclude-keys (procedure? exclude-keys) (exclude-keys k v)) s)
-          ((and exclude-keys (list? exclude-keys) (indexof? exclude-keys k)) s)
-          ((< i (dec hl)) (format "~a~a~a~a~a~a" s prefix k equal-sign vp delimeter))
-          (else (format "~a~a~a~a~a" s prefix k equal-sign vp)))))))
-
-(define (hash-print-json h #:prefix (prefix ""))
-  (format "{~a}"
-          (hash->string h #:delimeter ", " #:prefix prefix #:equal-sign ": ")))
-
-(define (print-hash format-str h)
-  (for/fold
-    ([res ""])
-    ([(k v) (in-hash h)])
-    (string-append res (format format-str k v))))
+;;;;; TODO >>>
+(define (list->hash lst header #:key-index (key-index 1) #:columns-exclude (columns-exclude null))
+  (let* ((header (remove-by-pos header key-index)))
+    (for/hash ((i lst))
+      (values
+        (nth i key-index)
+        (hash-remove-keys
+          (apply hash (interleave header (remove-by-pos i key-index)))
+          columns-exclude)))))
 
 (define (hash-remove-keys h keys)
   (cond
     ((null? keys) h)
     (else (hash-remove-keys (hash-remove h (car keys)) (cdr keys)))))
-
-(define-syntax (init-hash stx)
-  (syntax-case stx ()
-    ((_ (fields ...)) #'(make-hash (for/list ((f '(fields ...))) (cons f ""))))
-    ((_ (fields ...) init-val) #'(make-hash (for/list ((f '(fields ...))) (cons f init-val))))))
-
-(define (unify-hashes lst by-key)
-  (let loop ((res empty) (lst-rest lst))
-    (cond
-      ((empty? lst-rest) res)
-      (else
-        (let* ((cur-hash (car lst-rest))
-              (key-value (hash-ref cur-hash by-key #f))
-              (with-same-key-value (if key-value
-                                      (filter (λ (x) (equal? (hash-ref x by-key #f) key-value)) res)
-                                      #f))
-              (exist-with-same-key-value? (not (nil? with-same-key-value)))
-              (with-same-key-value (if exist-with-same-key-value? (car with-same-key-value) #f))
-              (joined-hash (if with-same-key-value
-                              (apply hash-union-c (list with-same-key-value cur-hash))
-                              cur-hash))
-              (res (if exist-with-same-key-value?
-                    (list-substitute res with-same-key-value joined-hash)
-                    (pushr res joined-hash)))
-              )
-        (loop res (cdr lst-rest)))))))
 
 (define-catch (hash-keys-substitute h original-keys subst-keys)
   (cond
@@ -362,72 +164,6 @@
             (original-value (hash-ref h original-key))
             (h (hash-union (hash subst-key original-value) (hash-delete h original-key))))
         (hash-keys-substitute h (cdr original-keys) (cdr subst-keys))))))
-
-(define (untyped-hash-ref h k)
-  (hash-ref
-    (hash-map
-      (λ (k v) (values (->string k) v))
-      h)
-    (->string k)))
-
-(define-catch (format-hash frmt h)
-  (let* ((matches (get-matches #rx"{(.+?)}" frmt)))
-    (for/fold
-      ((res frmt))
-      ((m matches))
-      (string-replace res (first m) (->string (hash-ref* h (second m)))))))
-
-;;; set operations
-(define (hash-minus h1 h2 #:e (e? equal?))
-  (let* ((k1s (hash-keys h1))
-        (k2s (hash-keys h2)))
-    (for*/fold
-      ((res (hash)))
-      ((k1 k1s) (k2 k2s))
-      (cond
-        ((and (indexof? k2s k1 e?)
-              (let* ((k2-pos (indexof k2s k1 e?))
-                    (k2 (nth k2s k2-pos)))
-                (e? (hash-ref h1 k1) (hash-ref h2 k2))))
-          ; if the same element exists in h2, don't include it in the result:
-          res)
-        (else
-          (hash-union
-            (hash k1 (hash-ref h1 k1))
-            res))))))
-
-(define (all-hash-values h)
-  (apply
-    append
-    (map
-      (λ (x) (cond
-                ((list? x) x)
-                ((scalar? x) (list x))
-                (else empty)))
-      (hash-values h))))
-
-(define (hash-mask h mask-keys)
-  (hash-filter
-    (λ (k v) (indexof? mask-keys k))
-    h))
-
-(define-catch (deep-hash-mask h mask-keys)
-  (for/fold
-    ((res (hash)))
-    (((k v) h))
-    (cond
-      ((not (indexof? mask-keys k)) res)
-      ((hash? v) (hash-union (hash k (deep-hash-mask v mask-keys)) res))
-      (else (hash-union (hash k v) res)))))
-
-(define (break-list-to-hash lst)
-  (for/hash ((e lst)) (values e e)))
-
-; (let ((a 10)) (@0 a 'b 100)) -> (hash 'a 10 'b 'b 100 100)
-(define-macro (@0 . args)
-  `(for/hash ((key ',args) (val (list ,@args)))
-    (let ((key (if (symbol-symbol? key) (eval key (make-base-namespace)) key)))
-      (values key val))))
 
 (define-catch (decart-hash ls1 ls2)
   (let* ((ls1 (listify ls1)))

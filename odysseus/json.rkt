@@ -6,8 +6,8 @@
 (require "type.rkt")
 (require "hash.rkt")
 (require "regexp.rkt")
-(require "io.rkt")
-(require "strings.rkt")
+(require "files.rkt")
+(require "string.rkt")
 
 (require json)
 

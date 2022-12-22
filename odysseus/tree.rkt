@@ -5,9 +5,9 @@
 (require "list.rkt")
 (require "hash.rkt")
 (require "debug.rkt")
-(require "strings.rkt")
+(require "string.rkt")
 (require "regexp.rkt")
-(require "io.rkt")
+(require "files.rkt")
 
 (provide (all-defined-out))
 

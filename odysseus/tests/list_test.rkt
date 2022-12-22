@@ -57,13 +57,13 @@
 (check-equal? (indexof '(11 -22 30 80 -5) 333) 0)
 (check-equal? (indexof '(11 -22 30 80 -5) -5 (λ (x y) (equal? x 30))) 3)
 
-(check-false (indexof? 'a 'd))
-(check-true (indexof? '(a b c d e f) 'a))
-(check-true (indexof? '(a b c d e f) 'd))
-(check-true (indexof? '(1 (10 1) 2) '(10 1)))
-(check-false (indexof? '(1 2 3 4 5) 6))
-(check-true (indexof? "abcdef" "d"))
-(check-false (indexof? "abcdef" "k"))
+(check-false (index-of? 'a 'd))
+(check-true (index-of? '(a b c d e f) 'a))
+(check-true (index-of? '(a b c d e f) 'd))
+(check-true (index-of? '(1 (10 1) 2) '(10 1)))
+(check-false (index-of? '(1 2 3 4 5) 6))
+(check-true (index-of? "abcdef" "d"))
+(check-false (index-of? "abcdef" "k"))
 
 (check-equal? (indexof-all "Hercules" "e") '(2 7))
 (check-equal? (indexof-all '(11 8 -22  8 30 80 -5 8) 8) '(2 4 8))
@@ -71,46 +71,35 @@
 (check-equal? (count-element '(11 8 -22  8 30 80 -5 8) 8) 3)
 (check-equal? (count-element '(1 1 1) 1) 3)
 
-(check-true (regexp-indexof? '("doo" "fowl" "island") "doo"))
-(check-true (regexp-indexof? '("doo" "fowl" "island") "i.*d"))
-(check-true (regexp-indexof? '("doo" "fowl" "island") "do{2}"))
-(check-true (regexp-indexof? '("doo" "fowl" "island") "f[oae]wl"))
-(check-false (regexp-indexof? '("doo" "fowl" "island") "baz"))
-(check-false (regexp-indexof? '("doo" "fowl" "island") "f[auy]+wl"))
-
-(check-equal? (lshift "" 10) "")
-(check-equal? (lshift "Black waters" 5) "Black")
-(check-equal? (lshift "Black waters" 0) "")
-(check-equal? (lshift "Black waters" 100) "Black waters")
-(check-equal? (lshift '(1 2 3 4 5 6 7 8 9)) '(1))
-(check-equal? (lshift '(1 2 3 4 5 6 7 8 9) 2) '(1 2))
+(check-true (regexp-index-of? '("doo" "fowl" "island") "doo"))
+(check-true (regexp-index-of? '("doo" "fowl" "island") "i.*d"))
+(check-true (regexp-index-of? '("doo" "fowl" "island") "do{2}"))
+(check-true (regexp-index-of? '("doo" "fowl" "island") "f[oae]wl"))
+(check-false (regexp-index-of? '("doo" "fowl" "island") "baz"))
+(check-false (regexp-index-of? '("doo" "fowl" "island") "f[auy]+wl"))
 
 (check-equal? (lpop '(1 2 3 4 5 6 7 8 9)) 1)
 (check-equal? (first-seq "Andromachus") "A")
 
-(check-equal? (ltrim "" 10) "")
-(check-equal? (ltrim "Oslo god morgen" 0) "Oslo god morgen")
-(check-equal? (ltrim "Oslo god morgen") "slo god morgen")
-(check-equal? (ltrim "Oslo god morgen" 10) "orgen")
-(check-equal? (ltrim "Oslo god morgen" 100) "")
-(check-equal? (ltrim "Oslo god morgen" -5) "") ; add contract!
-(check-equal? (ltrim '(1 2 3 4 5 6 7 8 9) 2) '(3 4 5 6 7 8 9))
+(check-equal? (drop* "" 10) "")
+(check-equal? (drop* "Oslo god morgen" 0) "Oslo god morgen")
+(check-equal? (drop* "Oslo god morgen") "slo god morgen")
+(check-equal? (drop* "Oslo god morgen" 10) "orgen")
+(check-equal? (drop* "Oslo god morgen" 100) "")
+(check-equal? (drop* "Oslo god morgen" -5) "") ; add contract!
+(check-equal? (drop* '(1 2 3 4 5 6 7 8 9) 2) '(3 4 5 6 7 8 9))
 
-(check-equal? (lpush '() 100) '(100))
-(check-equal? (lpush '(1 2 3) 100) '(100 1 2 3))
-(check-equal? (lpush '((1 2 3)) '(100 200)) '((100 200) (1 2 3)))
-(check-equal? (lpush '(1 2) 3 4 5) '(5 4 3 1 2))
-(check-equal? (pushl '(1 2) 3 4 5) '(5 4 3 1 2))
+(check-equal? (list-conj '() 100) '(100))
+(check-equal? (list-conj '(1 2 3) 100) '(100 1 2 3))
+(check-equal? (list-conj '((1 2 3)) '(100 200)) '((100 200) (1 2 3)))
+(check-equal? (list-conj '(1 2) 3 4 5) '(5 4 3 1 2))
 
-(check-equal? (lpush-unique '(1 2 3) 100) '(100 1 2 3))
-(check-equal? (lpush-unique '(1 2 3) 3) '(1 2 3))
+(check-equal? (pushl-unique '(1 2 3) 100) '(100 1 2 3))
+(check-equal? (pushl-unique '(1 2 3) 3) '(1 2 3))
 
-(check-equal? (rshift "" 10) "")
-(check-equal? (rshift "Black waters" 3) "ers")
-(check-equal? (rshift "Black waters" 0) "")
-(check-equal? (rshift "Black waters" 100) "Black waters")
-(check-equal? (rshift '(1 2 3 4 5 6 7 8 9)) '(9))
-(check-equal? (rshift '(1 2 3 4 5 6 7 8 9) 2) '(8 9))
+
+(check-equal? (take-right* '(1 2 3 4 5 6 7 8 9)) '(9))
+(check-equal? (take-right* '(1 2 3 4 5 6 7 8 9) 2) '(8 9))
 
 (check-equal? (rpop '(1 2 3 4 5 6 7 8 9)) 9)
 ; (check-equal? (last "Andromachus") "s")
@@ -123,15 +112,15 @@
 (check-equal? (rtrim '(1 2 3 4 5 6 7 8 9) 2) '(1 2 3 4 5 6 7))
 (check-equal? (rtrim '(1 2 3 4 5 6 7 8 9) 0) '(1 2 3 4 5 6 7 8 9))
 
-(check-equal? (rpush '() 100) '(100))
-(check-equal? (rpush '(1 2 3) 100) '(1 2 3 100))
-(check-equal? (rpush '(1 2 3) 3) '(1 2 3 3))
+(check-equal? (pushr '() 100) '(100))
+(check-equal? (pushr '(1 2 3) 100) '(1 2 3 100))
+(check-equal? (pushr '(1 2 3) 3) '(1 2 3 3))
 (check-equal? (pushr '(1 2 3) 3) '(1 2 3 3))
 (check-equal? (pushr '(1) 2 3 4) '(1 2 3 4))
 (check-equal? (pushr '(1) 2 '(3 4)) '(1 2 (3 4)))
 
-(check-equal? (rpush-unique '(1 2 3) 100) '(1 2 3 100))
-(check-equal? (rpush-unique '(1 2 3) 3) '(1 2 3))
+(check-equal? (pushr-unique '(1 2 3) 100) '(1 2 3 100))
+(check-equal? (pushr-unique '(1 2 3) 3) '(1 2 3))
 
 (check-equal? (slice "" 1 3) "")
 (check-equal? (slice "Oslo god morgen" 3 1) "")
@@ -162,10 +151,7 @@
 
 (check-equal? (concat '(1 2 3 4) '(100 200) '("a" "b")) '((1 2 3 4) (100 200) ("a" "b")))
 
-(check-equal? (splice
-  "Tell me, of that ingenious hero" "O muse, " 10)
-  "Tell me, O muse, of that ingenious hero")
-(check-equal? (splice '(1 2 3 4 5 6) '(100 200) 3) '(1 2 100 200 3 4 5 6))
+(check-equal? (splice '(1 2 3 4 5 6) '(100 200) 3) '(1 2 3 100 200 4 5 6))
 
 (check-equal? (remove-by-pos "Agamemnon" 4) "Agaemnon")
 (check-equal? (remove-by-pos "Agamemnon" 5 8) "Agamn")

@@ -190,7 +190,7 @@
   (hash 'a 10 'b 20 'c 40))
 
 (check-hash-equal?
-  (hash-delete-f (hash 'aa 1 'ab 2 'b 20 'c 40) (λ (k) (indexof? '(aa ab) k)))
+  (hash-delete-f (hash 'aa 1 'ab 2 'b 20 'c 40) (λ (k) (index-of? '(aa ab) k)))
   (hash 'b 20 'c 40))
 
 ; hash-delete-all

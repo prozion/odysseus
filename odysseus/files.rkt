@@ -65,7 +65,7 @@
 (define (write-file-to-dir #:file file #:dir dir v)
   ; first try thinking that dir is relative, then absolute path, if both are not directories then write to current-directory
   (let* (
-          [dir-parts (split dir "/")]
+          [dir-parts (string-split dir "/")]
           ; find and create non-existing directories
           (_ (let loop ((existed empty) (nonexisted dir-parts))
                                   (cond ((empty? nonexisted) 'end)

@@ -22,7 +22,7 @@
     ((i lst))
     (if (member i res)
       res
-      (rpush res i))))
+      (pushr res i))))
 
 (define (opt/uniques/unordered lst)
   (hash-keys
@@ -47,12 +47,6 @@
              ))))
     (apply string-append res-lst)))
 
-(define (opt/exclude-all seq el)
-  (cond
-    ((string? seq)
-        (string-replace seq el ""))
-    (else (exclude-all seq el))))
-
 (define (opt/split seq sep)
   (cond
     ((string? seq)
@@ -62,7 +56,7 @@
                     (string-append seq sep)
                     seq)))
         (string-split seq sep)))
-    (else (split seq sep))))
+    (else (string-split seq sep))))
 
 (define (opt/difference seq1 seq2)
   (set-symmetric-difference seq2 (reverse seq1)))

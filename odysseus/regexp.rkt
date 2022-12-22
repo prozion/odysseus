@@ -13,19 +13,19 @@
   (cond
     ((re? x) x)
     ((string? x) (pregexp x))
-    (else (pregexp (str x)))))
+    (else (pregexp (~a x)))))
 
 (define (->re x)
   (cond
     ((re? x) x)
     ((string? x) (regexp x))
-    (else (regexp (str x)))))
+    (else (regexp (~a x)))))
 
 (define (re-matches? re astr)
   (true? (regexp-match (->pre re) astr)))
 
 (define (re-full-matches? re astr)
-  (true? (re-matches? (str "^" re "$") astr)))
+  (true? (re-matches? (~a "^" re "$") astr)))
 
 (define-catch (get-matches re astr)
   (let ((re (->re re)))

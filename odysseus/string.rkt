@@ -17,56 +17,54 @@
       (λ (x) txt)
       (range 0 n))))
 
+(define not-empty-string? non-empty-string?)
+(define empty-string? (negate non-empty-string?))
+
 ; extended version of substring
-(define-catch (substring* txt start (end #f))
+(define-catch (substring* txt start (end (string-length txt)))
   (let* ((len (string-length txt))
-        (start (if (negative? start) (+ len start 1) start))
-        (end (if (not end) len end))
-        (end (if (negative? end) (+ len end 1) end)))
-    (if (< end len)
-      (substring txt start end)
-      (substring txt start))))
+        (start (if (< start 0) (+ len start) start))
+        (end (if (> end len) len end))
+        (end (if (and end (< end 0)) (+ len end) end)))
+    (cond
+      ((empty-string? txt)
+        txt)
+      (else
+        (substring txt start end)))))
 
-(define-catch (string-first s)
-  (and
-    (non-empty-string? s)
-    (substring* s 0 1)))
+(define (string-take s n)
+  (substring* s 0 n))
 
-(define-catch (string-last s)
-  (and
-    (non-empty-string? s)
-    (substring* s -1)))
+(define (string-take-right s n)
+  (let ((len (string-length s)))
+    (substring* s (- len n))))
+
+(define (string-drop s n)
+  (substring* s n))
+
+(define (string-drop-right s n)
+  (let ((len (string-length s)))
+    (substring* s 0 (- len n))))
+
+(define (string-first s)
+  (string-take s 1))
+
+(define (string-last s)
+  (string-take s -1))
 
 (define (string-rest s)
-  (and
-    (non-empty-string? s)
-    (not (letter? s))
-    (substring s 1)))
+  (string-drop s 1))
+
+(define string-remove (curryr string-replace ""))
 
 (define (string-explode s)
   (filter-not non-empty-string? (string-split s "")))
 
-(define (str/escape s (escapees empty))
-  (let ((replace-syms (merge (list "\\" "\"") escapees)))
-    (for/fold
-      ((res s))
-      ((sym replace-syms))
-      (string-replace s sym (str "\\" sym)))))
+(define (string-splice s ss pos)
+  (string-append (string-take s pos) ss (string-drop s pos)))
 
-(define (strnumber->number x)
-  (cond
-    ((number? x) x)
-    ((string? x)
-      (let* (
-            (res (re-substitute x '("," " ") '("." "")))
-            (res (bytes->list (string->bytes/utf-8 res)))
-            (res (exclude-all (exclude-all res 160) 194))
-            (res (bytes->string/utf-8 (list->bytes res)))
-            (res (string->number res))
-            (res (if res res 0)))
-        res))
-    ((false? x) 0)
-    (else x)))
+(define (string-reverse s)
+  (list->string (reverse (string->list s))))
 
 (define (format-number format-str number #:filler (filler ""))
   (define (format-number-iter format-str number-str res-str)
@@ -82,7 +80,7 @@
             (cond
               ((equal? cur-f "d") (format-number-iter (cdr format-str) (cdr number-str) (str cur-d res-str)))
               (else (format-number-iter (cdr format-str) number-str (str cur-f res-str))))))))
-  (format-number-iter (reverse (split format-str)) (reverse (split (->string number))) ""))
+  (format-number-iter (reverse (string-explode format-str)) (reverse (string-explode (->string number))) ""))
 
 (define (format-string format-str s #:filler (filler ""))
   (define (format-string-iter format-str s res-str)
@@ -96,27 +94,18 @@
             (cond
               ((equal? cur-f "c") (format-string-iter (cdr format-str) (if (empty? s) empty (cdr s)) (str res-str cur-c)))
               (else (format-string-iter (cdr format-str) s (str res-str cur-f))))))))
-(format-string-iter (split format-str) (split (->string s)) ""))
+(format-string-iter (string-explode format-str) (string-explode (->string s)) ""))
 
 (define-macro (when/str condition . expression)
   `(if ,condition (string-append ,@expression) ""))
 
 (define (title-case? s)
-  (let ((s (if (symbol? s) (symbol->string s) s)))
-    (re-matches? "^[A-ZА-Я].*" s)))
+  (re-matches? "^[A-ZА-Я].*" s))
 
 (define-catch (titlefy s)
   (string-append
-    (string-upcase (nth s 1))
-    (triml s)))
-
-(define-catch (titlefy-if-sentence s)
-  (if (string-contains? s " ")
-    (titlefy s)
-    s))
-
-(define (mstring->string s)
-  (string-replace s "\n" " "))
+    (string-upcase (string-first s))
+    (string-drop s 1)))
 
 (define (count-tabs line (sym "\t"))
 	(let loop ((count 0) (line (string-explode line)))
@@ -125,12 +114,12 @@
 			(else count))))
 
 (define (word-sum word)
-  (let ((en-letters (string-explode "abcdefghijklmnopqrstuvwxyz"))
-        (ru-letters (string-explode "абвгдеёжзиклмнопрстуфхцчшщъыьэюя")))
+  (let ((en-letters (string-explode " abcdefghijklmnopqrstuvwxyz"))
+        (ru-letters (string-explode " абвгдеёжзиклмнопрстуфхцчшщъыьэюя")))
     (for/fold
       ((res 0))
       ((w (string-explode word)))
-      (+ res (indexof en-letters w) (indexof ru-letters w)))))
+      (+ res (index-of en-letters w) (index-of ru-letters w)))))
 
 (define (no-words? s)
   (or
@@ -150,11 +139,6 @@
                     (cons "_" " ")
                     (cons "'" "\"")
                     (cons #px"(?<=\\S),(?=\\S)" ", "))))
-
-(define (empty-string? s)
-  (or
-    (not s)
-    (equal? s "")))
 
 (define (letter? s)
   (= (string-length s) 1))
@@ -177,7 +161,7 @@
 (define-catch (cyr? letter)
   (and
     (letter? letter)
-    (indexof? cyr-letters letter)))
+    (index-of cyr-letters letter)))
 
 (define (а-яa-z a b)
   (let* (
@@ -197,10 +181,6 @@
             (а-яa-z (string-rest a) (string-rest b)))))
       (else (string<? a b)))))
 
-(define string-first string-first)
-
-(define string-rest string-rest)
-
 (define (a-z a b) (string<? (string-downcase (->string a)) (string-downcase (->string b))))
 (define (z-a a b) (string>? (string-downcase (->string a)) (string-downcase (->string b))))
 (define (A-Za-z a b)
@@ -217,49 +197,27 @@
 (define-catch (0-9 a b)
   (< (->number a) (->number b)))
 
-(define-catch (take-one s #:f (f car) #:delimeter (delimeter ","))
-  (cond
-    ((equal? s "") "")
-    (else
-      (f (string-split (->string s) delimeter)))))
+(define-catch (string-take-word s f delimeter)
+  (if (empty-string? s "")
+    s
+    (f (string-split s delimeter))))
 
-(define-catch (take-last s #:f (f (λ (x) (and (not-empty? x) (last x)))) #:delimeter (delimeter ","))
-  (f (string-split (->string s) delimeter)))
+(define (string-first-word s (delimeter ","))
+  (string-take-word s first delimeter))
 
-(define-catch (string-ltrim s num)
-  (cond
-    ((not (string? s)) s)
-    ((< (string-length s) num) s)
-    (else (substring s 0 num))))
+(define (string-last-word s (delimeter ","))
+  (string-take-word s last delimeter))
 
-(define (starts-with? s one-char-string)
-  (equal? (nth s 1) one-char-string))
-
-; "foobar" -> "fooobar"
-; "foo bar" -> "\"foo bar\""
-(define-catch (quotate-if-sentence s)
-  (cond
-    ((re-matches? " " s) (format "\"~a\"" s))
-    (else s)))
-
-(define-catch (remove-extra-whitespaces s)
-  (string-replace s #px"\\s\\s+" " "))
-
-; either a or b is a substring of the counterpart
-(define-catch (symmetric-substring? a b)
-  (let* (
-        (a (string-downcase a))
-        (b (string-downcase b))
-        (a_length (string-length a))
-        (b_length (string-length b)))
-    (if (> a_length b_length)
-      (string-contains? a b)
-      (string-contains? b a))))
-
-(define (string-reverse s)
-  (cond (string? s)
-    (implode (reverse (string-explode s)))
-  (else (error (format "~a is not a string" s)))))
+(define starts-with? string-prefix?)
 
 (define (string-sha s)
   (bytes->hex-string (sha1 (string->bytes/utf-8 s))))
+
+(define (random-word size #:prefix (prefix ""))
+  (let* ((letters "abcdefghijklmnopqrstuvwxyz")
+        (letters (map string (string->list letters))))
+    (define (random-word-iter size result)
+      (if (<= size 0)
+        result
+        (random-word-iter (sub1 size) (string-append result (list-ref letters (random (length letters)))))))
+    (string-append prefix (random-word-iter size ""))))

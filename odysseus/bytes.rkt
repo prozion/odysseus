@@ -16,7 +16,7 @@
   (let* ((chunks (partition-all b byte-size))
         (chunks (if (equal? char-mode 'big) (map reverse chunks) chunks))
         (chunks (if (equal? word-mode 'big) (reverse chunks) chunks)))
-    (apply merge chunks)))
+    (apply append chunks)))
 
 (define (normal-bits->bits b #:char-mode (char-mode 'little) #:word-mode (word-mode 'little) #:byte-size (byte-size 8))
   (bits->normal-bits b #:char-mode char-mode #:word-mode word-mode #:byte-size byte-size))
@@ -39,7 +39,7 @@
       (else (fi (quotient d 2) (pushr res (remainder d 2))))))
   (let ((r (fi d (list))))
     (if (and bit-span (< (length r) bit-span))
-          (merge r (gen 0 (- bit-span (length r))))
+          (append r (gen 0 (- bit-span (length r))))
           r)))
 
 (define (bytes->normal-bits b #:word-mode (word-mode 'little) #:char-mode (char-mode 'little))
@@ -51,7 +51,7 @@
                     (char->normal-bits x)))
                 (bytes->list b)))
           (op2 (if (equal? word-mode 'big) (reverse op1) op1)))
-    (apply merge op2)))
+    (apply append op2)))
 
 ;;;;;;;;
 

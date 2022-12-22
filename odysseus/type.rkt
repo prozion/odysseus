@@ -130,7 +130,7 @@
       (let* ((filtered (string-replace x (regexp ",") "."))
             (filtered (filter
                         (λ (x) (or (string->number x) (equal? x ".")))
-                        (string-explode filtered)))
+                        (filter-not non-empty-string? (string-split filtered ""))))
             (filtered (if (empty? filtered) #f (implode filtered))))
         (and filtered (+ delta (string->number filtered)))))
     (else x)))
@@ -172,7 +172,7 @@
     (else (if (equal? (->string x) "#f") #f #t))))
 
 (define (atom? x)
-  (indexof? '(number string) (type x)))
+  (index-of? '(number string) (type x)))
 
 (define (alist? lst)
   (define (list-of-2? lst)

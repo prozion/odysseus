@@ -13,6 +13,11 @@
 (check-equal? (dupstr "a" 5) "aaaaa")
 (check-equal? (dupstr "foo " 3) "foo foo foo ")
 
+(check-equal? (string-take "" 10) "")
+(check-equal? (string-take "Black waters" 5) "Black")
+(check-equal? (string-take "Black waters" 0) "")
+(check-equal? (string-take "Black waters" 100) "Black waters")
+
 (check-equal? (strnumber->number "3") 3)
 (check-= (strnumber->number "3,0") 3.0 1e-6)
 (check-= (strnumber->number "2 100,50") 2100.5 1e-6)
@@ -51,7 +56,6 @@
 
 (check-true (no-words? ""))
 (check-true (no-words? " "))
-(check-true (no-words? #f))
 (check-false (no-words? "s"))
 (check-false (no-words? "  s"))
 (check-false (no-words? "  a"))
@@ -65,12 +69,21 @@
 (check-equal? (sort '("a" b "cd" "c" "aa" 1 2) a-z) '(1 2 "a" "aa" b "c" "cd"))
 (check-equal? (sort '("a" b "cd" "c" "aa" 1 2) z-a) (reverse '(1 2 "a" "aa" b "c" "cd")))
 
-(check-equal? (take-one "") "")
-(check-equal? (take-one "foo,bar") "foo")
-(check-equal? (take-one "foo,bar" #:f second) "bar")
-(check-equal? (take-one "foo;bar") "foo;bar")
-(check-equal? (take-one "foo;bar" #:delimeter ";") "foo")
-(check-equal? (take-one "foo;bar;baz" #:delimeter ";" #:f (λ (x) (string-append (second x) (third x)))) "barbaz")
+(check-equal? (string-take-right "" 10) "")
+(check-equal? (string-take-right "Black waters" 3) "ers")
+(check-equal? (string-take-right "Black waters" 0) "")
+(check-equal? (string-take-right "Black waters" 100) "Black waters")
+
+(check-equal? (string-first-word "") "")
+(check-equal? (string-first-word "foo,bar") "foo")
+(check-equal? (string-first-word "foo,bar" #:f second) "bar")
+(check-equal? (string-first-word "foo;bar") "foo;bar")
+(check-equal? (string-first-word "foo;bar" #:delimeter ";") "foo")
+(check-equal? (string-first-word "foo;bar;baz" #:delimeter ";" #:f (λ (x) (string-append (second x) (third x)))) "barbaz")
+
+(check-equal? (string-splice
+  "Tell me, of that ingenious hero" "O muse, " 10)
+  "Tell me, O muse, of that ingenious hero")
 
 (check-true (starts-with? "Hector" "H"))
 (check-false (starts-with? "Hector" "h"))

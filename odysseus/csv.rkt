@@ -1,6 +1,6 @@
 #lang racket
 
-(require "../main.rkt")
+(require "main.rkt")
 (require compatibility/defmacro)
 
 (provide (all-defined-out))
@@ -9,10 +9,10 @@
 
 (define-catch (csv->list-rows csv-str #:delimeter (delimeter ","))
   (let* (
-        (csv-str (opt/exclude-all csv-str "\r")))
+        (csv-str (string-remove csv-str "\r")))
     (map
-      (λ (x) (opt/split x delimeter))
-      (opt/split csv-str "\n"))))
+      (λ (x) (string-split x delimeter))
+      (string-split csv-str "\n"))))
 
 (define-catch (csv-file->list-rows filename #:delimeter (delimeter ","))
   (csv->list-rows (read-file filename) #:delimeter delimeter))
@@ -20,9 +20,9 @@
 (define-catch (csv-file->list-columns filename #:delimeter (delimeter ",") #:headers (headers #t))
   (let ((first-break-list (csv-file->list-rows filename #:delimeter delimeter)))
     (if headers
-      (merge  (list (first first-break-list))
+      (append  (list (first first-break-list))
               (transpose (rest first-break-list)))
-      (push   empty
+      (cons   empty
               (transpose first-break-list)))))
 
 (define-catch (csv->hash csv-str #:delimeter (delimeter ",") #:headers (headers #t) #:key-index (key-index 1) #:columns-exclude (columns-exclude null))
@@ -43,7 +43,7 @@
           (h (if (not headers)
                 (range 1 (inc (length (first content))))
                 (map ->symbol (first content))))
-          (_ (when-not (indexof? h id) (errorf "'~a' is not a field in a given CSV file, failed to detect id field" id)))
+          (_ (when-not (index-of? h id) (errorf "'~a' is not a field in a given CSV file, failed to detect id field" id)))
           (content (if (not headers) content (rest content)))
           (content (filter-not empty? content))
           ; make list of hashes from list of list of values

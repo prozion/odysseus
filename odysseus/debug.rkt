@@ -1,7 +1,7 @@
 #lang racket
 
 (require compatibility/defmacro)
-(require (for-syntax "strings.rkt" racket/match))
+(require (for-syntax "string.rkt" racket/match))
 
 (provide (all-defined-out))
 

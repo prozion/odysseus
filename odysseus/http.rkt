@@ -4,7 +4,7 @@
 (require net/base64)
 (require "regexp.rkt")
 (require "list.rkt")
-(require "io.rkt")
+(require "files.rkt")
 (require (for-syntax "list.rkt" "debug.rkt" racket/format))
 (require compatibility/defmacro)
 
@@ -28,12 +28,12 @@
     astr
     (second percent-encoding-table)
     (map
-      (λ (x) (exclude-all x "\\"))
+      (λ (x) (string-remove x "\\"))
       (first percent-encoding-table))))
 
 (define (string->base64 astr)
   (string->bytes/utf-8
-    (rtrim
+    (drop-right
       (bytes->string/utf-8 (base64-encode (string->bytes/utf-8 astr)))
       3)))
 
@@ -57,7 +57,7 @@
 ; "https://oauth.vk.com/authorize?client_id=client_id&redirect_uri=&display=page&scope=2080223&response_type=token&v=5.74&state=odysseus"
 (define-macro (url-with-parameters base-url . args)
   (let* ((pairs (map (λ (x) (list 'cons (~a x) x)) args))
-        (pairs (pushl pairs 'list)))
+        (pairs (list-conj pairs 'list)))
     `(string-append
       ,base-url
       "?"

@@ -7,7 +7,7 @@
 (require "type.rkt")
 (require "hash.rkt")
 (require "debug.rkt")
-(require "io.rkt")
+(require "files.rkt")
 
 (provide (all-defined-out))
 
@@ -30,9 +30,9 @@
         (for/and
           ((k1 k1s))
           (and
-            (indexof? k2s k1 same-elements?)
-            (let* ((position (indexof k2s k1 same-elements?))
-                  (k2 (nth k2s position)))
+            (index-of? k2s k1 same-elements?)
+            (let* ((position (index-where k2s (curry same-elements? k1)))
+                  (k2 (list-ref k2s position)))
               (equal? (hash-ref h1 k1) (hash-ref h2 k2))))))
       (list-any-order?
         (and (same-elements? k1s k2s) (same-elements? v1s v2s))) ; in the case we don't care about elements order in the lists. Although doesn't work for cross-permutations yet
@@ -42,23 +42,8 @@
           (for/and
             ((k1 k1s))
             (and
-              (indexof? k2s k1)
-              (equal? (hash-ref h1 k1) (hash-ref h2 (nth k2s (indexof k2s k1)))))))))))
-
-; (define (check-hash-iso h1 h2 #:list-any-order? (list-any-order? #f))
-;   (let* ((k1s (hash-keys h1))
-;         (k2s (hash-keys h2))
-;         (v1s (hash-values h1))
-;         (v2s (hash-values h2)))
-;     (if list-any-order?
-;       (and (same-elements? k1s k2s #:e iso?) (same-elements? v1s v2s #:e iso?)) ; in the case we don't care about elements order in the lists. Although doesn't work for cross-permutations yet
-;       (and
-;         (same-elements? k1s k2s iso?) ; no extra unchecked keys neither at k1s nor at k2s
-;         (for/and
-;           ((k1 k1s))
-;           (and
-;             (indexof? k2s k1)
-;             (same-elements? (hash-ref h1 k1) (hash-ref h2 (nth k2s (indexof k2s k1))) iso?)))))))
+              (index-of? k2s k1)
+              (equal? (hash-ref h1 k1) (hash-ref h2 (list-ref k2s (index-of k1s k1)))))))))))
 
 (define-macro (check-hash-equal? h1 h2)
   `(check-true
@@ -116,4 +101,4 @@
 (define-macro (check-speed expr high-limit)
   `(if (> (benchmark ,expr) (* ,high-limit SPEED-UNIT))
     (printf "~a - running time exceeds ~a speed units~n" ',expr ,high-limit)
-    (void)))      
+    (void)))

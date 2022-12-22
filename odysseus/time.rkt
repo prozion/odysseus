@@ -5,21 +5,21 @@
 (require "hash.rkt")
 (require "list.rkt")
 (require "math.rkt")
-(require "strings.rkt")
+(require "string.rkt")
 (require "regexp.rkt")
 (require "debug.rkt")
-(require "io.rkt")
+(require "files.rkt")
 
 (provide (all-defined-out))
 
 ;;;; basic data for functions
 
 (define days '(31 28 31 30 31 30 31 31 30 31 30 31))
-(define months (split "jan feb mar apr may jun jul aug sep oct nov dec" " "))
-(define months-full (split "january february march april may june july august september october november december" " "))
-(define months-ru (split "янв фев мар апр май июн июл aвг сен окт ноя дек" " "))
-(define months-ru-full (split "январь февраль март апрель май июнь июль август сентябрь октябрь ноябрь декабрь" " "))
-(define months-ru-full-genetive (split "января февраля марта апреля мая июня июля aвгуста сентября октября ноября декабря" " "))
+(define months (string-split "jan feb mar apr may jun jul aug sep oct nov dec" " "))
+(define months-full (string-split "january february march april may june july august september october november december" " "))
+(define months-ru (string-split "янв фев мар апр май июн июл aвг сен окт ноя дек" " "))
+(define months-ru-full (string-split "январь февраль март апрель май июнь июль август сентябрь октябрь ноябрь декабрь" " "))
+(define months-ru-full-genetive (string-split "января февраля марта апреля мая июня июля aвгуста сентября октября ноября декабря" " "))
 (define leap-days '(31 29 31 30 31 30 31 31 30 31 30 31))
 
 (define (acc-days d)
@@ -37,7 +37,7 @@
   (hash 'day day 'month month 'year year))
 
 (define (time->seconds astr)
-  (let* ( (time-units (split astr ":"))
+  (let* ( (time-units (string-split astr ":"))
           (seconds (string->number (last time-units)))
           (minutes (string->number (if (null? (nth time-units -2)) "0" (nth time-units -2))))
           (hours (string->number (if (null? (nth time-units -3)) "0" (nth time-units -3)))))
@@ -125,7 +125,7 @@
       ; general limits on days and months
       ((or (> day 31) (> month 12)) #f)
       ; check 31 and 30 days in month
-      ((and (= day 31) (indexof? '(2 4 6 9 11) month)) #f)
+      ((and (= day 31) (index-of? '(2 4 6 9 11) month)) #f)
       ; check for 29 February in a non-leap year
       ((and (not (leap-year? year)) (= 29 day) (= 2 month)) #f)
       ; if no checks triggered, consider d a valid date
@@ -213,8 +213,8 @@
   (abs (date-diff d1 d2)))
 
 (define (month-diff m1 m2)
-  (let* ((m1 (split m1 "."))
-        (m2 (split m2 "."))
+  (let* ((m1 (string-split m1 "."))
+        (m2 (string-split m2 "."))
         (m1-month (->number (first m1)))
         (m1-year (->number (second m1)))
         (m2-month (->number (first m2)))
@@ -306,10 +306,10 @@
 ; 2017-01-19T18:00:00 -> (hash 'year "2017" 'month "01" 'day "19" 'hour "18" 'min "00" 'sec "00")
 (define (parse-time timestr)
   (let* (
-        (ts (first (split timestr "+"))) ; exclude time zone
-        (ts (split ts "T"))
-        (t1s (split (nth ts 1) "-"))
-        (t2s (split (nth ts 2) ":"))
+        (ts (first (string-split timestr "+"))) ; exclude time zone
+        (ts (string-split ts "T"))
+        (t1s (string-split (nth ts 1) "-"))
+        (t2s (string-split (nth ts 2) ":"))
         (year (nth t1s 1))
         (month (nth t1s 2))
         (day (nth t1s 3))
@@ -355,13 +355,13 @@
   (seconds->datestr (current-seconds)))
 
 (define (current-day)
-  (nth (string-split (current-date) ".") 1))
+  (list-ref (string-split (current-date) ".") 0))
 
 (define (current-month)
-  (nth (string-split (current-date) ".") 2))
+  (list-ref (string-split (current-date) ".") 1))
 
 (define (current-year)
-  (nth (string-split (current-date) ".") 3))
+  (list-ref (string-split (current-date) ".") 2))
 
 (define (dd.mm.yyyy->yyyy-mm-dd date-string)
   (let* ((t (string-split date-string "."))
@@ -374,7 +374,7 @@
   (let* ((parts (get-matches
                   #px"([0-9x]{2}).([0-9x]{2})(.([0-9x]{4}[~?]?))?"
                   datestr))
-        (parts (if (notnil? parts) (car parts) #f)))
+        (parts (if (not-nil? parts) (car parts) #f)))
     (if parts
       (str (second parts) "." (third parts))
       "")))
@@ -411,13 +411,13 @@
     (+ atime (date->seconds adate))))
 
 (define (dtstr->dstr datetime)
-  (take-one datetime #:delimeter " "))
+  (string-first-word datetime #:delimeter " "))
 
 (define-catch (vk->date vk-datestr)
   (cond
     ((or (not vk-datestr) (equal? vk-datestr "")) #f)
     (else
-      (let* ((parts (split vk-datestr "."))
+      (let* ((parts (string-split vk-datestr "."))
             (dd (car parts))
             (dd (format-number "dd" dd #:filler "0"))
             (parts (cdr parts))
@@ -535,13 +535,13 @@
     ((0) 'sun)))
 
 (define-catch (holiday? datestr)
-  (indexof? '(sat sun) (weekday datestr)))
+  (index-of? '(sat sun) (weekday datestr)))
 
 (define-catch (long-month? mon)
-  (indexof? (list "01" "03" "05" "07" "08" "10" "12") mon))
+  (index-of? (list "01" "03" "05" "07" "08" "10" "12") mon))
 
 (define-catch (short-month? mon)
-  (indexof? (list "04" "06" "09" "11") mon))
+  (index-of? (list "04" "06" "09" "11") mon))
 
 (define (february? mon)
   (equal? "02" mon))

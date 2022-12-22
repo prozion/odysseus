@@ -1,7 +1,7 @@
 #lang racket
 
 (require rackunit)
-(require "list.rkt")
+(require "../list.rkt")
 (require "../bytes.rkt")
 
 (check-equal? (bytes-slice #"\100\0\2\1\20" 2 4) #"\0\2\1")
