@@ -3,6 +3,7 @@
 (require "base.rkt")
 (require "controls.rkt")
 (require "list.rkt")
+(require "string.rkt")
 (require "type.rkt")
 (require "debug.rkt")
 
@@ -38,10 +39,10 @@
   (string->number (str "#x" v)))
 
 ; 162 -> "a2"
-(define  (dec->hex v)
+(define (dec->hex v)
   (define (next-hex v)
     (let ((hex "0123456789abcdef"))
-      (nth hex (add1 (% v 16)))))
+      (string-ref hex (% v 16))))
   (define (dec->hex-r v)
     (cond
       ((= v 0) "")

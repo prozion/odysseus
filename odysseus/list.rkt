@@ -16,8 +16,9 @@
     ((s lst))
     (string-append res s "\n")))
 
-(define (implode lst (sep ""))
-  (apply string-append (add-between lst sep)))
+(define-catch (implode lst (sep ""))
+  (->> lst ((swap add-between) sep) (map ~a) (apply string-append)))
+  ; (apply string-append (map ~a (add-between lst sep))))
 
 (define (interleave l1 l2)
   (define (interleave-iter l1 l2 lres)
@@ -34,17 +35,26 @@
 (define (list-ref* lst index)
   (let ((len (length lst)))
     (cond
-      ((< index 0) (list-ref* lst (+ len index)))
-      ((> index (sub1 len)) (list-ref* lst (- index len)))
+      ((< (+ len index) 0) #f)
+      ((>= index len) #f)
+      ((< index 0) (list-ref lst (+ len index)))
       (else (list-ref lst index)))))
 
 ; for backward code compatibility:
 (define (nth lst index)
-  (list-ref* lst (add1 index)))
+  (cond
+    ((empty? lst)
+      #f)
+    ((= index 0)
+      #f)
+    ((< index 0)
+      (list-ref* lst index))
+    (else
+      (list-ref* lst (sub1 index)))))
 
-(define (indexof lst el)
+(define (indexof lst el (f equal?))
   (add1 (or
-          (index-of lst el)
+          (index-of lst el f)
           -1)))
 
 (define index-of? (combine not (curry equal? #f) index-of))
@@ -62,7 +72,7 @@
     lst))
 
 ; defensive take
-(define (take* lst (count 1))
+(define-catch (take* lst (count 1))
   (let ((len (length lst)))
     (cond
       ((empty? lst)
@@ -74,7 +84,7 @@
       (else
         (take lst count)))))
 
-(define (drop* lst (count 1))
+(define-catch (drop* lst (count 1))
   (let ((len (length lst)))
     (cond
       ((empty? lst)
@@ -98,6 +108,13 @@
   (cond
     ((empty? els) lst)
     (else (apply list-conj (cons (car els) lst) (cdr els)))))
+
+(define-catch (list-remove-by-pos lst pos)
+  (cond
+    ((>= pos (length lst))
+      lst)
+    (else
+      (append (take lst pos) (drop lst (add1 pos))))))
 
 ;; slice inclusively: slice c f -> a b [c d e f] g
 (define (slice lst pos1 (pos2 (length lst)))
@@ -165,11 +182,12 @@
   (empty? (unique-difference seq1 seq2)))
 
 (define (equal-set? seq1 seq2 (deep #f))
+  ; (set=? (apply set seq1) (apply set seq2)))
   (cond
     ((empty? seq1) (empty? seq2))
     ((empty? seq2) (empty? seq1))
     ((index-of? seq2 (car seq1))
-      (equal-set? (cdr seq1) (remove* (list (car seq1)) seq2)))
+      (equal-set? (cdr seq1) (remove (car seq1) seq2)))
     (else #f)))
 
 (define (deep-equal-set? seq1 seq2)
@@ -206,21 +224,11 @@
     ((null? (cdr (car llst))) (list (flatten llst)))
     (else (append (list (flatten (map car llst))) (transpose (map cdr llst))))))
 
-(define (cleanmap seqs)
-  (filter-not false? seqs))
+(define (cleanmap seq)
+  (filter-not false? seq))
 
-(define (append-unique lst . seqs)
-  (cond
-    ((empty? seqs) lst)
-    (else
-      (apply
-        (curry
-          append-unique
-          (for/fold
-            ((res lst))
-            ((s (car seqs)))
-            (remove-duplicates (pushr res s))))
-        (cdr seqs)))))
+(define (append-unique . seqs)
+  (remove-duplicates (apply append seqs)))
 
 (define (last? el lst)
   (equal? el (last lst)))

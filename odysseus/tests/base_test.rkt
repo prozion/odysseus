@@ -43,6 +43,7 @@
 
 (check-true (not-empty? '(2)))
 (check-false (not-empty? '()))
+(check-false (not-empty? 5))
 
 (check-pred nil? null)
 (check-pred nil? empty)

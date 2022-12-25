@@ -2,8 +2,6 @@
 
 (require
   "base.rkt"
-  "bytes.rkt"
-  "checks.rkt"
   "controls.rkt"
   "debug.rkt"
   "files.rkt"
@@ -16,6 +14,9 @@
 
 ; specific modules
 ; (require
+;   "bytes.rkt"
+;   "checks.rkt"
+;   "cmdline.rkt"
 ;   "csv.rkt"
 ;   "html.rkt"
 ;   "http.rkt"
@@ -31,8 +32,6 @@
 (provide
   (all-from-out
     "base.rkt"
-    "bytes.rkt"
-    "checks.rkt"
     "controls.rkt"
     "debug.rkt"
     "files.rkt"

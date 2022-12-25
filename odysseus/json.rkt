@@ -2,12 +2,12 @@
 
 (require "base.rkt")
 (require "list.rkt")
-(require "alist.rkt")
 (require "type.rkt")
 (require "hash.rkt")
 (require "regexp.rkt")
 (require "files.rkt")
 (require "string.rkt")
+(require "debug.rkt")
 
 (require json)
 

@@ -116,7 +116,7 @@
     ((plain-list? lst) (map f (f lst)))
     (else (map (λ (x) (transform-list-recur x f)) (f lst)))))
 
-(define (same-elements? as bs #:e (e? equal?))
+(define-catch (same-elements? as bs #:e (e? equal?))
   (cond
     ((and (scalar? as) (scalar? bs)) (e? as bs))
     ((and (list? as) (list? bs))

@@ -20,7 +20,7 @@
       (hash-values h2)
       <)))
 
-(define (check-hash h1 h2 #:list-any-order? (list-any-order? #f) #:values-any-order? (values-any-order? #f))
+(define-catch (check-hash h1 h2 #:list-any-order? (list-any-order? #f) #:values-any-order? (values-any-order? #f))
   (let* ((k1s (hash-keys h1))
         (k2s (hash-keys h2))
         (v1s (hash-values h1))
@@ -41,9 +41,7 @@
           (same-elements? k1s k2s) ; no extra unchecked keys neither at k1s nor at k2s
           (for/and
             ((k1 k1s))
-            (and
-              (index-of? k2s k1)
-              (equal? (hash-ref h1 k1) (hash-ref h2 (list-ref k2s (index-of k1s k1)))))))))))
+            (equal? (hash-ref h1 k1 #f) (hash-ref h2 k1 #f))))))))
 
 (define-macro (check-hash-equal? h1 h2)
   `(check-true

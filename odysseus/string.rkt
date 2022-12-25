@@ -4,12 +4,24 @@
 (require "type.rkt")
 (require "base.rkt")
 (require "regexp.rkt")
+(require "controls.rkt")
 (require compatibility/defmacro)
 (require sha)
 
 (provide (all-defined-out))
 
-(define str string-append)
+(define (str . els)
+  (define (str* el)
+    (cond
+      ((empty? el) "")
+      ((void? el) "")
+      (else (~a el))))
+  (apply string-append (map str* els)))
+
+(define (string-ref* astr n #:nth (nth? #f))
+  (if nth?
+    (-> astr string-explode (nth n)) ; old nth function compatible behavior
+    (~a (string-ref astr n))))
 
 (define (dupstr txt n)
   (implode
@@ -22,27 +34,35 @@
 
 ; extended version of substring
 (define-catch (substring* txt start (end (string-length txt)))
-  (let* ((len (string-length txt))
-        (start (if (< start 0) (+ len start) start))
-        (end (if (> end len) len end))
-        (end (if (and end (< end 0)) (+ len end) end)))
-    (cond
-      ((empty-string? txt)
-        txt)
-      (else
-        (substring txt start end)))))
+  (if (empty-string? txt)
+    txt
+    (let* ((len (string-length txt))
+          (start (cond
+                  ((< start (- len)) 0)
+                  ((< start 0) (+ len start))
+                  (else start)))
+          (end (cond
+                  ((> end len) len)
+                  ((< end (- len)) 0)
+                  ((< end 0) (+ len end))
+                  (else end))))
+      (cond
+        ((>= start len)
+          "")
+        (else
+          (substring txt start end))))))
 
-(define (string-take s n)
+(define (string-take s (n 1))
   (substring* s 0 n))
 
-(define (string-take-right s n)
+(define (string-take-right s (n 1))
   (let ((len (string-length s)))
     (substring* s (- len n))))
 
-(define (string-drop s n)
+(define (string-drop s (n 1))
   (substring* s n))
 
-(define (string-drop-right s n)
+(define (string-drop-right s (n 1))
   (let ((len (string-length s)))
     (substring* s 0 (- len n))))
 
@@ -55,10 +75,28 @@
 (define (string-rest s)
   (string-drop s 1))
 
+(define (string-index-of astr substr (n 0))
+  (cond
+    ((empty-string? astr)
+      #f)
+    ((string-prefix? astr substr)
+      n)
+    (else
+      (string-index-of (string-rest astr) substr (add1 n)))))
+
+(define (string-slice astr pos1 (pos2 (string-length astr)))
+  (cond
+    ((and (positive? pos1) (positive? pos2) (> pos1 pos2))
+      "")
+    (else
+      (implode
+        (slice
+          (string-explode astr) pos1 pos2)))))
+
 (define string-remove (curryr string-replace ""))
 
 (define (string-explode s)
-  (filter-not non-empty-string? (string-split s "")))
+  (filter non-empty-string? (string-split s "")))
 
 (define (string-splice s ss pos)
   (string-append (string-take s pos) ss (string-drop s pos)))
@@ -119,7 +157,10 @@
     (for/fold
       ((res 0))
       ((w (string-explode word)))
-      (+ res (index-of en-letters w) (index-of ru-letters w)))))
+      (+
+        res
+        (or (index-of en-letters w) 0)
+        (or (index-of ru-letters w) 0)))))
 
 (define (no-words? s)
   (or
@@ -197,16 +238,16 @@
 (define-catch (0-9 a b)
   (< (->number a) (->number b)))
 
-(define-catch (string-take-word s f delimeter)
-  (if (empty-string? s "")
+(define-catch (string-take-word s #:f (f car) #:delimeter (delimeter ","))
+  (if (empty-string? s)
     s
     (f (string-split s delimeter))))
 
 (define (string-first-word s (delimeter ","))
-  (string-take-word s first delimeter))
+  (string-take-word s #:f first #:delimeter delimeter))
 
 (define (string-last-word s (delimeter ","))
-  (string-take-word s last delimeter))
+  (string-take-word s #:f last #:delimeter delimeter))
 
 (define starts-with? string-prefix?)
 

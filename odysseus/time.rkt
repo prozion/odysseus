@@ -39,8 +39,8 @@
 (define (time->seconds astr)
   (let* ( (time-units (string-split astr ":"))
           (seconds (string->number (last time-units)))
-          (minutes (string->number (if (null? (nth time-units -2)) "0" (nth time-units -2))))
-          (hours (string->number (if (null? (nth time-units -3)) "0" (nth time-units -3)))))
+          (minutes (string->number (or (list-ref* time-units -2) "0")))
+          (hours (string->number (or (list-ref* time-units -3) "0"))))
     (+ (* 60 60 hours) (* 60 minutes) seconds)))
 
 (define (seconds->days sec)

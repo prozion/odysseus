@@ -6,7 +6,6 @@
 (require "string.rkt")
 (require "regexp.rkt")
 (require "controls.rkt")
-(require "alist.rkt")
 (require "debug.rkt")
 (require "files.rkt")
 (require "hash.rkt")
@@ -65,7 +64,7 @@
       (cons "\"" "&quot;")
     )))
 
-(define clean-htmlify (--> clean-text htmlify-text))
+(define clean-htmlify (compose clean-text htmlify-text))
 
 (define clean-value
           (change-text

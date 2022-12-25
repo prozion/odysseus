@@ -99,7 +99,7 @@
   (write-to-file (serialize data) filepath #:exists 'replace))
 
 ; read serialized data and converts it to a normal value
-(define (read-serialized-data-from-file filepath)
+(define-catch (read-serialized-data-from-file filepath (value-if-failed #f))
   (if (file-exists? filepath)
     (deserialize (file->value filepath))
-    #f))
+    value-if-failed))

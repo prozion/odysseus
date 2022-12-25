@@ -4,6 +4,7 @@
 (require net/base64)
 (require "regexp.rkt")
 (require "list.rkt")
+(require "string.rkt")
 (require "files.rkt")
 (require (for-syntax "list.rkt" "debug.rkt" racket/format))
 (require compatibility/defmacro)

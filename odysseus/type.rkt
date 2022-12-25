@@ -130,7 +130,7 @@
       (let* ((filtered (string-replace x (regexp ",") "."))
             (filtered (filter
                         (λ (x) (or (string->number x) (equal? x ".")))
-                        (filter-not non-empty-string? (string-split filtered ""))))
+                        (filter non-empty-string? (string-split filtered ""))))
             (filtered (if (empty? filtered) #f (implode filtered))))
         (and filtered (+ delta (string->number filtered)))))
     (else x)))

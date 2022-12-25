@@ -9,6 +9,10 @@
 
 (define combine compose)
 
+(define (swap f)
+  (λ (x . args)
+    (apply f (append args (list x)))))
+
 (define % remainder)
 
 (define (int a)
@@ -39,7 +43,8 @@
 (define (rand n)
   (add1 (random n)))
 
-(define not-empty? (negate empty?))
+(define (not-empty? x)
+  (and* list? (negate empty?) x))
 
 (define not-equal? (negate equal?))
 
@@ -100,7 +105,10 @@
 (define-syntax (define-catch stx)
   (syntax-case stx ()
     ((_ (name args ...) body ...)
-      (with-syntax ((plain-name (datum->syntax stx (symbol->string (syntax->datum #'name)))))
+      (with-syntax
+        ((plain-name (datum->syntax
+                        stx
+                        (symbol->string (syntax->datum #'name)))))
         #'(define (name args ...)
             (catch
               plain-name
@@ -122,3 +130,13 @@
               res
               (format "~a : ~a~n" k (hash-ref h k))))))
   res-str))
+
+; for debug cases, when --- is unavailable
+(define (p . args)
+  (displayln
+    (apply
+      format
+      (apply
+        string-append
+        (make-list (length args) "~a "))
+        args)))

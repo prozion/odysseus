@@ -25,22 +25,22 @@
     ; remove all pairs with nil-type keys:
     (clean (λ (x) (nil? (car x))) (hash->list (apply hash body))))))
 
-(define-catch (get-$ path hh)
+(define-catch (hash-ref-path hh path (default-value #f))
   (cond
-    ((empty? hh) empty)
+    ((empty? hh) default-value)
     ((empty? path) hh)
-    ((hash? hh) (get-$ (rest path) (hash-ref* hh (first path))))
-    ((and (list? hh) (one-element? hh)) (get-$ (rest path) (hash-ref* (first hh) (first path))))
+    ((hash? hh) (hash-ref-path (hash-ref* hh (first path)) (rest path)))
+    ((and (list? hh) (one-element? hh)) (hash-ref-path (hash-ref* (first hh) (first path)) (rest path)))
     ((list? hh)
-      (let ((res (cleanmap (map (λ (h) (get-$ path h)) hh))))
+      (let ((res (cleanmap (map (λ (h) (hash-ref-path h path)) hh))))
         (if (one-element? res)
           (first res)
           res)))
-    (else #f)))
+    (else default-value)))
 
 (define-macro ($ dotted-path hh)
   (let ((path (string-split (->string dotted-path) ".")))
-    `(get-$ ',path ,hh)))
+    `(hash-ref-path ,hh ',path)))
 
 ; the same of hash-ref but no matter of type, matches if string projection values of hash key and compared key are equal
 (define-catch (hash-ref* h key (default-value #f))
@@ -50,6 +50,34 @@
       h)
     (->string key)
     default-value))
+
+(define (hash-set* h path value)
+  (cond
+    ((empty? path)
+      h)
+    ((empty? (cdr path))
+      (hash-set h (car path) value))
+    ((hash-has-key? h (car path))
+      (hash-set
+        h
+        (car path)
+        (hash-set* (hash-ref h (car path)) (cdr path) value)))
+    (else
+      (hash-set
+        h
+        (car path)
+        (hash-set* (hash) (cdr path) value)))))
+
+(define (hash-update* h path updater (failure-result h))
+  (cond
+    ((empty? path)
+      h)
+    ((empty? (cdr path))
+      (hash-update h (car path) updater))
+    ((hash? (hash-ref h (car path) #f))
+      (hash-update h (car path) (λ (v) (hash-update* v (cdr path) updater))))
+    (else
+      failure-result)))
 
 ; (@. h.a.b.c)
 (define-macro (@. path)
@@ -103,7 +131,7 @@
     ((res (hash)))
     (((k v) h))
     (if (lambdakv k v)
-      (hash-insert res (cons k v))
+      (hash-set res k v)
       res)))
 
 (define (hash-clean lambdakv h)
@@ -116,37 +144,17 @@
     ((immutable? h) (hash-remove h k))
     (else (hash-delete (make-immutable-hash (hash->list h)) k))))
 
-(define (hash-substitute h1 arg)
-  ;(printf "arg: ~a~n(car arg): ~a~nresulted hash: ~a~n" arg (car arg) (hash-delete h1 (car arg)))
-  (cond
-    ((null? arg) h1)
-    ((simple-cons? arg)
-      (hash-insert
-        (hash-delete h1 (car arg))
-        arg))
-    ((cons-ext? arg)
-      (hash-insert
-        (hash-delete h1 (car arg))
-        arg))
-    ((list-of-cons? arg)
-      (if (null? (cdr arg))
-        (hash-substitute h1 (car arg))
-        (hash-substitute (hash-substitute h1 (car arg)) (cdr arg))))
-    (else h1)))
-
 (define (hash-revert h)
   (apply hash (interleave (hash-values h) (hash-keys h))))
 
-(define hash-insert hash-set)
-
 ;;;;; TODO >>>
-(define (list->hash lst header #:key-index (key-index 1) #:columns-exclude (columns-exclude null))
-  (let* ((header (remove-by-pos header key-index)))
+(define-catch (list->hash lst header #:key-index (key-index 0) #:columns-exclude (columns-exclude null))
+  (let* ((header (list-remove-by-pos header key-index)))
     (for/hash ((i lst))
       (values
-        (nth i key-index)
+        (list-ref i key-index)
         (hash-remove-keys
-          (apply hash (interleave header (remove-by-pos i key-index)))
+          (apply hash (interleave header (list-remove-by-pos i key-index)))
           columns-exclude)))))
 
 (define (hash-remove-keys h keys)

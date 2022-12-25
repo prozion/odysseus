@@ -62,8 +62,10 @@
                                 (not-equal? (hash-ref h '__id) "")))
                       hashtree))
           ; make id look like id
+          (idify (λ (s)
+                    (-> s (string-replace " " "_") string-downcase)))
           (hashtree (map
-                      (λ (h) (hash-union (hash '__id (->symbol (hash-ref h '__id) #:transform-function idfy)) h))
+                      (λ (h) (hash-union (hash '__id (->symbol (hash-ref h '__id) #:transform-function idify)) h))
                       hashtree))
           ; make true hashtree in its form
           (hashtree (for/hash

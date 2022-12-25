@@ -2,10 +2,17 @@
 
 (require rackunit)
 (require "../string.rkt")
+(require "../debug.rkt")
 
 (check-equal? (str "" "hello" " world!" "") "hello world!")
 (check-equal? (str "1" (unless #t "2") "3") "13")
 (check-equal? (str 123) "123")
+
+(check-equal? (string-ref* "" 10 #:nth #t) #f)
+(check-equal? (string-ref* "Oslo god morgen" 0 #:nth #t) #f)
+(check-equal? (string-ref* "Oslo god morgen" 1 #:nth #t) "O")
+(check-equal? (string-ref* "Oslo god morgen" 6 #:nth #t) "g")
+(check-equal? (string-ref* "ost og skinke" -1 #:nth #t) "e")
 
 (check-equal? (string-explode "") empty)
 (check-equal? (string-explode " bake\nry") '(" " "b" "a" "k" "e" "\n" "r" "y"))
@@ -18,9 +25,24 @@
 (check-equal? (string-take "Black waters" 0) "")
 (check-equal? (string-take "Black waters" 100) "Black waters")
 
-(check-equal? (strnumber->number "3") 3)
-(check-= (strnumber->number "3,0") 3.0 1e-6)
-(check-= (strnumber->number "2 100,50") 2100.5 1e-6)
+(check-equal? (string-drop "" 10) "")
+(check-equal? (string-drop "Oslo god morgen" 0) "Oslo god morgen")
+(check-equal? (string-drop "Oslo god morgen") "slo god morgen")
+(check-equal? (string-drop "Oslo god morgen" 10) "orgen")
+(check-equal? (string-drop "Oslo god morgen" 100) "")
+(check-equal? (string-drop "Oslo god morgen" -1) "n")
+(check-equal? (string-drop "Oslo god morgen" -4) "rgen")
+
+(check-equal? (string-index-of "" "e") #f)
+(check-equal? (string-index-of "Hercules" "e") 1)
+(check-equal? (string-index-of "Hercules" "a") #f)
+
+(check-equal? (string-slice "" 1 3) "")
+(check-equal? (string-slice "Oslo god morgen" 3 1) "")
+(check-equal? (string-slice "Oslo god morgen" 2 7) "slo go")
+(check-equal? (string-slice "Oslo god morgen" 4) "o god morgen")
+(check-equal? (string-slice "Oslo god morgen" 4 100) "o god morgen")
+(check-equal? (string-slice "Oslo god morgen" 4 -3) "o god morg")
 
 (check-equal? (format-number "d ddd" 3504) "3 504")
 (check-equal? (format-number "ddd ddd" 38504) "38 504")
@@ -74,24 +96,18 @@
 (check-equal? (string-take-right "Black waters" 0) "")
 (check-equal? (string-take-right "Black waters" 100) "Black waters")
 
+(check-equal? (string-take-word "foo,bar" #:f second) "bar")
+(check-equal? (string-take-word "foo;bar") "foo;bar")
+(check-equal? (string-take-word "foo;bar" #:delimeter ";") "foo")
+(check-equal? (string-take-word "foo;bar;baz" #:delimeter ";" #:f (λ (x) (string-append (second x) (third x)))) "barbaz")
+
 (check-equal? (string-first-word "") "")
+; (string-take-word "" (λ (x) (--- x) x) ",")
 (check-equal? (string-first-word "foo,bar") "foo")
-(check-equal? (string-first-word "foo,bar" #:f second) "bar")
-(check-equal? (string-first-word "foo;bar") "foo;bar")
-(check-equal? (string-first-word "foo;bar" #:delimeter ";") "foo")
-(check-equal? (string-first-word "foo;bar;baz" #:delimeter ";" #:f (λ (x) (string-append (second x) (third x)))) "barbaz")
 
 (check-equal? (string-splice
-  "Tell me, of that ingenious hero" "O muse, " 10)
+  "Tell me, of that ingenious hero" "O muse, " 9)
   "Tell me, O muse, of that ingenious hero")
 
 (check-true (starts-with? "Hector" "H"))
 (check-false (starts-with? "Hector" "h"))
-
-(check-true (tabtree> "Питер" "Москва"))
-(check-true (tabtree> "Washington" "Питер"))
-(check-true (tabtree> "Самойлово" "Самара"))
-(check-true (tabtree> "Самойлово" "самара"))
-(check-true (tabtree> "Washington" "Boston"))
-(check-false (tabtree< "Washington" "Boston"))
-(check-false (tabtree> "Boston" "Seattle"))

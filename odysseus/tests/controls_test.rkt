@@ -14,3 +14,15 @@
 (check-equal? (repeat-f append '(1 2 3) '((4) (5 (6)) (7))) '(1 2 3 4 5 (6) 7))
 (check-equal? (repeat-f + 0 '(1 2 3)) 6)
 (check-equal? (repeat-f + 0 '()) 0)
+
+(check-equal?
+  (->
+    "Lisp arriba!"
+    (string-replace " " "-")
+    (string-split "-")
+    (->>
+      (map string-length)
+      (apply +))
+    add1
+    (+ 30))
+  42)

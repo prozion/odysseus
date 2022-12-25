@@ -1,6 +1,7 @@
 #lang racket
 
 (require "../math.rkt")
+(require "../checks.rkt")
 (require rackunit)
 
 (check-= (avg 1 2 3 4 5) 3 0)

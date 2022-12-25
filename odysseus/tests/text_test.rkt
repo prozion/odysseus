@@ -4,6 +4,7 @@
 (require "../list.rkt")
 (require "../checks.rkt")
 (require "../text.rkt")
+(require "../controls.rkt")
 
 (define text1
 #<<TEXT
