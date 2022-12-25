@@ -6,7 +6,6 @@
 (require "regexp.rkt")
 (require "controls.rkt")
 (require compatibility/defmacro)
-(require sha)
 
 (provide (all-defined-out))
 
@@ -251,8 +250,8 @@
 
 (define starts-with? string-prefix?)
 
-(define (string-sha s)
-  (bytes->hex-string (sha1 (string->bytes/utf-8 s))))
+; (define (string-sha s)
+;   (bytes->hex-string (sha1 (string->bytes/utf-8 s))))
 
 (define (random-word size #:prefix (prefix ""))
   (let* ((letters "abcdefghijklmnopqrstuvwxyz")
