@@ -114,7 +114,9 @@
 
 (defn only-or-first [v]
   (if (coll? v)
-    (first v)
+    (if (empty? v)
+      nil
+      (first v))
     v))
 
 (defn rotate [coll & [n]]
