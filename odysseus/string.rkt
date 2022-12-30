@@ -261,3 +261,7 @@
         result
         (random-word-iter (sub1 size) (string-append result (list-ref letters (random (length letters)))))))
     (string-append prefix (random-word-iter size ""))))
+
+; for compatibility with taganoskop
+(define (take-one astr #:delimeter (delimeter ","))
+  (first (string-split astr delimeter)))

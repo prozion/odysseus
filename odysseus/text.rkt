@@ -155,3 +155,28 @@
       (λ (expression)
         (string-contains? txt expression))
       expressions)))
+
+(define (format-phone phone #:prefix (prefix "") #:landline-regex (landline-regex "^\\d{5}$"))
+  (cond
+    ((re-matches? "\\+\\d{11}" phone)
+      (format-string "cc ccc ccc-cc-cc" phone))
+    ((re-matches? "8\\d{10}" phone)
+      (format-string "+7 ccc ccc-cc-cc" (string-drop phone 1)))
+    ((re-matches? landline-regex phone)
+      (format "8~a ~a" (if (non-empty-string? prefix) (format " (~a)" prefix) "")
+                          (case (string-length phone)
+                            ((4) (format-string "cc-cc" phone))
+                            ((5) (format-string "c-cc-cc" phone))
+                            ((6) (format-string "cc-cc-cc" phone))
+                            ((7) (format-string "ccc-cc-cc" phone))
+                            (else phone))))
+    (else phone)))
+
+(define (extend-txt prefix (suffix ""))
+  (λ (txt)
+      (if (and txt (non-empty-string? txt))
+        (str prefix txt suffix)
+        "")))
+
+(define escape-txt
+  (change-text '(("%(" . "% (") (")%" . ") %"))))

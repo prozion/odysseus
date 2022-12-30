@@ -153,3 +153,24 @@
       (cons #px"\\s*-\\s*" "-")
       (cons #px"\\s{2,}" " ")
       (cons #px"[\\.,;:\\\\/\\!?()\\[\\]]" ""))))
+
+(define (make-link id #:target (target "_blank") #:anchor (anchor #f) urls)
+  (let* ((name (namefy id)))
+    (if (and (andmap nil? urls) (not anchor))
+      name
+      (format "<a id=\"~a\" href=\"~a\" target=\"~a\">~a</a>"
+              id
+              (if anchor
+                (format "#~a" (if (equal? anchor "#") id anchor))
+                (httpify (for/or ((url urls)) url)))
+              target
+              name))))
+
+(define (namefy-with-url id name . urls)
+  (let* (
+        (urls (filter-not nil? urls))
+        (url (and (not-empty? urls) (car urls)))
+        (title (if (non-empty-string? name) name (namefy id))))
+    (if (and url (non-empty-string? url))
+      (format "<a href=\"~a\" target=\"_blank\">~a</a>" (httpify url) title)
+      title)))

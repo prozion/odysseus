@@ -41,11 +41,12 @@
                                       ((and value-to-add append? varname-is-hash?)
                                           (hash-union value-to-add (or old-value (hash))))
                                       ((and value-to-add append?)
-                                          (opt/append-unique
-                                            (or old-value empty)
-                                            (if (list? value-to-add)
-                                                value-to-add
-                                                (list value-to-add))))
+                                          remove-duplicates
+                                            (append
+                                              (or old-value empty)
+                                              (if (list? value-to-add)
+                                                  value-to-add
+                                                  (list value-to-add))))
                                       ((and value-to-add varname-is-hash?)
                                           value-to-add)
                                       ((and value-to-add (list? value-to-add))
