@@ -2,6 +2,8 @@
 
 (provide (all-defined-out))
 
+(define empty-vector (make-vector 0))
+
 (define (vector-ref* v index)
   (vector-ref
     v

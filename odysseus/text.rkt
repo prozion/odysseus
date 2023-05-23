@@ -180,3 +180,8 @@
 
 (define escape-txt
   (change-text '(("%(" . "% (") (")%" . ") %"))))
+
+(define (url? s)
+  (or
+    (re-matches? "^https?://" s))
+    (re-matches? "\\.(ru|org|рф|su|net|com|uk|by|edu|gov)" s))

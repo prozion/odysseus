@@ -36,7 +36,24 @@
                     (append f (list var)))
                   (else
                     (list f var)))))
-          (apply ->>rec (cons new-expression (cdr fs)))))))
+            (apply ->>rec (cons new-expression (cdr fs)))))))
+  (apply ->>rec (cons var fs)))
+
+(define-macro (some->> var . fs)
+  (define (->>rec var . fs)
+    (cond
+      ((empty? fs) var)
+      (else
+        (let* ((f (car fs))
+              (new-expression
+                (cond
+                  ((list? f)
+                    (append f (list var)))
+                  (else
+                    (list f var)))))
+          (if new-expression
+            (apply ->>rec (cons new-expression (cdr fs)))
+            #f)))))
   (apply ->>rec (cons var fs)))
 
 ; (gen (random 100) 10) -> '(1 34 50 7 80 62 58 91 10 8)

@@ -372,7 +372,7 @@
 
 (define (d.m datestr)
   (let* ((parts (get-matches
-                  #px"([0-9x]{2}).([0-9x]{2})(.([0-9x]{4}[~?]?))?"
+                  #px"([0-9x]{1,2}).([0-9x]{1,2})(.([0-9x]{4}[~?]?))?"
                   datestr))
         (parts (if (not-nil? parts) (car parts) #f)))
     (if parts

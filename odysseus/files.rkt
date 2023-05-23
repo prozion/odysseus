@@ -103,3 +103,9 @@
   (if (file-exists? filepath)
     (deserialize (file->value filepath))
     value-if-failed))
+
+(define (get-path filepath)
+  (string-join (butlast (string-split filepath "/")) "/"))
+
+(define (get-filename filepath)
+  (last (string-split filepath "/")))
