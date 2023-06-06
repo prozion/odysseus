@@ -126,6 +126,7 @@
     ((false? x) 0)
     ((and (string? x) (string->number x))
         (string->number x))
+    ((equal? x "") 0)
     ((string? x)
       (let* ((filtered (string-replace x (regexp ",") "."))
             (filtered (filter

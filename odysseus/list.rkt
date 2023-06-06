@@ -236,10 +236,16 @@
 (define (several? lst)
   (and lst (list? lst) (> (length lst) 1)))
 
-(define (only-or-first x)
+(define (only-or-first x (default #f))
   (cond
     ((list? x)
       (if (not-empty? x)
         (first x)
-        #f))
+        default))
     (else x)))
+
+(define (sort-by-order lst given-order-v)
+  (->>
+    given-order-v
+    (filter (λ (x) (index-of? lst x)))
+    ((λ (x) (append x (minus lst given-order-v))))))

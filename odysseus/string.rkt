@@ -268,3 +268,24 @@
 
 (define (string-in-string? s)
   (re-matches? "^\".*\"$" s))
+
+(define (id-string>? a b)
+  (let* ((letters (string-explode "_абвгдеёжзийклмнопрстуфхцчшщьыъэюяabcdefghijklmnopqrstuvwxyz0123456789"))
+        (a (string-downcase a))
+        (b (string-downcase b))
+        (a-first (string-first a))
+        (a-rest (string-rest a))
+        (b-first (string-first b))
+        (b-rest (string-rest b))
+        (a-pos (index-of letters a-first))
+        (b-pos (index-of letters b-first)))
+    (cond
+      ((empty-string? a-rest) #t)
+      ((empty-string? b-rest) #f)
+      ((equal? a-first b-first) (id-string>? a-rest b-rest))
+      (else (> a-pos b-pos)))))
+
+(define (id-string<? a b)
+  (and
+    (not (equal? a b))
+    (not (id-string>? a b))))
