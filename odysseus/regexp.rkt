@@ -27,8 +27,8 @@
 (define (re-full-matches? re astr)
   (true? (re-matches? (~a "^" re "$") astr)))
 
-(define-catch (get-matches re astr)
-  (let ((re (->re re)))
+(define-catch (get-matches re astr (->mode ->re))
+  (let ((re (->mode re)))
     (for/fold
       ((res (list)))
       ((match-position (regexp-match-positions* re astr)))
@@ -39,6 +39,9 @@
         (if next-match
           (pushr res next-match)
           res)))))
+
+(define (get-matches-pre re astr)
+  (get-matches re astr ->pre))
 
 (define (get-first-group-match re astr)
   (let* ((res (get-matches re astr)))

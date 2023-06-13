@@ -248,6 +248,10 @@
 (define (string-last-word s (delimeter ","))
   (string-take-word s #:f last #:delimeter delimeter))
 
+(define (string-split-only-first s (delimeter ","))
+  (let ((chunks (string-split s delimeter)))
+    (list (first chunks) (string-join (rest chunks) delimeter))))
+
 (define starts-with? string-prefix?)
 
 ; (define (string-sha s)

@@ -8,6 +8,7 @@
 (require "hash.rkt")
 (require "regexp.rkt")
 (require "list.rkt")
+(require "string.rkt")
 (require "type.rkt")
 
 (provide (all-defined-out))
@@ -105,7 +106,12 @@
     value-if-failed))
 
 (define (get-path filepath)
-  (string-join (butlast (string-split filepath "/")) "/"))
+  (let ((leading-slash? (equal? (string-first filepath) "/")))
+    (str
+      (if leading-slash? "/" "")
+      (string-join
+        (butlast (string-split filepath "/"))
+        "/"))))
 
 (define (get-filename filepath)
   (last (string-split filepath "/")))

@@ -244,6 +244,8 @@
         default))
     (else x)))
 
+(define first-or-only only-or-first)
+
 (define (sort-by-order lst given-order-v)
   (->>
     given-order-v
