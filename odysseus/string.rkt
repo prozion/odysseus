@@ -69,7 +69,7 @@
   (string-take s 1))
 
 (define (string-last s)
-  (string-take s -1))
+  (string-take-right s 1))
 
 (define (string-rest s)
   (string-drop s 1))
@@ -274,7 +274,7 @@
   (re-matches? "^\".*\"$" s))
 
 (define (id-string>? a b)
-  (let* ((letters (string-explode "_абвгдеёжзийклмнопрстуфхцчшщьыъэюяabcdefghijklmnopqrstuvwxyz0123456789"))
+  (let* ((letters (string-explode "_абвгдеёжзийклмнопрстуфхцчшщьыъэюяabcdefghijklmnopqrstuvwxyz0123456789-.№"))
         (a (string-downcase a))
         (b (string-downcase b))
         (a-first (string-first a))

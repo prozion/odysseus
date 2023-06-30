@@ -140,6 +140,9 @@
       (λ (x) (not-empty? (cdr (indexes-of lst x))))
       lst)))
 
+(define (join seq1 seq2)
+  (remove-duplicates (append seq1 seq2)))
+
 (define (minus seq1 seq2 #:equal-f (equal-f #f))
   (if equal-f
     (filter-not
@@ -251,3 +254,6 @@
     given-order-v
     (filter (λ (x) (index-of? lst x)))
     ((λ (x) (append x (minus lst given-order-v))))))
+
+(define (first-element . els)
+  (first els))
