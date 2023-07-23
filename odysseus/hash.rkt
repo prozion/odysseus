@@ -178,3 +178,12 @@
     (for/hash
       ((l1 ls1))
       (values l1 ls2))))
+
+(define-catch (hash-ref-some h keys (fallback-value #f))
+  (cond
+    ((empty? keys)
+      fallback-value)
+    (else
+      (or
+        (hash-ref h (first keys) #f)
+        (hash-ref-some h (rest keys) fallback-value)))))

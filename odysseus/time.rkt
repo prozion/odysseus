@@ -428,6 +428,15 @@
             (yyyy (if yyyy (format-number "dddd" yyyy) #f)))
         (format "~a~a~a" (if dd dd "") (if mm (str "." mm) "") (if yyyy (str "." yyyy) ""))))))
 
+(define (dexify-year year)
+  (cond
+    ((equal? year "xxxx") "1917")
+    ((equal? year "1xxx") "1917")
+    ((equal? year "2xxx") "2000")
+    ((regexp-match? #px"\\d\\dxx" year) (string-replace year "xx" "50"))
+    ((regexp-match? #px"\\d\\d\\dx" year) (string-replace year "x" "5"))
+    (else "1917")))
+
 (define (day datestr)
   (hash-ref (parse-date datestr) 'day #f))
 
@@ -557,6 +566,14 @@
           (else months-full))
         month-number)
       "?")))
+
+(define-catch (iso8601-date-string seconds)
+  (let ((d (seconds->date seconds)))
+    (format "~a-~a-~a"
+            (date-year d)
+            (format-number "dd" (date-month d) #:filler "0")
+            (format-number "dd" (date-day d) #:filler "0")
+            )))
 
 (define-catch (iso8601-time-string seconds)
   (let ((d (seconds->date seconds)))
