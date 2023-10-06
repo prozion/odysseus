@@ -16,6 +16,20 @@
 (define (hash-union-c . hs)
   (apply hash-union-std #:combine (λ (v1 v2) v1) hs))
 
+; merge different values at the same key into the list
+(define (hash-union-merge . hs)
+  (apply
+    hash-union-std
+    #:combine (λ (v1 v2)
+      (cond
+        ((equal? v1 v2) v1)
+        ((and (hash? v1) (hash? v2)) (hash-union-merge v1 v2))
+        ((and (list? v1) (list? v2)) (remove-duplicates (append v1 v2)))
+        ((list? v1) (remove-duplicates (pushr v1 v2)))
+        ((list? v2) (remove-duplicates (cons v1 v2)))
+        (else (list v1 v2))))
+    hs))
+
 (define (@ . body)
   ;(apply hash body))
   ;(apply hash (clean nil? body)))

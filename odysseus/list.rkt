@@ -261,5 +261,5 @@
 (define (consists-of? list-or-scalar . els)
   (intersect? (flatten (list list-or-scalar)) els))
 
-(define (list->pretty-string lst (delimeter " "))
-  (string-join (map ~a lst) delimeter))
+(define (list->pretty-string lst (sep " "))
+  (string-join (map ~a lst) sep))
