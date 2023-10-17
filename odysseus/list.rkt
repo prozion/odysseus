@@ -261,5 +261,7 @@
 (define (consists-of? list-or-scalar . els)
   (intersect? (flatten (list list-or-scalar)) els))
 
-(define (list->pretty-string lst (sep " "))
-  (string-join (map ~a lst) sep))
+(define (list->pretty-string lst (sep " ") #:tail-sep (tail-sep? #f))
+  (format "~a~a"
+    (string-join (map ~a lst) sep)
+    (if tail-sep? sep "")))

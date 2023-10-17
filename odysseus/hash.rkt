@@ -148,6 +148,8 @@
       (hash-set res k v)
       res)))
 
+(define filter-hash hash-filter)
+
 (define (hash-clean lambdakv h)
   (hash-filter (λ (k v) (not (lambdakv k v))) h))
 
