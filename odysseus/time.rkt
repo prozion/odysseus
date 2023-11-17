@@ -435,7 +435,7 @@
     ((equal? year "2xxx") "2000")
     ((regexp-match? #px"\\d\\dxx" year) (string-replace year "xx" "50"))
     ((regexp-match? #px"\\d\\d\\dx" year) (string-replace year "x" "5"))
-    (else "1917")))
+    (else year)))
 
 (define (day datestr)
   (hash-ref (parse-date datestr) 'day #f))
