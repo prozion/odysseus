@@ -13,28 +13,6 @@
 
 (provide (all-defined-out))
 
-; -> racket/base
-; (define-catch (copy-file src dest)
-;   (when (and (file-exists? src) (file-exists? dest)) (delete-directory/files dest))
-;   (copy-directory/files src dest))
-
-(define-catch (move-file src dest)
-  (if (and (file-exists? src) (file-exists? dest))
-    (begin
-      (delete-directory/files dest)
-      (copy-directory/files src dest)
-      (delete-directory/files src))
-    (error
-      (cond
-        ((not (file-exists? src)) (format "file ~a doesn't exists" src))
-        ((not (file-exists? dest)) (format "file ~a doesn't exists" dest))
-        (else "unknown error")))))
-
-(define-catch (get-file-extension path)
-  (let* ((path-parts (string-split (->string path) "."))
-        (extension (if (> (length path) 1) (last path-parts) "")))
-    extension))
-
 (define-catch (absolute-path? astr)
   (re-matches? "^(/|[A-Z]:)" astr))
 
@@ -47,6 +25,7 @@
 (define (read-file filename)
   (file->string filename #:mode 'text))
 
+; FIXME: remove if it is the same function as read-file-by-lines
 (define (read-lines filename)
   (file->lines filename #:mode 'text #:line-mode 'linefeed))
 
@@ -89,11 +68,12 @@
       (load filepath))
     #f))
 
-; read data from file into the s-expression (not used? uncomment once you meet a use of it!)
-; (define (read-data-from-file filepath namespace)
-;   (if (file-exists? filepath)
-;     (read (open-input-string (read-file filepath)))
-;     #f))
+; read data from file into the s-expression
+; FIXME: What is the use of it? Maybe there is the same racket core function?
+(define (read-data-from-file filepath namespace)
+  (if (file-exists? filepath)
+    (read (open-input-string (read-file filepath)))
+    #f))
 
 ; serializes data and save it into the file
 (define (write-data-to-file data filepath)

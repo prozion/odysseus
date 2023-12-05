@@ -7,16 +7,6 @@
 
 (define debug-output (make-parameter #f))
 
-(define debug
-  (lambda args (apply string-append
-    (map
-      (lambda (el)
-        (cond
-          ((number? el) (number->string el))
-          ((list? el) (list->string el)) ; list of chars to string
-          (else el)))
-      args))))
-
 (define-macro (benchmark . args)
   (let-values (((descr args)
                   (match args
@@ -27,24 +17,6 @@
               (post-time (- (current-inexact-milliseconds) start-time)))
           (printf "~a~a ms~n" (if ,descr (format "~a: " ,descr) "") post-time)
           res)))
-
-(define-syntax (print-benchmark stx)
-  (syntax-case stx ()
-    ((_ args ...) #'(void (benchmark args ...)))))
-
-(define-macro (show-status status-var text)
-  `(when (,status-var)
-    (display ,text)
-    (flush-output)))
-
-(define-macro (show-status-in-let status-var text)
-  `(when (,status-var) (display ,text) (flush-output)))
-
-(define-macro (_t text)
-  `(show-status debug-output ,text))
-
-(define-macro (__t text)
-  `(show-status-in-let debug-output ,text))
 
 (define-macro (errorf frmt . args)
 	`(error (format ,frmt ,@args)))
@@ -79,13 +51,11 @@
     ((hash? obj) (print-list (for/list (((k v) obj)) (cons k v))))
     (else obj)))
 
-(define-macro (terpri)
-	`(--- ""))
-
 (define (----- n)
   (for ((i (range n))) (displayln ""))
   (flush-output))
 
+; substitute for let* when you want to find, in which binding of let* happens an error
 (define-macro (let*-print . let-exprs)
   (let* ((let-forms (car let-exprs))
         (let-forms (for/fold

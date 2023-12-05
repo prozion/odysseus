@@ -73,13 +73,6 @@
 
 (check-equal? (clean odd? '(1 2 3 4 5)) '(2 4))
 
-(check-equal? (ok-or-false (first empty)) #f)
-(check-equal? (ok-or-false (second '(1))) #f)
-(check-equal? (ok-or-false (second '(1 2))) 2)
-(check-equal? (ok-or-false (third '(1 2 3 4 5))) 3)
-(check-equal? (ok-or-false (/ 1 0)) #f)
-(check-equal? (ok-or-false (sin 1 2)) #f)
-
 (check-equal? (dup 5 10) '(5 5 5 5 5 5 5 5 5 5))
 
 (check-equal? (butlast '(1 2 3)) '(1 2))

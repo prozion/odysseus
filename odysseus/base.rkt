@@ -94,14 +94,6 @@
           ((exn:fail? (λ (err) result)))
           code))))
 
-; (or-or-false (second '(1))) -> #f
-(define-syntax (ok-or-false stx)
-  (syntax-case stx ()
-    ((_ body ...)
-      #'(with-handlers
-          ((exn:fail? (λ (err) #f)))
-          body ...))))
-
 (define-syntax (define-catch stx)
   (syntax-case stx ()
     ((_ (name args ...) body ...)
@@ -140,3 +132,8 @@
         string-append
         (make-list (length args) "~a "))
         args)))
+
+(define (member? m lst)
+  (and
+    (member m lst)
+    #t))

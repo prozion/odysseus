@@ -174,12 +174,6 @@
       ((s dictionary))
       (string-replace res (car s) (cdr s)))))
 
-(define namefy (change-text
-                  (list
-                    (cons "_" " ")
-                    (cons "'" "\"")
-                    (cons #px"(?<=\\S),(?=\\S)" ", "))))
-
 (define (letter? s)
   (= (string-length s) 1))
 
@@ -266,7 +260,6 @@
         (random-word-iter (sub1 size) (string-append result (list-ref letters (random (length letters)))))))
     (string-append prefix (random-word-iter size ""))))
 
-; for compatibility with taganoskop
 (define (take-one astr #:delimeter (delimeter ","))
   (first (string-split astr delimeter)))
 

@@ -4,6 +4,9 @@
 
 (require rackunit)
 
+(check-true (not-empty-list? '(1)))
+(check-false (not-empty-list? '()))
+
 (check-equal? (implode '("a" "b" "c" "d") "-") "a-b-c-d")
 (check-equal? (implode '("long" "sail" "across" "the" "sea") " ") "long sail across the sea")
 
@@ -176,3 +179,40 @@
 (check-equal? (append-unique '(1 2 3) '(4 5 1 6)) '(1 2 3 4 5 6))
 (check-equal? (append-unique '(1 2 1 3) '(4 5 1 6 2 2 2)) '(1 2 3 4 5 6))
 (check-equal? (append-unique '(1 1 3) '(4 5 1 6 2) '(2 2) '(7 3 8 8 (9) 10)) '(1 3 4 5 6 2 7 8 (9) 10))
+
+(check-equal? (format-list '(a b ~a d) '(c)) '(a b (c) d))
+(check-equal? (format-list '(a b ~a) 'c) '(a b c))
+(check-equal? (format-list '(a b ~a d) 'c) '(a b c d))
+(check-equal? (format-list '(a b ~a d e) 'c) '(a b c d e))
+(check-equal? (format-list '(a b ~a d (e (f ~a))) '(c) 'u) '(a b (c) d (e (f u))))
+(check-equal? (format-list '(a b ~a d) (for/list ((i (in-range 1 3))) i)) '(a b (1 2) d))
+(check-equal? (format-list '(a b ~a d) (for/fold ((res (list))) ((i (in-range 1 3))) `(,@res ,i))) '(a b (1 2) d))
+(check-equal? (format-list '(a b ~a d e ~a f g) 'c '$f) '(a b c d e f g))
+(check-equal? (let ((x '$f)) (format-list '(a b ~a d e ~a f g) 'c x)) '(a b c d e f g))
+(check-equal? (format-list '(a b ~a d e ~@a f g) 'c '(1 2)) '(a b c d e 1 2 f g))
+(check-equal? (format-list '(a b ~a d e ~@a f g) 'c '((a 10) (b 20))) '(a b c d e (a 10) (b 20) f g))
+(check-equal? (format-list '(a b ~a d e ~@a f g) 'c 3) '(a b c d e 3 f g))
+(check-equal? (format-list '(a b ~a d e ~@a f g) 'c '$f) '(a b c d e f g))
+(check-equal? (format-list '(a b ~a d e ~@a f g ~a l) 'c '$f 'k) '(a b c d e f g k l))
+(check-equal? (format-list '(a b ~a d e ~s f g ~s l ~@s) 'a 'b 10 '(30 "40")) '(a b a d e "b" f g "10" l "30" "40"))
+; (check-equal? (format-list '(~a ~@a) 'a '($f)) '(a))
+; (check-equal? (format-list '(~a ~@a) 'a '(b $f c)) '(a b c))
+
+(check-equal? (transform-list-recur
+                '(1 2 3 (4 5) (6 (10 8) 7) () (8 10 3) (10 1 2) 9 10 11 (10 (3 4)) 12)
+                (λ (x) (if (and (not-empty-list? x) (equal? (car x) 10))
+                          `(,(* 2 (car x)) ,@(cdr x))
+                          x)))
+              '(1 2 3 (4 5) (6 (20 8) 7) () (8 10 3) (20 1 2) 9 10 11 (20 (3 4)) 12))
+(check-equal? (transform-list-recur
+                '(1 2 (3 (10 4 (10 5 6 (10 7) 8 (10 9 10) 11) 12 (10 (13))) 14) 15 (10 16))
+                (λ (x) (if (and (not-empty-list? x) (equal? (car x) 10))
+                          `(a ,@(cdr x))
+                          x)))
+              '(1 2 (3 (a 4 (a 5 6 (a 7) 8 (a 9 10) 11) 12 (a (13))) 14) 15 (a 16)))
+(check-equal? (transform-list-recur
+                '(10 2 (3 (10 4 (10 5 6 (10 7) 8 (10 9 10) 11) 12 (10 (13))) 14) 15 (10 16))
+                (λ (x) (if (equal? x 10)
+                          'a
+                          x)))
+              '(a 2 (3 (a 4 (a 5 6 (a 7) 8 (a 9 a) 11) 12 (a (13))) 14) 15 (a 16)))

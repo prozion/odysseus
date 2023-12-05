@@ -2,6 +2,7 @@
 
 (require compatibility/defmacro)
 (require "base.rkt")
+(require "type.rkt")
 (require "controls.rkt")
 (require racket/set)
 (require (only-in
@@ -10,11 +11,8 @@
 
 (provide (all-defined-out))
 
-(define (list-pretty-string lst)
-  (for/fold
-    ((res ""))
-    ((s lst))
-    (string-append res s "\n")))
+(define (not-empty-list? x)
+  (and (list? x) (not (empty? x))))
 
 (define-catch (implode lst (sep ""))
   (->> lst ((swap add-between) sep) (map ~a) (apply string-append)))
@@ -260,6 +258,66 @@
 
 (define (consists-of? list-or-scalar . els)
   (intersect? (flatten (list list-or-scalar)) els))
+
+(define (transform-list-recur lst f)
+  (cond
+    ((scalar? lst) (f lst))
+    ((plain-list? lst) (map f (f lst)))
+    (else (map (λ (x) (transform-list-recur x f)) (f lst)))))
+
+(define (format-list pattern . inserts)
+  (local ((define (format-list-iter head tail inserts)
+            (cond
+              ((empty? tail) (values head inserts))
+              ((list? (car tail))
+                (let-values (((el inserts) (format-list-iter (list) (car tail) inserts)))
+                  (format-list-iter
+                    (pushr head el)
+                    (cdr tail)
+                    inserts)))
+              ((equal? (car tail) '~a)
+                (format-list-iter
+                  (if (equal? (car inserts) '$f)
+                    head
+                    (pushr head (car inserts)))
+                  (cdr tail)
+                  (cdr inserts)))
+              ((equal? (car tail) '~@a)
+                (format-list-iter
+                  (if (equal? (car inserts) '$f)
+                    head
+                    (if (list? (car inserts))
+                        (apply (curry pushr head) (car inserts))
+                        (pushr head (car inserts))))
+                  (cdr tail)
+                  (cdr inserts)))
+              ((equal? (car tail) '~s)
+                (format-list-iter
+                  (if (equal? (car inserts) '$f)
+                    head
+                    (pushr head (->string (car inserts))))
+                  (cdr tail)
+                  (cdr inserts)))
+              ((equal? (car tail) '~@s)
+                (format-list-iter
+                  (if (equal? (car inserts) '$f)
+                    head
+                    (if (list? (car inserts))
+                        (apply (curry pushr head) (map ->string (car inserts)))
+                        (pushr head (->string (car inserts)))))
+                  (cdr tail)
+                  (cdr inserts)))
+              (else
+                (format-list-iter
+                  (pushr head (car tail))
+                  (cdr tail)
+                  inserts)))))
+    (let-values (((res extra-inserts)
+                    (format-list-iter
+                      (list)
+                      pattern
+                      inserts)))
+      res)))
 
 (define (list->pretty-string lst (sep " ") #:tail-sep (tail-sep? #f))
   (format "~a~a"

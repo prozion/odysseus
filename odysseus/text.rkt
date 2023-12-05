@@ -55,30 +55,6 @@
       (cons #rx"\\ +,\\ +" ", ")
       (cons #rx"\\ *:\\ *(?=[A-Za-zА-Яа-я])" ": "))))
 
-(define htmlify-text
-  (change-text
-    (list
-      ; add line breaks
-      (cons "\r\n" "<br>")
-      (cons "\n" "<br>")
-      (cons "\"" "&quot;")
-    )))
-
-(define clean-htmlify (compose clean-text htmlify-text))
-
-(define clean-value
-          (change-text
-            (list
-              (cons "\"" " ")
-              (cons "&nbsp;" " ")
-              ; (cons "," "")
-              (cons "\n" " ")
-              (cons "\t" "")
-              (cons "  " " ")
-              (cons " ." ".")
-              (cons "<span>" "")
-              (cons "</span>" ""))))
-
 (define remove-hashtags
   (change-text
     (list
@@ -178,10 +154,29 @@
         (str prefix txt suffix)
         "")))
 
-(define escape-txt
-  (change-text '(("%(" . "% (") (")%" . ") %"))))
-
 (define (url? s)
   (or
     (re-matches? "^https?://" s))
     (re-matches? "\\.(ru|org|рф|su|net|com|uk|by|edu|gov)" s))
+
+(define namefy (change-text
+                  (list
+                    (cons "_" " ")
+                    (cons "'" "\"")
+                    (cons #px"(?<=\\S),(?=\\S)" ", "))))
+
+(define text-idify (change-text
+  (list
+    (cons " " "_")
+    (cons "«" "")
+    (cons "»" "")
+    (cons "(" "")
+    (cons ")" "")
+    (cons "," "")
+    (cons ":" "")
+    (cons "—" "_")
+    (cons "-" "_")
+    (cons "/" "_")
+    (cons "ё" "е")
+    (cons "__" "_")
+    )))

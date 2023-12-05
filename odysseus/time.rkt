@@ -222,13 +222,7 @@
         )
     (+ (- m2-month m1-month) (* 12 (- m2-year m1-year)))))
 
-(define (comparison-f comp-op conversion)
-  (λ (a b)
-    (let* ((a (if (list? a) (car a) a))
-          (b (if (list? b) (car b) b)))
-      (comp-op (conversion a) (conversion b)))))
-
-; this function must work faster than comparison-f for functions like d> and d<
+; this function must work faster than former comparison-f for functions like d> and d<
 (define (compare-date comp-op)
   (λ (date1 date2)
     (define (compare-list-neq comp-op lst1 lst2)
@@ -255,12 +249,6 @@
         ((ormap (λ (x) (equal? x comp-op)) (list = >= <=)) (compare-list-eq comp-op parsed1 parsed2))
         (else (compare-list-neq comp-op parsed1 parsed2))))))
 
-; (define d> (comparison-f > date->days))
-; (define d>= (comparison-f >= date->days))
-; (define d< (comparison-f < date->days))
-; (define d<= (comparison-f <= date->days))
-; (define d= (comparison-f = date->days))
-
 (define d> (compare-date >))
 (define d>= (compare-date >=))
 (define d< (compare-date <))
@@ -274,23 +262,6 @@
   (and
     (d>= adate (car date-interval-cons))
     (d<= adate (cdr date-interval-cons))))
-
-  ;(~r #:min-width 2 #:pad-string "0" 1)
-
-;; add hours and minutes
-(define (+h . hs)
-  (define (rst a) (- a (floor a)))
-    (let* ( [intsum (apply + (map floor hs))]
-            [fractsum (apply + (map rst hs))]
-            [h_fractsum (floor (/ fractsum 0.6))]
-            [m (- fractsum (* 0.6 h_fractsum))])
-  ;(printf "h1=~a, prod=~a, h2=~a, m=~a\n" h1 prod h2 m)
-      (/
-        (round
-          (*
-            100
-            (+ intsum h_fractsum m)))
-        100)))
 
 ; minutes and seconds to decimals
 (define (ms->decimals m s)
@@ -317,8 +288,6 @@
         (minute (nth t2s 2))
         (sec (nth t2s 3)))
     (hash 'year year 'month month 'day day 'hour hour 'min minute 'sec sec)))
-
-(define timestr->hdate parse-time)
 
 (define-catch (seconds->hdate seconds)
   (let* ((date-struct (seconds->date seconds))
@@ -395,8 +364,6 @@
     (else
         (hash))))
 
-(define datestr->hdate parse-date)
-
 (define (date->seconds datestr)
   (let* ((days (date->days datestr)))
     (* 60 60 24 days)))
@@ -409,9 +376,6 @@
                 (and atime (time->seconds atime))
                 0)))
     (+ atime (date->seconds adate))))
-
-(define (dtstr->dstr datetime)
-  (string-first-word datetime #:delimeter " "))
 
 (define-catch (vk->date vk-datestr)
   (cond
@@ -577,10 +541,8 @@
 
 (define-catch (iso8601-time-string seconds)
   (let ((d (seconds->date seconds)))
-    (format "~a-~a-~aT~a:~a:~aZ"
-            (date-year d)
-            (format-number "dd" (date-month d) #:filler "0")
-            (format-number "dd" (date-day d) #:filler "0")
+    (format "~aT~a:~a:~aZ"
+            (iso8601-date-string seconds)
             (format-number "dd" (date-hour d) #:filler "0")
             (format-number "dd" (date-minute d) #:filler "0")
             (format-number "dd" (date-second d) #:filler "0")

@@ -23,6 +23,3 @@
     (if (member i res)
       res
       (pushr res i))))
-
-(define (opt/append-unique . seqs)
-  (opt/uniques (apply append seqs)))

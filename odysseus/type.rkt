@@ -1,6 +1,6 @@
 #lang racket
 
-(require "list.rkt")
+; (require "list.rkt")
 (require "base.rkt")
 
 (provide (all-defined-out))
@@ -22,9 +22,6 @@
 (define (true-sequence? x)
   (or (list? x) (hash? x) (vector? x)))
 
-(define (not-empty-list? x)
-  (and (list? x) (not (empty? x))))
-
 (define (one-element? seq)
   (and (list? seq) (= (length seq) 1)))
 
@@ -39,10 +36,10 @@
 (define several-elements? more-than-one-element?)
 
 (define (simple-cons? x)
-  (and (pair? x) (not (list? x))))
-
-(define (cons-ext? x)
-  (and (pair? x) (scalar? (car x))))
+  (and
+    (cons? x)
+    (scalar? (car x))
+    (scalar? (cdr x)) ))
 
 (define (list2? x)
   (and
@@ -56,44 +53,11 @@
     (not (ormap list? x))
     (not (ormap simple-cons? x))))
 
-(define (list-of-cons? x)
-  (and
-    (list? x)
-    (not (empty? x))
-    (andmap cons? x)))
-
-(define (list-of-simple-cons? x)
-  (and
-    (list? x)
-    (not (empty? x))
-    (andmap simple-cons? x)))
-
-(define (list-of-seqs? x)
-  (and
-    (list? x)
-    (not (empty? x))
-    (andmap pair? x)))
-
 ; some elements in list are lists
 (define (list>=2? lst)
   (and
     (list? lst)
     (ormap (λ (x) (list? x)) lst)))
-
-(define (plain-hash? x)
-  (and
-    (hash? x)
-    (not (ormap
-            (λ (el) (cond
-                      ((hash? el) #t)
-                      ((list? el) (ormap hash? el))
-                      (else #f)))
-            (hash-values x)))))
-
-(define (nested-hash? hh)
-  (and
-    (hash? hh)
-    (ormap (λ (v) (hash? v)) (hash-values hh))))
 
 (define-catch (type x)
   (cond
@@ -102,11 +66,6 @@
     ((number? x) 'number)
     ((string? x) 'string)
     ((bytes? x) 'bytes)
-    ((alist? x) 'alist)
-    ((list-of-simple-cons? x) 'list-of-cons)
-    ((list2? x) 'list2)
-    ((list? x) 'list)
-    ((pair? x) 'pair)
     ((char? x) 'char)
     ((symbol? x) 'symbol)
     ((procedure? x) 'procedure)
@@ -115,6 +74,11 @@
     ((hash? x) 'hash)
     ((path? x) 'path)
     ((void? x) 'void)
+    ((simple-cons? x) 'simple-cons)
+    ((alist? x) 'alist)
+    ((clist? x) 'clist)
+    ((list2? x) 'list2)
+    ((list? x) 'list)
     (else #f)))
 
 ; delta is for special case met in sorting newspapers issues:
@@ -132,7 +96,7 @@
             (filtered (filter
                         (λ (x) (or (string->number x) (equal? x ".")))
                         (filter non-empty-string? (string-split filtered ""))))
-            (filtered (if (empty? filtered) #f (implode filtered))))
+            (filtered (if (empty? filtered) #f (apply ~a filtered))))
         (and filtered (+ delta (string->number filtered)))))
     (else x)))
 
@@ -173,7 +137,7 @@
     (else (if (equal? (->string x) "#f") #f #t))))
 
 (define (atom? x)
-  (index-of? '(number string) (type x)))
+  (member? (type x) '(number string)))
 
 (define (alist? lst)
   (define (list-of-2? lst)
@@ -186,20 +150,12 @@
 (define (clist? seq)
   (andmap simple-cons? seq))
 
-(define (untype-equal? a1 a2)
-  (equal? (->string a1) (->string a2)))
-
 (define (iso? a b)
   (printf "~a ~a ~a ~a~n" a b (type a) (type b))
   (equal? (type a) (type b)))
 
 (define (equal*? x y)
   (equal? (->string x) (->string y)))
-
-(define (symbol-symbol? s)
-  (and
-    (not (symbol? s))
-    (symbol? (eval s (make-base-namespace)))))
 
 (define (listify x)
   (cond
@@ -216,3 +172,27 @@
                       (format "~a" x)
                       x))
     (else (format "~a" x))))
+
+(define-catch (same-elements? as bs #:e (e? equal?))
+  (cond
+    ((and (scalar? as) (scalar? bs)) (e? as bs))
+    ((and (list? as) (list? bs))
+      (and
+        (for/and
+          ((a as))
+          (ormap (λ (b) (same-elements? a b)) bs)))
+        (for/and
+          ((b bs))
+          (ormap (λ (a) (same-elements? b a)) as)))
+    (else (e? as bs))))
+
+(define (iso-elements? as bs)
+  (cond
+    ((and (empty? as) (empty? bs)) #t)
+    ((and (scalar? as) (scalar? bs)) (equal? (type as) (type bs)))
+    ((and (list? as) (list? bs))
+      (and
+        (= (length as) (length bs))
+        (iso-elements? (car as) (car bs))
+        (iso-elements? (cdr as) (cdr bs))))
+    (else #f)))

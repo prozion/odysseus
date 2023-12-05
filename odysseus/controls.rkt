@@ -5,7 +5,7 @@
 (require racket/syntax (for-syntax racket/syntax racket/list))
 (require "base.rkt")
 
-(provide (except-out (all-defined-out) while-fun))
+(provide (all-defined-out))
 
 (define-macro (-> var . fs)
   (define (->rec var . fs)
@@ -87,21 +87,6 @@
         ((null? args) (lambda-args))
         ((list? (car args)) (apply lambda-args (car args)))
         (else (apply lambda-args args)))))))
-
-(define (while-fun condition body)
-  (when (condition)
-    (body)
-    (while-fun condition body)))
-
-(define-syntax-rule (while condition body ...)
-  (while-fun
-      (lambda () condition)
-      (lambda () body ...)))
-
-(define (repeat-f f arg-acc arg-lst)
-  (cond
-    ((empty? arg-lst) arg-acc)
-    (else (repeat-f f (f arg-acc (car arg-lst)) (cdr arg-lst)))))
 
 (define-syntax (for/fold/idx stx)
   (syntax-case stx ()

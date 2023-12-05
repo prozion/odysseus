@@ -1,70 +1,10 @@
 #lang racket
 
 (require compatibility/defmacro)
+(require "text.rkt")
 (require "main.rkt")
 
 (provide (all-defined-out))
-
-(define ADVANCED-HTML-TEMPLATE
-  (str
-    "<!DOCTYPE html>"
-    "<html>"
-    "  <head>"
-    "    <meta charset=\"utf-8\">"
-    "    <title>~a</title>"
-    "    <style>"
-    "      * { font-family: Arial, sans-serif; line-height: 1.5em;}"
-    "      h1 { font-size: 160%; }"
-    "    </style>"
-    "  </head>"
-    "  <body>"
-    "    <!-- title: -->"
-    "    <h1>~a</h1>"
-    "    <!-- lead: -->"
-    "    <p>~a</p>"
-    "    <!-- body: -->"
-    "    ~a"
-    "  </body>"
-    "</html>"       ))
-
-(define (write-html-file filename title body #:lead (lead ""))
-  (let* ( (html-format ADVANCED-HTML-TEMPLATE)
-          (body (cond
-                  ((string? body) body)
-                  ((list2? body) (div-iter body ""))
-                  ((list? body) (format "<ul>~a</ul>" (li-iter body "")))
-                  (else "unknown format")))
-          (res (format html-format title title lead body)))
-  (display "\nready!")
-  (write-file filename res)))
-
-(define (div-iter body res)
-  (cond
-    ((empty? body) res)
-    (else (div-iter
-            (cdr body)
-            (format
-              "~a~n<div>~a</div>~n"
-              res
-              (let ((item (car body)))
-                (cond
-                  ((list? item) (implode item " – "))
-                  (else (str item)))))))))
-
-(define (li-iter body res)
-  (cond
-    ((empty? body) res)
-    (else (li-iter (cdr body) (format "~a~n<li>~a</li>~n" res (str (car body)))))))
-
-
-(define (html-color s color)
-  (format "<span style='color: ~a'>~a</span>" color s))
-
-(define (html-a href text #:color (color null))
-  (let ((style (if (or color)
-                  (format "style=\"color: ~a\"" color)
-                  "")))
-    (format "<a href=\"~a\" ~a>~a</a>" href style text)))
 
 (define (html #:title (title "") #:head (head "") #:css (css "") #:js (js "") #:html (html-content ""))
   (let ((frmt
@@ -88,38 +28,6 @@
       frmt
       title css js head html-content)))
 
-; wrapper for md format
-(define (md #:title (title "") content)
-  (let ((frmt
-            "# ~a~n\
-            ~n~n\
-            ~a"))
-  (format
-    frmt
-    title content)))
-
-(define idfy (change-text
-                  (list
-                    (cons " " "_")
-                    (cons "«" "")
-                    (cons "»" "")
-                    (cons "(" "")
-                    (cons ")" "")
-                    (cons "," "")
-                    (cons ":" "")
-                    (cons "—" "_")
-                    (cons "-" "_")
-                    (cons "/" "_")
-                    (cons "ё" "е")
-                    (cons "__" "_")
-                    )))
-
-(define namefy-nbsp (change-text
-                  (list
-                    (cons "_" "&nbsp;")
-                    (cons "'" "\"")
-                    (cons #px"(?<=\\S),(?=\\S)" ", "))))
-
 (define textify (change-text
                   (list
                     (cons " - " " &ndash; ")
@@ -142,18 +50,6 @@
     ((re-matches? "^\\./" txt) txt)
     (else (str prefix "://" txt))))
 
-; used for comparing messages in vk
-(define simplify-text
-  (change-text
-    (list
-      (cons "." " ")
-      (cons "—" "-")
-      (cons "\n" " ")
-      (cons #px" $" "")
-      (cons #px"\\s*-\\s*" "-")
-      (cons #px"\\s{2,}" " ")
-      (cons #px"[\\.,;:\\\\/\\!?()\\[\\]]" ""))))
-
 (define (make-link id #:target (target "_blank") #:anchor (anchor #f) urls)
   (let* ((name (namefy id)))
     (if (and (andmap nil? urls) (not anchor))
@@ -166,11 +62,38 @@
               target
               name))))
 
-(define (namefy-with-url id name . urls)
-  (let* (
-        (urls (filter-not nil? urls))
-        (url (and (not-empty? urls) (car urls)))
-        (title (if (non-empty-string? name) name (namefy id))))
-    (if (and url (non-empty-string? url))
-      (format "<a href=\"~a\" target=\"_blank\">~a</a>" (httpify url) title)
-      title)))
+(define htmlify-text
+  (change-text
+    (list
+      ; add line breaks
+      (cons "\r\n" "<br>")
+      (cons "\n" "<br>")
+      (cons "\"" "&quot;")
+    )))
+
+(define clean-htmlify (compose clean-text htmlify-text))
+
+(define clean-value
+          (change-text
+            (list
+              (cons "\"" " ")
+              (cons "&nbsp;" " ")
+              ; (cons "," "")
+              (cons "\n" " ")
+              (cons "\t" "")
+              (cons "  " " ")
+              (cons " ." ".")
+              (cons "<span>" "")
+              (cons "</span>" ""))))
+
+; used for comparing messages in vk
+(define simplify-text
+  (change-text
+    (list
+      (cons "." " ")
+      (cons "—" "-")
+      (cons "\n" " ")
+      (cons #px" $" "")
+      (cons #px"\\s*-\\s*" "-")
+      (cons #px"\\s{2,}" " ")
+      (cons #px"[\\.,;:\\\\/\\!?()\\[\\]]" ""))))

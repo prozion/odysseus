@@ -33,13 +33,6 @@
               (alist->json (cdr alst) #f))))
     (if first-time "}" "")))
 
-(define-catch (json->alist jsonstr)
-  (cond
-    ((nil? jsonstr) (list empty))
-    (else
-      (hash->list
-        (string->jsexpr jsonstr)))))
-
 (define (json->hash jsonstr)
   (cond
     ((nil? jsonstr) (hash))

@@ -26,8 +26,6 @@
 (check-= (lg 2 4) 2 1e-10)
 (check-= (lg 10 1e100) 100 1e-10)
 
-(check-same-elements? (permutations '(a b c)) '((a b c) (a c b) (b a c) (b c a) (c a b) (c b a)))
-
 (check-equal? (f! 0) 1)
 (check-equal? (f! 1) 1)
 (check-equal? (f! 5) (* 1 2 3 4 5))

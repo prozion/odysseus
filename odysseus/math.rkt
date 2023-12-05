@@ -14,13 +14,6 @@
 (define PI 3.1415926535897932)
 (define π PI)
 
-;(define-macro (avg-weighted name op)
-;  `(define-poly (,name args)
-;      (/ (apply ,op args) (length args))))
-;
-;(avg-weighted avg +)
-;(avg-weighted gavg *)
-
 (define (avg . args)
   (/ (apply + args) (length args)))
 
@@ -61,23 +54,8 @@
         (list (car lst))
         (cdr lst)))))
 
-; sum up sequence
-; (sum-seq (lambda (n) (/ 1.0 (* n n n))) 1e7) -> Apery's constant
-(define (sum-seq f k (s 0))
-  (cond
-    ((= k 0) s)
-    (else (sum-seq f (dec k) (+ s (f k))))))
-
-(define (reqsum f k (s 0))
-  (cond
-    ((= 0 k) s)
-    (else (reqsum f (dec k) (+ s (f s))))))
-
 (define (lg a x)
   (/ (log x) (log a)))
-
-(define (sec x)
-  (/ 1 (cos x)))
 
 (define (distance x1 y1 x2 y2)
   (sqrt (+
@@ -116,16 +94,6 @@
           (map
             (λ (x) (list x (length (filter (curry = x) args))))
             args))
-        (freqs (uniques freqs))
-        (freqs (sort freqs (λ (a b) (> (second a) (second b))))))
-    (caar freqs)))
-
-; how to incorporate it to s/mode so the following is possible: (s/mode args #:epsilon (epsilon 0))?
-(define (mode-epsilon arglst (epsilon 0))
-  (let* ((freqs
-          (map
-            (λ (x) (list x (length (filter (λ (y) (<= (abs (- x y)) epsilon)) arglst))))
-            arglst))
         (freqs (uniques freqs))
         (freqs (sort freqs (λ (a b) (> (second a) (second b))))))
     (caar freqs)))

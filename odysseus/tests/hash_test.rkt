@@ -6,7 +6,6 @@
 (require "../checks.rkt")
 (require "../type.rkt")
 (require "../regexp.rkt")
-(require "../tree.rkt")
 (require "../debug.rkt")
 
 (define h (hash 'a (hash 'aa 10 'ab 20) 'b (hash 'ba (hash 'baa 300 'bab 30))))
@@ -267,3 +266,11 @@
 (check-hash-equal?
               (hash-keys-substitute (hash 'a 10 'b 20) '(a b) '(c d))
               (hash 'c 10 'd 20))
+
+(check-hash-equal?
+  (decart-hash '(a b c) '(1 2 3))
+  (hash 'a '(1 2 3) 'b '(1 2 3) 'c '(1 2 3)))
+
+(check-hash-equal?
+  (decart-hash 'd '(1 2 3))
+  (hash 'd '(1 2 3)))
