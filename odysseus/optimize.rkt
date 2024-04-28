@@ -1,6 +1,5 @@
 #lang racket
 
-(require (rename-in  racket/hash  (hash-union hash-union-racket)))
 (require compatibility/defmacro)
 (require "base.rkt")
 (require "list.rkt")
